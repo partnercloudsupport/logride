@@ -165,6 +165,55 @@ class _HomePageState extends State<HomePage> {
 
     Duration animationDuration = const Duration(milliseconds: 400);
 
+    Widget content = ContentFrame(
+        child: Container(
+            child: Column(
+      children: <Widget>[
+        AnimatedContainer(
+          curve: Curves.linear,
+          duration: animationDuration,
+          height: _favesHeight,
+          child: ParkListView(
+            parksData: userParkData,
+            favorites: true,
+            slidableController: _slidableController,
+            sliderActionCallback: _handleSlidableCallback,
+            headerCallback: _handleHeaderCallback,
+            onTap: _handleEntryCallback,
+            arrowWidget: Transform(
+              transform: Matrix4.translationValues(10, 10, 0.0),
+              child: AnimatedContainer(
+                  curve: Curves.linear,
+                  duration: animationDuration,
+                  transform: _favesArrowRotation,
+                  child: arrowIcon),
+            ),
+          ),
+        ),
+        AnimatedContainer(
+          curve: Curves.linear,
+          duration: animationDuration,
+          height: _allHeight,
+          child: ParkListView(
+              parksData: userParkData,
+              favorites: false,
+              slidableController: _slidableController,
+              headerCallback: _handleHeaderCallback,
+              onTap: _handleEntryCallback,
+              sliderActionCallback: _handleSlidableCallback,
+              arrowWidget: Transform(
+                transform: Matrix4.translationValues(10, 10, 0.0),
+                child: AnimatedContainer(
+                    curve: Curves.linear,
+                    duration: animationDuration,
+                    transform: _allArrowRotation,
+                    alignment: Alignment(0.0, 30.0),
+                    child: arrowIcon),
+              )),
+        )
+      ],
+    )));
+
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       resizeToAvoidBottomPadding: false,
@@ -182,62 +231,15 @@ class _HomePageState extends State<HomePage> {
                 allParks: allParks,
                 tapBack: _handleAddCallback,
               )));
-          setState(
-              () {}); // We update our state so any changes done by the search page work
+          setState(() {}); // We update our state so any changes done by the search page work
         },
         backgroundColor: Theme.of(context).primaryColor,
       ),
       body: StandardPageStructure(
         content: <Widget>[
           // Title Bar Buttons,
-          ContentFrame(
-              child: Container(
-                  child: Column(
-            children: <Widget>[
-              AnimatedContainer(
-                curve: Curves.linear,
-                duration: animationDuration,
-                height: _favesHeight,
-                child: ParkListView(
-                  parksData: userParkData,
-                  favorites: true,
-                  slidableController: _slidableController,
-                  sliderActionCallback: _handleSlidableCallback,
-                  headerCallback: _handleHeaderCallback,
-                  onTap: _handleEntryCallback,
-                  arrowWidget: Transform(
-                    transform: Matrix4.translationValues(10, 10, 0.0),
-                    child: AnimatedContainer(
-                        curve: Curves.linear,
-                        duration: animationDuration,
-                        transform: _favesArrowRotation,
-                        child: arrowIcon),
-                  ),
-                ),
-              ),
-              AnimatedContainer(
-                curve: Curves.linear,
-                duration: animationDuration,
-                height: _allHeight,
-                child: ParkListView(
-                    parksData: userParkData,
-                    favorites: false,
-                    slidableController: _slidableController,
-                    headerCallback: _handleHeaderCallback,
-                    onTap: _handleEntryCallback,
-                    sliderActionCallback: _handleSlidableCallback,
-                    arrowWidget: Transform(
-                      transform: Matrix4.translationValues(10, 10, 0.0),
-                      child: AnimatedContainer(
-                          curve: Curves.linear,
-                          duration: animationDuration,
-                          transform: _allArrowRotation,
-                          alignment: Alignment(0.0, 30.0),
-                          child: arrowIcon),
-                    )),
-              )
-            ],
-          )))
+          content,
+
         ],
       ),
     );
