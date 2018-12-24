@@ -57,6 +57,7 @@ class _SearchParksCardState extends State<SearchParksCard> {
         Column(
           children: <Widget>[
             TextField(
+              autofocus: true,
               onChanged: (value) {
                 filterListBySearch(value);
               },
