@@ -112,6 +112,7 @@ class AllParkSearchPage extends StatelessWidget {
         backgroundColor: Colors.transparent,
         body: StandardPageStructure(
           iconFunction: () => Navigator.of(context).pop(),
+          iconDecoration: Container(child: Icon(Icons.home, size: 60, color: Colors.white), constraints: BoxConstraints.expand(),),
           content: <Widget>[
             AllParkSearchCard(allParkData: allParks, tapBack: tapBack)
           ],
