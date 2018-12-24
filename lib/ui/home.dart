@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'dart:math' as math;
-import '../widgets/home_icon.dart';
 import '../widgets/park_list_widget.dart';
 import '../widgets/park_list_entry.dart';
+import '../widgets/content_frame.dart';
 import '../data/park_structures.dart';
 import '../data/section_focus_model.dart';
 import '../data/webfetcher.dart';
 import '../animations/slide_up_transition.dart';
+import 'standard_page_structure.dart';
 import 'all_park_search.dart';
 
 class HomePage extends StatefulWidget {
@@ -126,12 +127,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _handleAddCallback(ParkData park) async {
-    if(userParkData.contains(park)) return;
+    if (userParkData.contains(park)) return;
 
     userParkData.add(park);
     await populateParkData(park);
-    if(mounted){
-      setState((){});
+    if (mounted) {
+      setState(() {});
     }
   }
 
@@ -155,8 +156,6 @@ class _HomePageState extends State<HomePage> {
     _favesHeight = _calculateSectionHeight(true, focus);
     _allHeight = _calculateSectionHeight(false, focus);
 
-    // TODO: Build location, favorites, and allParks widgets
-
     Widget arrowIcon = Transform(
         transform: Matrix4.translationValues(-10, -10, 0.0),
         child: Icon(
@@ -167,106 +166,80 @@ class _HomePageState extends State<HomePage> {
     Duration animationDuration = const Duration(milliseconds: 400);
 
     return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor,
       resizeToAvoidBottomPadding: false,
-        floatingActionButton: FloatingActionButton(
-          child: Icon(
-            Icons.add,
-            color: Colors.white,
-            size: 38,
-          ),
-          onPressed: () {
-            Navigator.push(
-                context,
-                SlideUpRoute(
-                    widget: AllParkSearchPage(
-                  allParks: allParks,
-                  tapBack: _handleAddCallback,
-                )));
-            setState(() {}); // We update our state so any changes done by the search page work
-          },
-          backgroundColor: Theme.of(context).primaryColor,
+      floatingActionButton: FloatingActionButton(
+        child: Icon(
+          Icons.add,
+          color: Colors.white,
+          size: 38,
         ),
-        body: Container(
-            child: Center(
-                child: SafeArea(
-                    child: Stack(
-              children: <Widget>[
-                // Title Bar Buttons,
-                Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Container(
-                        child: Column(
-                      children: <Widget>[
-                        Padding(
-                            padding: EdgeInsets.only(top: 50.0),
-                            child: Container()),
-                        AnimatedContainer(
+        onPressed: () {
+          Navigator.push(
+              context,
+              SlideUpRoute(
+                  widget: AllParkSearchPage(
+                allParks: allParks,
+                tapBack: _handleAddCallback,
+              )));
+          setState(
+              () {}); // We update our state so any changes done by the search page work
+        },
+        backgroundColor: Theme.of(context).primaryColor,
+      ),
+      body: StandardPageStructure(
+        content: <Widget>[
+          // Title Bar Buttons,
+          ContentFrame(
+              child: Container(
+                  child: Column(
+            children: <Widget>[
+              AnimatedContainer(
+                curve: Curves.linear,
+                duration: animationDuration,
+                height: _favesHeight,
+                child: ParkListView(
+                  parksData: userParkData,
+                  favorites: true,
+                  slidableController: _slidableController,
+                  sliderActionCallback: _handleSlidableCallback,
+                  headerCallback: _handleHeaderCallback,
+                  onTap: _handleEntryCallback,
+                  arrowWidget: Transform(
+                    transform: Matrix4.translationValues(10, 10, 0.0),
+                    child: AnimatedContainer(
+                        curve: Curves.linear,
+                        duration: animationDuration,
+                        transform: _favesArrowRotation,
+                        child: arrowIcon),
+                  ),
+                ),
+              ),
+              AnimatedContainer(
+                curve: Curves.linear,
+                duration: animationDuration,
+                height: _allHeight,
+                child: ParkListView(
+                    parksData: userParkData,
+                    favorites: false,
+                    slidableController: _slidableController,
+                    headerCallback: _handleHeaderCallback,
+                    onTap: _handleEntryCallback,
+                    sliderActionCallback: _handleSlidableCallback,
+                    arrowWidget: Transform(
+                      transform: Matrix4.translationValues(10, 10, 0.0),
+                      child: AnimatedContainer(
                           curve: Curves.linear,
                           duration: animationDuration,
-                          height: _favesHeight,
-                          child: ParkListView(
-                            parksData: userParkData,
-                            favorites: true,
-                            slidableController: _slidableController,
-                            sliderActionCallback: _handleSlidableCallback,
-                            headerCallback: _handleHeaderCallback,
-                            onTap: _handleEntryCallback,
-                            arrowWidget: Transform(
-                              transform:
-                                  Matrix4.translationValues(10, 10, 0.0),
-                              child: AnimatedContainer(
-                                  curve: Curves.linear,
-                                  duration: animationDuration,
-                                  transform: _favesArrowRotation,
-                                  child: arrowIcon),
-                            ),
-                          ),
-                        ),
-                        AnimatedContainer(
-                          curve: Curves.linear,
-                          duration: animationDuration,
-                          height: _allHeight,
-                          child: ParkListView(
-                              parksData: userParkData,
-                              favorites: false,
-                              slidableController: _slidableController,
-                              headerCallback: _handleHeaderCallback,
-                              onTap: _handleEntryCallback,
-                              sliderActionCallback: _handleSlidableCallback,
-                              arrowWidget: Transform(
-                                transform:
-                                    Matrix4.translationValues(10, 10, 0.0),
-                                child: AnimatedContainer(
-                                    curve: Curves.linear,
-                                    duration: animationDuration,
-                                    transform: _allArrowRotation,
-                                    alignment: Alignment(0.0, 30.0),
-                                    child: arrowIcon),
-                              )),
-                        )
-                      ],
-                    ))),
-
-                HomeIconButton()
-              ],
-            ))),
-            color: Theme.of(context).primaryColor));
+                          transform: _allArrowRotation,
+                          alignment: Alignment(0.0, 30.0),
+                          child: arrowIcon),
+                    )),
+              )
+            ],
+          )))
+        ],
+      ),
+    );
   }
 }
-
-// TODO: THOMAS
-// Tomorrow, you need to go through and transition the system to Animated Containers
-// This will be done with FIXED heights. you need to calculate these from the
-// window sizes. You also need to fix the layout to work with these fixed heights.
-
-// When animating, we will change the heights of the listviews and the rotation of the arrows
-// You still need to figure out how to handle that properly.
-
-// Good Luck.
-
-// The children all are paying attention to the statemodel thing. On build, they
-// check for the state as it pertains to their identity. Balanced -> %50 height,
-// invidual focus -> 2/5ths or 3/5ths, whatever is needed by the identity. Setting
-// height of the listviews with their animated containers should be OK.
-
-// Ok hopefully you can do this good luck.

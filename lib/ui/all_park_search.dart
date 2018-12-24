@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../data/park_structures.dart';
-import '../widgets/home_icon.dart';
 import '../widgets/generic_list_entry.dart';
+import '../widgets/content_frame.dart';
+import 'standard_page_structure.dart';
 
 class SearchParksCard extends StatefulWidget {
   SearchParksCard({Key key, this.parkList, this.tapBack}) : super(key: key);
@@ -71,8 +72,7 @@ class _SearchParksCardState extends State<SearchParksCard> {
                   itemCount: workingList.length,
                   itemBuilder: (context, index) {
                     return GenericListEntry(
-                        park: workingList[index],
-                        onTap: widget.tapBack);
+                        park: workingList[index], onTap: widget.tapBack);
                   }),
             )
           ],
@@ -90,25 +90,11 @@ class AllParkSearchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Container(
-              padding: EdgeInsets.only(top: 54.0, bottom: 8.0),
-              child: Card(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.0)),
-                  child:
-                      SearchParksCard(parkList: allParkData, tapBack: tapBack)),
-            ),
-          ),
-          HomeIconButton(onTap: () {
-            Navigator.of(context).pop();
-          })
-        ],
-      ),
+    return ContentFrame(
+      child: Card(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+          child: SearchParksCard(parkList: allParkData, tapBack: tapBack)),
     );
   }
 }
@@ -122,12 +108,13 @@ class AllParkSearchPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomPadding: false,
+        resizeToAvoidBottomPadding: false,
         backgroundColor: Colors.transparent,
-        body: Container(
-            child: Center(
-              child: AllParkSearchCard(allParkData: allParks, tapBack: tapBack),
-            ),
-            color: Colors.transparent));
+        body: StandardPageStructure(
+          iconFunction: () => Navigator.of(context).pop(),
+          content: <Widget>[
+            AllParkSearchCard(allParkData: allParks, tapBack: tapBack)
+          ],
+        ));
   }
 }
