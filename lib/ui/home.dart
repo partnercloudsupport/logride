@@ -231,7 +231,8 @@ class _HomePageState extends State<HomePage> {
                 allParks: allParks,
                 tapBack: _handleAddCallback,
               )));
-          setState(() {}); // We update our state so any changes done by the search page work
+          setState(
+              () {}); // We update our state so any changes done by the search page work
         },
         backgroundColor: Theme.of(context).primaryColor,
       ),
@@ -239,7 +240,6 @@ class _HomePageState extends State<HomePage> {
         content: <Widget>[
           // Title Bar Buttons,
           content,
-
         ],
       ),
     );

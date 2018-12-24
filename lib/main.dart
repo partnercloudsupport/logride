@@ -1,39 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'ui/home.dart';
-import 'widgets/attraction_status_button.dart';
-
-class TestAttractionStatusScaffold extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        body: Container(
-            child: Center(
-                child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: <Widget>[
-                Row(children: <Widget>[
-                  Expanded(child: Text("Ooh ride")),
-                  AttractionButton(enabled: true, count: 0)
-                ]),
-                Row(children: <Widget>[
-                  Expanded(child: Text("Ooh ride")),
-                  AttractionButton(enabled: true, count: 25)
-                ]),
-                Row(children: <Widget>[
-                  Expanded(child: Text("Ooh ride")),
-                  AttractionButton(enabled: false, count: 0)
-                ]),
-                Row(children: <Widget>[
-                  Expanded(child: Text("Ooh ride")),
-                  AttractionButton(enabled: false, count: 25)
-                ]),
-              ],
-            )),
-            color: Theme.of(context).primaryColor));
-  }
-}
+import 'ui/auth_page.dart';
 
 class MyApp extends StatelessWidget {
   @override
@@ -54,7 +22,7 @@ class MyApp extends StatelessWidget {
                   fontSize: 28.0,
                   fontWeight: FontWeight.bold
                 ))),
-        home: HomePage());
+        home: AuthPage());
   }
 }
 
