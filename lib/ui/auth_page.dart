@@ -39,19 +39,97 @@ class _AuthPageState extends State<AuthPage>
   bool _obscureLoginText = true;
   bool _obscureSignUpText = true;
 
+  bool _loginEmailValid = true;
+  bool _loginPaswordValid = true;
+  bool _signUpUsernameValid = true;
+  bool _signUpEmailValid = true;
+  bool _signUpPasswordValid = true;
+
   Color _leftTextColor = Colors.white;
   Color _rightTextColor = Colors.black;
 
-  Future<FirebaseUser> _handleSignIn() async {
-    // TODO: THIS
-    print("THOMAS FIX THIS NOW");
+  Future<FirebaseUser> _handleSignIn(String email, String password) async {
     FirebaseUser user =
-        await _auth.signInWithEmailAndPassword(email: null, password: null);
+        await _auth.signInWithEmailAndPassword(email: email, password: password);
+
+    if(await user.getIdToken() == null){
+      print("error with login");
+    }
+
+    return user;
+  }
+  
+  Future<FirebaseUser> _handleSignUp(String username, String email, String password) async {
+    FirebaseUser user = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+
     return user;
   }
 
   void forumSubmit(){
-    Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
+    switch(currentPage){
+      case 0:
+        String username = signUpUsernameController.text;
+        String email = signUpEmailController.text;
+        String password = signUpPasswordController.text;
+
+        // We validate just to make sure they're full
+        bool valid = true;
+        _signUpUsernameValid = (username != "");
+        _signUpEmailValid = (email != "");
+        _signUpPasswordValid = (password != "");
+
+        valid = (_signUpUsernameValid && _signUpEmailValid && _signUpPasswordValid);
+
+        if(!valid){
+          showDialog(context: context, builder: (BuildContext context){
+            return AlertDialog(
+              title: Text("Invalid Sign Up"),
+              content: Text("One or more required fields were empty."),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text("Ok"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                )
+              ],
+            );
+          });
+          setState((){});
+        }
+
+        //_handleSignUp(username, email, password);
+        break;
+      case 1:
+        String email = loginEmailController.text;
+        String password = loginEmailController.text;
+
+        // We validate just to make sure they're full
+        bool valid = true;
+        _signUpEmailValid = (email != "");
+        _signUpPasswordValid = (password != "");
+
+        valid = (_signUpEmailValid && _signUpPasswordValid);
+
+        if(!valid){
+          showDialog(context: context, builder: (BuildContext context){
+            return AlertDialog(
+              title: Text("Invalid Sign Up"),
+              content: Text("One or more required fields were empty."),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text("Ok"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                )
+              ],
+            );
+          });
+          setState((){});
+        }
+        break;
+    }
   }
 
   @override
@@ -188,9 +266,10 @@ class _AuthPageState extends State<AuthPage>
   Widget _buildLoginPage(BuildContext context) {
     return Column(
       children: <Widget>[
-        _buildEmailField(controller: loginEmailController, node: loginEmailNode, next: loginPasswordNode),
+        _buildEmailField(controller: loginEmailController, valid: _loginEmailValid, node: loginEmailNode, next: loginPasswordNode),
         _buildPasswordField(
             controller: loginPasswordController,
+            valid: _loginPaswordValid,
             visibility: _obscureLoginText,
             visibilityTap: () {
               setState(() {
@@ -207,10 +286,11 @@ class _AuthPageState extends State<AuthPage>
   Widget _buildSignUpPage(BuildContext context) {
     return Column(
       children: <Widget>[
-        _buildUsernameField(controller: signUpUsernameController, node: signUpUsernameNode, next: signUpEmailNode),
-        _buildEmailField(controller: signUpEmailController, node: signUpEmailNode, next: signUpPasswordNode),
+        _buildUsernameField(controller: signUpUsernameController, valid: _signUpUsernameValid, node: signUpUsernameNode, next: signUpEmailNode),
+        _buildEmailField(controller: signUpEmailController, valid: _signUpEmailValid, node: signUpEmailNode, next: signUpPasswordNode),
         _buildPasswordField(
           controller: signUpPasswordController,
+          valid: _signUpPasswordValid,
           visibility: _obscureSignUpText,
           visibilityTap: () {
             setState(() {
@@ -231,14 +311,17 @@ class _AuthPageState extends State<AuthPage>
 
 
   /// Returns the text entry field (with appropriate decor) for usernames
-  Widget _buildUsernameField({TextEditingController controller, FocusNode node, FocusNode next}) {
+  Widget _buildUsernameField({TextEditingController controller, bool valid, FocusNode node, FocusNode next}) {
     return TextField(
       controller: controller,
       textInputAction: TextInputAction.next,
       focusNode: node,
       onSubmitted: (content) {node.unfocus(); FocusScope.of(context).requestFocus(next);},
       decoration: InputDecoration(
-        border: InputBorder.none,
+        border: UnderlineInputBorder(borderRadius: BorderRadius.circular(10.0), borderSide: BorderSide(width: 0.0, style: BorderStyle.none)),
+        fillColor: Colors.red[300],
+        filled: !valid,
+        contentPadding: EdgeInsets.all(8.0),
         icon: Icon(Icons.person),
         hintText: "Username",
       ),
@@ -247,7 +330,7 @@ class _AuthPageState extends State<AuthPage>
 
   /// Returns an appropriately configured text field for emails
   Widget _buildEmailField(
-      {TextEditingController controller, FocusNode node, FocusNode next}) {
+      {TextEditingController controller, bool valid, FocusNode node, FocusNode next}) {
     return TextField(
       controller: controller,
       keyboardType: TextInputType.emailAddress,
@@ -255,7 +338,10 @@ class _AuthPageState extends State<AuthPage>
       onSubmitted: (content) {node.unfocus(); FocusScope.of(context).requestFocus(next);},
       textInputAction: TextInputAction.next,
       decoration: InputDecoration(
-        border: InputBorder.none,
+        border: UnderlineInputBorder(borderRadius: BorderRadius.circular(10.0), borderSide: BorderSide(width: 0.0, style: BorderStyle.none)),
+        fillColor: Colors.red[300],
+        filled: !valid,
+        contentPadding: EdgeInsets.all(8.0),
         icon: Icon(Icons.mail),
         hintText: "Email Address",
       ),
@@ -267,6 +353,7 @@ class _AuthPageState extends State<AuthPage>
   /// visibility when the eye icon is tapped
   Widget _buildPasswordField(
       {TextEditingController controller,
+        bool valid,
       bool visibility,
       Function visibilityTap,
       FocusNode node}) {
@@ -277,7 +364,10 @@ class _AuthPageState extends State<AuthPage>
       onSubmitted: (content) {forumSubmit();},
       textInputAction: TextInputAction.done,
       decoration: InputDecoration(
-          border: InputBorder.none,
+          border: UnderlineInputBorder(borderRadius: BorderRadius.circular(10.0), borderSide: BorderSide(width: 0.0, style: BorderStyle.none)),
+          fillColor: Colors.red[300],
+          filled: !valid,
+          contentPadding: EdgeInsets.all(8.0),
           icon: Icon(Icons.lock),
           hintText: "Password",
           suffixIcon: GestureDetector(
