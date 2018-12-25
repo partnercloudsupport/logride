@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import '../widgets/submit_button.dart';
 import '../widgets/home_icon.dart';
 import '../animations/auth_bubble_painter.dart';
-import 'home.dart';
 
 class AuthPage extends StatefulWidget {
   @override
@@ -13,6 +14,7 @@ class AuthPage extends StatefulWidget {
 class _AuthPageState extends State<AuthPage>
     with SingleTickerProviderStateMixin {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseDatabase _database = FirebaseDatabase.instance;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -45,28 +47,138 @@ class _AuthPageState extends State<AuthPage>
   bool _signUpEmailValid = true;
   bool _signUpPasswordValid = true;
 
+  bool _signUpError = false;
+  bool _signInError = false;
+
   Color _leftTextColor = Colors.white;
   Color _rightTextColor = Colors.black;
 
+  void _validationAlertDialog({String body}) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Invalid Authorization"),
+            content: Text(body),
+            actions: <Widget>[
+              FlatButton(
+                child: Text("Ok"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          );
+        });
+  }
+
   Future<FirebaseUser> _handleSignIn(String email, String password) async {
-    FirebaseUser user =
-        await _auth.signInWithEmailAndPassword(email: email, password: password);
+    _signInError = false;
 
-    if(await user.getIdToken() == null){
-      print("error with login");
-    }
-
-    return user;
+    return _auth
+        .signInWithEmailAndPassword(email: email, password: password)
+        .catchError((exception) {
+      String displayMessage;
+      _signInError = true;
+      _loginEmailValid = _loginPaswordValid = true;
+      switch (exception.code) {
+        case "ERROR_INVALID_EMAIL":
+          displayMessage = "Invalid Email. Check the formatting.";
+          _loginEmailValid = false;
+          break;
+        case "ERROR_WRONG_PASSWORD":
+          displayMessage = "Incorrect Password";
+          _loginPaswordValid = false;
+          break;
+        case "ERROR_USER_NOT_FOUND":
+          displayMessage = "There is no account associated with that email.";
+          _loginEmailValid = false;
+          break;
+        case "ERROR_USER_DISABLED":
+          displayMessage =
+              "This account has been disabled by the LogRide Administration";
+          break;
+        case "ERROR_TOO_MANY_REQUESTS":
+          displayMessage =
+              "There have been too many attempts to sign in to this account. Please try again later.";
+          break;
+        case "ERROR_OPERATION_NOT_ALLOWED":
+          // This really shouldn't happen, but just in case
+          displayMessage = "Unable to log in at this time.";
+          break;
+        default:
+          displayMessage = exception.message;
+          break;
+      }
+      _validationAlertDialog(body: displayMessage);
+      setState(() {});
+      return;
+    }).then((FirebaseUser createdUser) {
+      print(_signInError
+          ? "Error signing in user"
+          : "Successfully singed in a user");
+      if (_signInError) return null;
+      return createdUser;
+      // No fancy logic is required for signing in - once it's done, it's done
+    });
   }
-  
-  Future<FirebaseUser> _handleSignUp(String username, String email, String password) async {
-    FirebaseUser user = await _auth.createUserWithEmailAndPassword(email: email, password: password);
 
-    return user;
+  Future<FirebaseUser> _handleSignUp(
+      String username, String email, String password) async {
+    _signUpError = false;
+    return _auth
+        .createUserWithEmailAndPassword(email: email, password: password)
+        .catchError((exception) {
+      String displayMessage;
+      _signUpError = true;
+      _signUpPasswordValid = _signUpEmailValid = _signUpUsernameValid = true;
+      switch (exception.code) {
+        case "ERROR_WEAK_PASSWORD":
+          // Weak Password
+          displayMessage =
+              "Password is too weak. It must be six characters or longer.";
+          _signUpPasswordValid = false;
+          break;
+        case "ERROR_INVALID_CREDENTIAL":
+          // Email is malformed
+          displayMessage = "Invalid Email Address. Check the formatting.";
+          _signUpEmailValid = false;
+          break;
+        case "ERROR_EMAIL_ALREADY_IN_USE":
+          // Email is already used
+          displayMessage =
+              "That email is already in use by a different account.";
+          _signUpEmailValid = false;
+          break;
+        default:
+          // Any other error
+          displayMessage = exception.message;
+          break;
+      }
+      _validationAlertDialog(body: displayMessage);
+      setState(() {}); // Set the forms to be invalid
+    }).then((FirebaseUser createdUser) {
+      print(_signUpError
+          ? "Error creating a new user"
+          : "Creating a user successful");
+      if (_signUpError) return null;
+
+      // Now we need to get the current user's ID, then take the database and add their
+      // username to it.
+      DatabaseReference reference =
+          _database.reference().child("users/details");
+      reference
+          .child(createdUser.uid)
+          .set({"userID": createdUser.uid, "username": username});
+
+      // Username has been set.
+      // Sign-up process is done, we've got ourselves a valid user.
+      return createdUser;
+    });
   }
 
-  void forumSubmit(){
-    switch(currentPage){
+  void forumSubmit() {
+    switch (currentPage) {
       case 0:
         String username = signUpUsernameController.text;
         String email = signUpEmailController.text;
@@ -78,56 +190,51 @@ class _AuthPageState extends State<AuthPage>
         _signUpEmailValid = (email != "");
         _signUpPasswordValid = (password != "");
 
-        valid = (_signUpUsernameValid && _signUpEmailValid && _signUpPasswordValid);
+        valid =
+            (_signUpUsernameValid && _signUpEmailValid && _signUpPasswordValid);
 
-        if(!valid){
-          showDialog(context: context, builder: (BuildContext context){
-            return AlertDialog(
-              title: Text("Invalid Sign Up"),
-              content: Text("One or more required fields were empty."),
-              actions: <Widget>[
-                FlatButton(
-                  child: Text("Ok"),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                )
-              ],
-            );
-          });
-          setState((){});
+        if (!valid) {
+          _validationAlertDialog(
+              body: "One or more required fields were empty.");
+          setState(() {});
+          return;
         }
 
-        //_handleSignUp(username, email, password);
+        _handleSignUp(username, email, password).then((user) {
+          print("Checking for user stuff");
+          if (user == null) return;
+          print("User data is good");
+          // No errors in the process, we have a valid signed-in user
+          // TODO: PASS SIGN-ON TO MAIN PAGE
+          Navigator.pushReplacementNamed(context, "/home");
+        });
         break;
       case 1:
         String email = loginEmailController.text;
-        String password = loginEmailController.text;
+        String password = loginPasswordController.text;
 
         // We validate just to make sure they're full
         bool valid = true;
-        _signUpEmailValid = (email != "");
-        _signUpPasswordValid = (password != "");
+        _loginEmailValid = (email != "");
+        _loginPaswordValid = (password != "");
 
-        valid = (_signUpEmailValid && _signUpPasswordValid);
+        valid = (_loginEmailValid && _loginPaswordValid);
 
-        if(!valid){
-          showDialog(context: context, builder: (BuildContext context){
-            return AlertDialog(
-              title: Text("Invalid Sign Up"),
-              content: Text("One or more required fields were empty."),
-              actions: <Widget>[
-                FlatButton(
-                  child: Text("Ok"),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                )
-              ],
-            );
-          });
-          setState((){});
+        if (!valid) {
+          _validationAlertDialog(
+              body: "One or more required fields were empty");
+          setState(() {});
+          return;
         }
+
+        _handleSignIn(email, password).then((user) {
+          print("Checking for user stuff");
+          if (user == null) return;
+          print("User data is good");
+          // No errors in the process, we have a valid signed-in user
+          // TODO: PASS SIGN-ON TO MAIN PAGE
+          Navigator.pushReplacementNamed(context, "/home");
+        });
         break;
     }
   }
@@ -266,17 +373,21 @@ class _AuthPageState extends State<AuthPage>
   Widget _buildLoginPage(BuildContext context) {
     return Column(
       children: <Widget>[
-        _buildEmailField(controller: loginEmailController, valid: _loginEmailValid, node: loginEmailNode, next: loginPasswordNode),
+        _buildEmailField(
+            controller: loginEmailController,
+            valid: _loginEmailValid,
+            node: loginEmailNode,
+            next: loginPasswordNode),
         _buildPasswordField(
-            controller: loginPasswordController,
-            valid: _loginPaswordValid,
-            visibility: _obscureLoginText,
-            visibilityTap: () {
-              setState(() {
-                _obscureLoginText = !_obscureLoginText;
-              });
-            },
-            node: loginPasswordNode,
+          controller: loginPasswordController,
+          valid: _loginPaswordValid,
+          visibility: _obscureLoginText,
+          visibilityTap: () {
+            setState(() {
+              _obscureLoginText = !_obscureLoginText;
+            });
+          },
+          node: loginPasswordNode,
         ),
       ],
     );
@@ -286,8 +397,16 @@ class _AuthPageState extends State<AuthPage>
   Widget _buildSignUpPage(BuildContext context) {
     return Column(
       children: <Widget>[
-        _buildUsernameField(controller: signUpUsernameController, valid: _signUpUsernameValid, node: signUpUsernameNode, next: signUpEmailNode),
-        _buildEmailField(controller: signUpEmailController, valid: _signUpEmailValid, node: signUpEmailNode, next: signUpPasswordNode),
+        _buildUsernameField(
+            controller: signUpUsernameController,
+            valid: _signUpUsernameValid,
+            node: signUpUsernameNode,
+            next: signUpEmailNode),
+        _buildEmailField(
+            controller: signUpEmailController,
+            valid: _signUpEmailValid,
+            node: signUpEmailNode,
+            next: signUpPasswordNode),
         _buildPasswordField(
           controller: signUpPasswordController,
           valid: _signUpPasswordValid,
@@ -306,19 +425,30 @@ class _AuthPageState extends State<AuthPage>
   // I may remove this
   Widget _buildSubmitButton(num pageIndex) {
     return SubmitButton(
-        text: "Submit", onTap: () {forumSubmit();});
+        text: "Submit",
+        onTap: () {
+          forumSubmit();
+        });
   }
 
-
   /// Returns the text entry field (with appropriate decor) for usernames
-  Widget _buildUsernameField({TextEditingController controller, bool valid, FocusNode node, FocusNode next}) {
+  Widget _buildUsernameField(
+      {TextEditingController controller,
+      bool valid,
+      FocusNode node,
+      FocusNode next}) {
     return TextField(
       controller: controller,
       textInputAction: TextInputAction.next,
       focusNode: node,
-      onSubmitted: (content) {node.unfocus(); FocusScope.of(context).requestFocus(next);},
+      onSubmitted: (content) {
+        node.unfocus();
+        FocusScope.of(context).requestFocus(next);
+      },
       decoration: InputDecoration(
-        border: UnderlineInputBorder(borderRadius: BorderRadius.circular(10.0), borderSide: BorderSide(width: 0.0, style: BorderStyle.none)),
+        border: UnderlineInputBorder(
+            borderRadius: BorderRadius.circular(10.0),
+            borderSide: BorderSide(width: 0.0, style: BorderStyle.none)),
         fillColor: Colors.red[300],
         filled: !valid,
         contentPadding: EdgeInsets.all(8.0),
@@ -330,15 +460,23 @@ class _AuthPageState extends State<AuthPage>
 
   /// Returns an appropriately configured text field for emails
   Widget _buildEmailField(
-      {TextEditingController controller, bool valid, FocusNode node, FocusNode next}) {
+      {TextEditingController controller,
+      bool valid,
+      FocusNode node,
+      FocusNode next}) {
     return TextField(
       controller: controller,
       keyboardType: TextInputType.emailAddress,
       focusNode: node,
-      onSubmitted: (content) {node.unfocus(); FocusScope.of(context).requestFocus(next);},
+      onSubmitted: (content) {
+        node.unfocus();
+        FocusScope.of(context).requestFocus(next);
+      },
       textInputAction: TextInputAction.next,
       decoration: InputDecoration(
-        border: UnderlineInputBorder(borderRadius: BorderRadius.circular(10.0), borderSide: BorderSide(width: 0.0, style: BorderStyle.none)),
+        border: UnderlineInputBorder(
+            borderRadius: BorderRadius.circular(10.0),
+            borderSide: BorderSide(width: 0.0, style: BorderStyle.none)),
         fillColor: Colors.red[300],
         filled: !valid,
         contentPadding: EdgeInsets.all(8.0),
@@ -353,7 +491,7 @@ class _AuthPageState extends State<AuthPage>
   /// visibility when the eye icon is tapped
   Widget _buildPasswordField(
       {TextEditingController controller,
-        bool valid,
+      bool valid,
       bool visibility,
       Function visibilityTap,
       FocusNode node}) {
@@ -361,10 +499,14 @@ class _AuthPageState extends State<AuthPage>
       controller: controller,
       obscureText: visibility,
       focusNode: node,
-      onSubmitted: (content) {forumSubmit();},
+      onSubmitted: (content) {
+        forumSubmit();
+      },
       textInputAction: TextInputAction.done,
       decoration: InputDecoration(
-          border: UnderlineInputBorder(borderRadius: BorderRadius.circular(10.0), borderSide: BorderSide(width: 0.0, style: BorderStyle.none)),
+          border: UnderlineInputBorder(
+              borderRadius: BorderRadius.circular(10.0),
+              borderSide: BorderSide(width: 0.0, style: BorderStyle.none)),
           fillColor: Colors.red[300],
           filled: !valid,
           contentPadding: EdgeInsets.all(8.0),
@@ -377,5 +519,4 @@ class _AuthPageState extends State<AuthPage>
           )),
     );
   }
-
 }
