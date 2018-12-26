@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../widgets/submit_button.dart';
 import '../widgets/home_icon.dart';
 import '../widgets/page_controller_slider_bar.dart';
@@ -347,6 +348,7 @@ class _AuthPageState extends State<AuthPage>
                                   Padding(
                                       padding: EdgeInsets.only(bottom: 25.0),
                                       child: _buildSubmitButton(currentPage)),
+                                  _buildInfoRow(context)
                                 ],
                               )),
                         ),
@@ -523,6 +525,30 @@ class _AuthPageState extends State<AuthPage>
             // Toggle visibility of password on tap
             onTap: visibilityTap,
           )),
+    );
+  }
+
+  void _launchURL(String url) async{
+    if(await canLaunch(url)){
+      launch(url);
+    } else {
+      print("Couldn't launch ${url}");
+    }
+  }
+
+  Widget _buildInfoRow(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        FlatButton(
+          child: Text("Privacy Policy", textScaleFactor: 1.1,),
+          onPressed: () => _launchURL("https://www.theparksman.com/logride-privacy-policy/"),
+        ),
+        FlatButton(
+          child: Text("Terms of Service", textScaleFactor: 1.2,),
+          onPressed: () => _launchURL("https://www.theparksman.com/logride-terms-and-conditions/"),
+        )
+      ],
     );
   }
 }
