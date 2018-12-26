@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:math' as math;
 import '../widgets/park_list_widget.dart';
 import '../widgets/park_list_entry.dart';
 import '../widgets/content_frame.dart';
 import '../data/park_structures.dart';
-import '../data/section_focus_model.dart';
 import '../data/webfetcher.dart';
+import '../data/auth_manager.dart';
 import '../animations/slide_up_transition.dart';
 import 'standard_page_structure.dart';
 import 'all_park_search.dart';
 
+enum SectionFocus { favorites, all, balanced }
+
 class HomePage extends StatefulWidget {
-  HomePage({Key key}) : super(key: key);
+  HomePage({Key key, this.auth, this.onSignedOut}) : super(key: key);
+
+  final BaseAuth auth;
+  final Function onSignedOut;
 
   @override
   _HomePageState createState() => new _HomePageState();
@@ -238,7 +244,6 @@ class _HomePageState extends State<HomePage> {
       ),
       body: StandardPageStructure(
         content: <Widget>[
-          // Title Bar Buttons,
           content,
         ],
       ),

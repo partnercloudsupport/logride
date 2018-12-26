@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'ui/home.dart';
-import 'ui/auth_page.dart';
+import 'data/auth_manager.dart';
 import 'ui/all_park_search.dart';
+import 'ui/landing_page.dart';
 
 class MyApp extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
         title: 'LogRide',
         routes: <String, WidgetBuilder>{
-          "/home": (BuildContext context) => HomePage(),
-          "/auth": (BuildContext context) => AuthPage(),
           "/all_search": (BuildContext context) => AllParkSearchPage(),
         },
         theme: ThemeData(
@@ -28,7 +27,7 @@ class MyApp extends StatelessWidget {
                   fontSize: 28.0,
                   fontWeight: FontWeight.bold
                 ))),
-        home: AuthPage());
+        home: LandingPage(auth: Auth()));
   }
 }
 

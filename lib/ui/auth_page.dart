@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import '../widgets/submit_button.dart';
 import '../widgets/home_icon.dart';
 import '../animations/auth_bubble_painter.dart';
+import '../data/auth_manager.dart';
 
 class AuthPage extends StatefulWidget {
+  AuthPage({this.auth, this.onSignedIn});
+
+  final BaseAuth auth;
+  final Function onSignedIn;
+
   @override
   _AuthPageState createState() => _AuthPageState();
 }
 
 class _AuthPageState extends State<AuthPage>
     with SingleTickerProviderStateMixin {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseDatabase _database = FirebaseDatabase.instance;
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -42,7 +44,7 @@ class _AuthPageState extends State<AuthPage>
   bool _obscureSignUpText = true;
 
   bool _loginEmailValid = true;
-  bool _loginPaswordValid = true;
+  bool _loginPasswordValid = true;
   bool _signUpUsernameValid = true;
   bool _signUpEmailValid = true;
   bool _signUpPasswordValid = true;
@@ -72,15 +74,14 @@ class _AuthPageState extends State<AuthPage>
         });
   }
 
-  Future<FirebaseUser> _handleSignIn(String email, String password) async {
+  Future<String> _handleSignIn(String email, String password) async {
     _signInError = false;
 
-    return _auth
-        .signInWithEmailAndPassword(email: email, password: password)
+    return widget.auth.signIn(email, password)
         .catchError((exception) {
       String displayMessage;
       _signInError = true;
-      _loginEmailValid = _loginPaswordValid = true;
+      _loginEmailValid = _loginPasswordValid = true;
       switch (exception.code) {
         case "ERROR_INVALID_EMAIL":
           displayMessage = "Invalid Email. Check the formatting.";
@@ -88,7 +89,7 @@ class _AuthPageState extends State<AuthPage>
           break;
         case "ERROR_WRONG_PASSWORD":
           displayMessage = "Incorrect Password";
-          _loginPaswordValid = false;
+          _loginPasswordValid = false;
           break;
         case "ERROR_USER_NOT_FOUND":
           displayMessage = "There is no account associated with that email.";
@@ -113,7 +114,7 @@ class _AuthPageState extends State<AuthPage>
       _validationAlertDialog(body: displayMessage);
       setState(() {});
       return;
-    }).then((FirebaseUser createdUser) {
+    }).then((String createdUser) {
       print(_signInError
           ? "Error signing in user"
           : "Successfully singed in a user");
@@ -123,11 +124,11 @@ class _AuthPageState extends State<AuthPage>
     });
   }
 
-  Future<FirebaseUser> _handleSignUp(
+  Future<String> _handleSignUp(
       String username, String email, String password) async {
     _signUpError = false;
-    return _auth
-        .createUserWithEmailAndPassword(email: email, password: password)
+    return widget.auth
+        .signUp(username, email, password)
         .catchError((exception) {
       String displayMessage;
       _signUpError = true;
@@ -157,22 +158,13 @@ class _AuthPageState extends State<AuthPage>
       }
       _validationAlertDialog(body: displayMessage);
       setState(() {}); // Set the forms to be invalid
-    }).then((FirebaseUser createdUser) {
+    }).then((String createdUser) {
       print(_signUpError
           ? "Error creating a new user"
           : "Creating a user successful");
       if (_signUpError) return null;
 
-      // Now we need to get the current user's ID, then take the database and add their
-      // username to it.
-      DatabaseReference reference =
-          _database.reference().child("users/details");
-      reference
-          .child(createdUser.uid)
-          .set({"userID": createdUser.uid, "username": username});
-
-      // Username has been set.
-      // Sign-up process is done, we've got ourselves a valid user.
+      // Sign up is done.
       return createdUser;
     });
   }
@@ -206,7 +198,7 @@ class _AuthPageState extends State<AuthPage>
           print("User data is good");
           // No errors in the process, we have a valid signed-in user
           // TODO: PASS SIGN-ON TO MAIN PAGE
-          Navigator.pushReplacementNamed(context, "/home");
+          widget.onSignedIn();
         });
         break;
       case 1:
@@ -216,9 +208,9 @@ class _AuthPageState extends State<AuthPage>
         // We validate just to make sure they're full
         bool valid = true;
         _loginEmailValid = (email != "");
-        _loginPaswordValid = (password != "");
+        _loginPasswordValid = (password != "");
 
-        valid = (_loginEmailValid && _loginPaswordValid);
+        valid = (_loginEmailValid && _loginPasswordValid);
 
         if (!valid) {
           _validationAlertDialog(
@@ -233,7 +225,7 @@ class _AuthPageState extends State<AuthPage>
           print("User data is good");
           // No errors in the process, we have a valid signed-in user
           // TODO: PASS SIGN-ON TO MAIN PAGE
-          Navigator.pushReplacementNamed(context, "/home");
+          widget.onSignedIn();
         });
         break;
     }
@@ -380,7 +372,7 @@ class _AuthPageState extends State<AuthPage>
             next: loginPasswordNode),
         _buildPasswordField(
           controller: loginPasswordController,
-          valid: _loginPaswordValid,
+          valid: _loginPasswordValid,
           visibility: _obscureLoginText,
           visibilityTap: () {
             setState(() {
