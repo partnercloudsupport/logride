@@ -37,7 +37,7 @@ class HomeIconButton extends StatelessWidget{
                         decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             image: DecorationImage(
-                                colorFilter: ColorFilter.mode(colorOverlay, BlendMode.darken),
+                                colorFilter: ColorFilter.mode(colorOverlay, BlendMode.screen),
                                 image: AssetImage('assets/appicon.png')),
                             border: Border.all(
                               color: Colors.white,
