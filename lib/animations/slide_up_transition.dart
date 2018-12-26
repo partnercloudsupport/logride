@@ -29,12 +29,6 @@ class SlideUpRoute extends PageRouteBuilder {
                 )
               ],
             );
-            /*SlideTransition(
-            position:
-                Tween<Offset>(begin: const Offset(0.0, 1.0), end: Offset.zero)
-                    .animate(animation),
-            child: FadeTransition(opacity: Tween<double>(begin: 1.0, end: 0.5).animate(secondaryAnimation),child: child,),
-          );*/
           },
           opaque: false,
         );

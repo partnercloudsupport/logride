@@ -25,7 +25,7 @@ class HomeIconButton extends StatelessWidget{
           child: Padding(
             padding: const EdgeInsets.only(top: 4.0),
             child: InkWell(
-              onTap: onTap,
+              onTap: onTap != null ? onTap : (){}, // Pass an empty function if we don't have a tap function
               child: Container(
                 height: 85.4,
                 width: 85.4,

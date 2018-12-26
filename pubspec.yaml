@@ -36,9 +36,18 @@ dependencies:
 
   ## Firebase libraries
   firebase_core: ^0.2.5
-  firebase_auth: ^0.6.6
+  ## This version of firebase_auth has proper error handling - adopting this
+  firebase_auth:
+    git:
+      url: git://github.com/flutter/plugins.git
+      ref: a444ad120418d622c4dea2882190968722abbcfe
+      path: packages/firebase_auth
   firebase_database: ^1.0.5
   firebase_analytics: ^1.0.6
+
+  font_awesome_flutter: ^8.2.0
+
+  url_launcher: ^4.0.3
 
 dev_dependencies:
   flutter_test:
