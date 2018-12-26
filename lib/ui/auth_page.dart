@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../widgets/submit_button.dart';
 import '../widgets/home_icon.dart';
-import '../animations/auth_bubble_painter.dart';
+import '../widgets/page_controller_slider_bar.dart';
 import '../data/auth_manager.dart';
 
 class AuthPage extends StatefulWidget {
@@ -17,7 +17,6 @@ class AuthPage extends StatefulWidget {
 
 class _AuthPageState extends State<AuthPage>
     with SingleTickerProviderStateMixin {
-
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   final TextEditingController loginEmailController = TextEditingController();
@@ -55,12 +54,28 @@ class _AuthPageState extends State<AuthPage>
   Color _leftTextColor = Colors.white;
   Color _rightTextColor = Colors.black;
 
+  void _pageChanged(pageIndex) {
+    if (pageIndex == 0) {
+      setState(() {
+        _leftTextColor = Colors.white;
+        _rightTextColor = Colors.black;
+        currentPage = pageIndex;
+      });
+    } else {
+      setState(() {
+        _leftTextColor = Colors.black;
+        _rightTextColor = Colors.white;
+        currentPage = pageIndex;
+      });
+    }
+  }
+
   void _validationAlertDialog({String body}) {
     showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text("Invalid Authorization"),
+            title: Text("Invalid Authentication"),
             content: Text(body),
             actions: <Widget>[
               FlatButton(
@@ -77,8 +92,7 @@ class _AuthPageState extends State<AuthPage>
   Future<String> _handleSignIn(String email, String password) async {
     _signInError = false;
 
-    return widget.auth.signIn(email, password)
-        .catchError((exception) {
+    return widget.auth.signIn(email, password).catchError((exception) {
       String displayMessage;
       _signInError = true;
       _loginEmailValid = _loginPasswordValid = true;
@@ -120,7 +134,6 @@ class _AuthPageState extends State<AuthPage>
           : "Successfully singed in a user");
       if (_signInError) return null;
       return createdUser;
-      // No fancy logic is required for signing in - once it's done, it's done
     });
   }
 
@@ -169,6 +182,55 @@ class _AuthPageState extends State<AuthPage>
     });
   }
 
+  void _resetPassword() async {
+    String email = loginEmailController.text;
+    _loginEmailValid = true;
+    bool wasReset = true;
+    if (email == "") {
+      _validationAlertDialog(body: "Please enter your email");
+      setState(() {
+        _loginEmailValid = false;
+      });
+      return;
+    }
+    await widget.auth.resetPassword(email).catchError((exception) {
+      String displayMessage;
+      switch (exception.code) {
+        case "ERROR_INVALID_EMAIL":
+          displayMessage = "Invalid email. Please check the formatting.";
+          _loginEmailValid = false;
+          break;
+        case "ERROR_USER_NOT_FOUND":
+          displayMessage = "There is no account associated with that email.";
+          break;
+        default:
+          displayMessage = exception.message;
+      }
+      setState(() {});
+      _validationAlertDialog(body: displayMessage);
+      wasReset = false;
+    });
+    if (wasReset) {
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text("Password Rest"),
+              content: Text(
+                  "An email has been sent with a link to reset your password."),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text("Ok"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                )
+              ],
+            );
+          });
+    }
+  }
+
   void forumSubmit() {
     switch (currentPage) {
       case 0:
@@ -197,7 +259,6 @@ class _AuthPageState extends State<AuthPage>
           if (user == null) return;
           print("User data is good");
           // No errors in the process, we have a valid signed-in user
-          // TODO: PASS SIGN-ON TO MAIN PAGE
           widget.onSignedIn();
         });
         break;
@@ -224,7 +285,6 @@ class _AuthPageState extends State<AuthPage>
           if (user == null) return;
           print("User data is good");
           // No errors in the process, we have a valid signed-in user
-          // TODO: PASS SIGN-ON TO MAIN PAGE
           widget.onSignedIn();
         });
         break;
@@ -276,22 +336,7 @@ class _AuthPageState extends State<AuthPage>
                                           vertical: 24.0, horizontal: 24.0),
                                       child: PageView(
                                         controller: _pageController,
-                                        onPageChanged: (pageIndex) {
-                                          // Change text label colors according to the page we're on
-                                          if (pageIndex == 0) {
-                                            setState(() {
-                                              _leftTextColor = Colors.white;
-                                              _rightTextColor = Colors.black;
-                                              currentPage = pageIndex;
-                                            });
-                                          } else {
-                                            setState(() {
-                                              _leftTextColor = Colors.black;
-                                              _rightTextColor = Colors.white;
-                                              currentPage = pageIndex;
-                                            });
-                                          }
-                                        },
+                                        onPageChanged: _pageChanged,
                                         children: <Widget>[
                                           _buildSignUpPage(context),
                                           _buildLoginPage(context),
@@ -313,51 +358,14 @@ class _AuthPageState extends State<AuthPage>
 
   /// Returns the sliding menu bar that manages the page controller
   Widget _buildMenuBar(BuildContext context) {
-    return Container(
-      width: 275.0,
-      height: 50.0,
-      decoration: BoxDecoration(
-        color: Color.fromARGB(255, 221, 222, 224),
-        borderRadius: BorderRadius.all(Radius.circular(25.0)),
-      ),
-      child: CustomPaint(
-        painter: TabIndicationPainter(pageController: _pageController),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            Expanded(
-              child: FlatButton(
-                splashColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                onPressed: () {
-                  _pageController.animateToPage(0,
-                      duration: Duration(milliseconds: 500),
-                      curve: Curves.decelerate);
-                },
-                child: Text(
-                  "Sign Up",
-                  style: TextStyle(color: _leftTextColor, fontSize: 16.0),
-                ),
-              ),
-            ),
-            Expanded(
-              child: FlatButton(
-                splashColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                onPressed: () {
-                  _pageController?.animateToPage(1,
-                      duration: Duration(milliseconds: 500),
-                      curve: Curves.decelerate);
-                },
-                child: Text(
-                  "Log In",
-                  style: TextStyle(color: _rightTextColor, fontSize: 16.0),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+    return PageControllerSliderBar(
+      pageController: _pageController,
+      height: 50,
+      width: 275,
+      leftText: "Sign Up",
+      rightText: "Log In",
+      leftTextColor: _leftTextColor,
+      rightTextColor: _rightTextColor,
     );
   }
 
@@ -381,6 +389,12 @@ class _AuthPageState extends State<AuthPage>
           },
           node: loginPasswordNode,
         ),
+        FlatButton(
+            onPressed: () => _resetPassword(),
+            child: Text(
+              "Forgot password?",
+              textScaleFactor: 1.2,
+            ))
       ],
     );
   }
