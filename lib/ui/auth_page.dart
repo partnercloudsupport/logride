@@ -532,7 +532,7 @@ class _AuthPageState extends State<AuthPage>
     if(await canLaunch(url)){
       launch(url);
     } else {
-      print("Couldn't launch ${url}");
+      print("Couldn't launch $url");
     }
   }
 
