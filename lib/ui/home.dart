@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:math' as math;
 import '../widgets/park_list_widget.dart';
 import '../widgets/park_list_entry.dart';
@@ -9,8 +9,8 @@ import '../data/park_structures.dart';
 import '../data/webfetcher.dart';
 import '../data/auth_manager.dart';
 import '../animations/slide_up_transition.dart';
-import 'standard_page_structure.dart';
-import 'all_park_search.dart';
+import '../ui/standard_page_structure.dart';
+import '../ui/all_park_search.dart';
 
 enum SectionFocus { favorites, all, balanced }
 
@@ -142,6 +142,15 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void _signOut() async {
+    try {
+      await widget.auth.signOut();
+      widget.onSignedOut();
+    } catch (e) {
+      print(e);
+    }
+  }
+
   @override
   void initState() {
     // When this state is initialized, it needs to do the following steps
@@ -244,9 +253,39 @@ class _HomePageState extends State<HomePage> {
       ),
       body: StandardPageStructure(
         content: <Widget>[
+          _buildMenuBar(context),
           content,
         ],
       ),
     );
+  }
+
+  Widget _buildMenuBar(BuildContext context){
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            GestureDetector(
+                onTap: _signOut,
+                child: _buildMenuIcon(FontAwesomeIcons.userAlt)),
+            Row(
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(right: 28.0),
+                  child: _buildMenuIcon(FontAwesomeIcons.trophy),
+                ),
+                _buildMenuIcon(FontAwesomeIcons.cog)
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuIcon(IconData icon){
+    return Icon(icon, color: Colors.white);
   }
 }
