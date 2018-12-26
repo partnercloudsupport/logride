@@ -47,6 +47,7 @@ class _HomePageState extends State<HomePage> {
     screenHeight -= 50.0; // Remove the floating icon's padding
     // We now have our total height to play with
     double titleBarHeight = 61.0;
+    double allParksTtileBarHeight = 82.0; // AllParks is slightly bigger thanks to the icon for the search
     // If we're not in focus, fall back to the titlebarheight
     switch (focus) {
       case SectionFocus.balanced:
@@ -57,7 +58,7 @@ class _HomePageState extends State<HomePage> {
         return isFavorites ? titleBarHeight : screenHeight - titleBarHeight;
       case SectionFocus.favorites:
         // Opposite of favorites
-        return isFavorites ? screenHeight - titleBarHeight : titleBarHeight;
+        return isFavorites ? screenHeight - allParksTtileBarHeight : allParksTtileBarHeight;
     }
     print("Error - calculateSectionHeight was given an improper focus");
     return 0.0;
