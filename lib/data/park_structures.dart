@@ -1,6 +1,53 @@
 import 'attraction_structures.dart';
 import 'package:latlong/latlong.dart';
 
+class BasicPark {
+  final int parkID;
+  String name;
+  String location;
+  bool checkedInToday;
+  bool favorite;
+  bool incrementorEnabled;
+  DateTime lastDayVisited;
+  int numberOfCheckIns;
+  int ridesRidden;
+  bool showDefunct;
+  int totalRides;
+
+  BasicPark({this.parkID});
+
+  factory BasicPark.fromJson(Map<String, dynamic> json){
+    BasicPark newPark = BasicPark(parkID: json["parkID"]);
+    newPark.name = json["name"];
+    newPark.location = json["location"];
+    newPark.checkedInToday = json["checkedInToday"];
+    newPark.favorite = json["favorite"];
+    newPark.incrementorEnabled = json["incrementorEnabled"];
+    newPark.lastDayVisited = DateTime.fromMillisecondsSinceEpoch(json["lastDayVisited"]);
+    newPark.numberOfCheckIns = json["numberOfCheckIns"];
+    newPark.ridesRidden = json["ridesRidden"];
+    newPark.showDefunct = json["showDefunct"];
+    newPark.totalRides = json["totalRides"];
+    return newPark;
+  }
+
+  Map<String, dynamic> toMap(){
+    return {
+      "parkID": this.parkID,
+      "name": this.name,
+      "location": this.location,
+      "checkedInToday": this.checkedInToday,
+      "favorite": this.favorite,
+      "incrementorEnabled": this.incrementorEnabled,
+      "lastDayVisited": this.lastDayVisited.millisecondsSinceEpoch,
+      "numberOfCheckIns": this.numberOfCheckIns,
+      "ridesRidden": this.ridesRidden,
+      "showDefunct": this.showDefunct,
+      "totalRides": this.totalRides
+    };
+  }
+}
+
 /// Used to hold data pertaining to parks
 class ParkData {
   final num parkID;

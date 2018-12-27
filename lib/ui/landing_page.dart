@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../data/auth_manager.dart';
+import '../data/fbdb_manager.dart';
 import 'home.dart';
 import 'auth_page.dart';
 
@@ -10,9 +11,10 @@ enum AuthStatus {
 }
 
 class LandingPage extends StatefulWidget {
-  LandingPage({this.auth});
+  LandingPage({this.auth, this.db});
 
   final BaseAuth auth;
+  final BaseDB db;
 
   @override
   _LandingPageState createState() => _LandingPageState();
@@ -77,6 +79,8 @@ class _LandingPageState extends State<LandingPage> {
         if(userID.length > 0 && userID != null){
           return HomePage(
             auth: widget.auth,
+            db: widget.db,
+            uid: userID,
             onSignedOut: _onSignedOut
           );
         } else {

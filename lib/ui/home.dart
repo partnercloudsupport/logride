@@ -8,6 +8,7 @@ import '../widgets/content_frame.dart';
 import '../data/park_structures.dart';
 import '../data/webfetcher.dart';
 import '../data/auth_manager.dart';
+import '../data/fbdb_manager.dart';
 import '../animations/slide_up_transition.dart';
 import '../ui/standard_page_structure.dart';
 import '../ui/all_park_search.dart';
@@ -15,10 +16,13 @@ import '../ui/all_park_search.dart';
 enum SectionFocus { favorites, all, balanced }
 
 class HomePage extends StatefulWidget {
-  HomePage({Key key, this.auth, this.onSignedOut}) : super(key: key);
+  HomePage({Key key, this.auth, this.db, this.uid, this.onSignedOut})
+      : super(key: key);
 
   final BaseAuth auth;
+  final BaseDB db;
   final Function onSignedOut;
+  final String uid;
 
   @override
   _HomePageState createState() => new _HomePageState();
@@ -34,7 +38,12 @@ class _HomePageState extends State<HomePage> {
   Matrix4 _favesArrowRotation;
   Matrix4 _allArrowRotation;
 
+  bool _favesHasContent = false;
+  bool _allHasContent = false;
+
   SectionFocus focus = SectionFocus.balanced;
+
+  String userID;
 
   final SlidableController _slidableController = SlidableController();
 
@@ -47,7 +56,8 @@ class _HomePageState extends State<HomePage> {
     screenHeight -= 50.0; // Remove the floating icon's padding
     // We now have our total height to play with
     double titleBarHeight = 61.0;
-    double allParksTtileBarHeight = 82.0; // AllParks is slightly bigger thanks to the icon for the search
+    double allParksTtileBarHeight =
+        82.0; // AllParks is slightly bigger thanks to the icon for the search
     // If we're not in focus, fall back to the titlebarheight
     switch (focus) {
       case SectionFocus.balanced:
@@ -58,7 +68,9 @@ class _HomePageState extends State<HomePage> {
         return isFavorites ? titleBarHeight : screenHeight - titleBarHeight;
       case SectionFocus.favorites:
         // Opposite of favorites
-        return isFavorites ? screenHeight - allParksTtileBarHeight : allParksTtileBarHeight;
+        return isFavorites
+            ? screenHeight - allParksTtileBarHeight
+            : allParksTtileBarHeight;
     }
     print("Error - calculateSectionHeight was given an improper focus");
     return 0.0;
@@ -86,17 +98,31 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void _handleSlidableCallback(ParkSlideActionType actionType, ParkData park) {
+  void _handleSlidableCallback(ParkSlideActionType actionType, BasicPark park) {
     switch (actionType) {
       case ParkSlideActionType.faveAdd:
-        setState(() {
-          park.favorite = true;
-        });
+        widget.db.addEntryToPath(
+            path: DatabasePath.FAVORITES,
+            userID: widget.uid,
+            key: park.parkID.toString(),
+            payload: park.toMap());
+        widget.db.setEntryAtPath(
+            path: DatabasePath.PARKS,
+            userID: widget.uid,
+            key: park.parkID.toString() + "/favorite",
+            payload: true);
+
         break;
       case ParkSlideActionType.faveRemove:
-        setState(() {
-          park.favorite = false;
-        });
+        widget.db.removeEntryFromPath(
+            path: DatabasePath.FAVORITES,
+            userID: widget.uid,
+            key: park.parkID.toString());
+        widget.db.setEntryAtPath(
+            path: DatabasePath.PARKS,
+            userID: widget.uid,
+            key: park.parkID.toString() + "/favorite",
+            payload: false);
         break;
       case ParkSlideActionType.delete:
         showDialog(
@@ -105,7 +131,7 @@ class _HomePageState extends State<HomePage> {
               return AlertDialog(
                 title: Text("Delete Park Data?"),
                 content: Text(
-                    "This will permanately delete your progress for ${park.parkName}"),
+                    "This will permanately delete your progress for ${park.name}"),
                 actions: <Widget>[
                   FlatButton(
                     child: Text("Cancel"),
@@ -118,8 +144,18 @@ class _HomePageState extends State<HomePage> {
                     onPressed: () {
                       setState(() {
                         userParkData.remove(park);
-                        park.reset();
+                        if (park.favorite) {
+                          widget.db.removeEntryFromPath(
+                              path: DatabasePath.FAVORITES,
+                              userID: widget.uid,
+                              key: park.parkID.toString());
+                        }
+                        widget.db.removeEntryFromPath(
+                            path: DatabasePath.PARKS,
+                            userID: widget.uid,
+                            key: park.parkID.toString());
                         Navigator.of(context).pop();
+                        _calculateHasContent();
                       });
                     },
                   )
@@ -127,20 +163,72 @@ class _HomePageState extends State<HomePage> {
               );
             });
     }
+    // Used to trigger a recalculation of (has-content)
+    setState(() {
+      _calculateHasContent();
+    });
   }
 
-  void _handleEntryCallback(ParkData park) {
-    print("THOMAS - Open up attraction list page for ${park.parkName}");
+  void _handleEntryCallback(BasicPark park) {
+    print("THOMAS - Open up attraction list page for ${park.name}");
   }
 
   void _handleAddCallback(ParkData park) async {
-    if (userParkData.contains(park)) return;
-
-    userParkData.add(park);
-    await populateParkData(park);
-    if (mounted) {
-      setState(() {});
+    bool doesExist = await widget.db.doesEntryExistAtPath(
+        path: DatabasePath.PARKS,
+        userID: widget.uid,
+        key: park.parkID.toString());
+    if (doesExist) {
+      print("It does exist!");
+      return;
     }
+
+    BasicPark newPark = BasicPark(parkID: park.parkID);
+    newPark.name = park.parkName;
+    newPark.location = park.parkCity;
+
+    newPark.totalRides = 0;
+    newPark.numberOfCheckIns = 0;
+    newPark.lastDayVisited = DateTime.fromMillisecondsSinceEpoch(0);
+    newPark.ridesRidden = 0;
+    newPark.incrementorEnabled = false;
+    newPark.favorite = false;
+    newPark.checkedInToday = false;
+    newPark.showDefunct = false;
+
+    // TODO: Implement better attraction counting
+    await populateParkData(park);
+
+    newPark.totalRides = park.numAttractions;
+
+    widget.db.addEntryToPath(
+        path: DatabasePath.PARKS,
+        userID: widget.uid,
+        key: newPark.parkID.toString(),
+        payload: newPark.toMap());
+    setState(() {
+      _calculateHasContent();
+    });
+  }
+
+  void _calculateHasContent() {
+    widget.db
+        .doesEntryExistAtPath(
+            path: DatabasePath.FAVORITES, userID: widget.uid, key: "")
+        .then((result) {
+      setState(() {
+        _favesHasContent = result;
+      });
+    });
+
+    widget.db
+        .doesEntryExistAtPath(
+            path: DatabasePath.PARKS, userID: widget.uid, key: "")
+        .then((result) {
+      setState(() {
+        _allHasContent = result;
+      });
+    });
   }
 
   void _signOut() async {
@@ -164,6 +252,9 @@ class _HomePageState extends State<HomePage> {
         userParkData = returnedMap["visited"];
       });
     });
+
+    _calculateHasContent();
+
     super.initState();
   }
 
@@ -190,8 +281,10 @@ class _HomePageState extends State<HomePage> {
           duration: animationDuration,
           height: _favesHeight,
           child: ParkListView(
-            parksData: userParkData,
+            parksData: widget.db.getSortedQueryForUser(
+                path: DatabasePath.FAVORITES, userID: widget.uid, key: "name"),
             favorites: true,
+            hasContent: _favesHasContent,
             slidableController: _slidableController,
             sliderActionCallback: _handleSlidableCallback,
             headerCallback: _handleHeaderCallback,
@@ -211,8 +304,10 @@ class _HomePageState extends State<HomePage> {
           duration: animationDuration,
           height: _allHeight,
           child: ParkListView(
-              parksData: userParkData,
+              parksData: widget.db.getSortedQueryForUser(
+                  path: DatabasePath.PARKS, userID: widget.uid, key: "name"),
               favorites: false,
+              hasContent: _allHasContent,
               slidableController: _slidableController,
               headerCallback: _handleHeaderCallback,
               onTap: _handleEntryCallback,
@@ -261,7 +356,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildMenuBar(BuildContext context){
+  Widget _buildMenuBar(BuildContext context) {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
@@ -286,7 +381,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildMenuIcon(IconData icon){
+  Widget _buildMenuIcon(IconData icon) {
     return Icon(icon, color: Colors.white);
   }
 }
