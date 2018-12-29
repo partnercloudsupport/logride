@@ -20,10 +20,10 @@ class ParkListEntry extends StatelessWidget {
         this.slidableController,
         this.sliderActionCallback}) : super(key: key);
 
-  final BasicPark parkData;
+  final FirebasePark parkData;
   final bool inFavorites;
-  final Function(BasicPark data) onTap;
-  final Function(ParkSlideActionType actionType, BasicPark data)
+  final Function(FirebasePark data) onTap;
+  final Function(ParkSlideActionType actionType, FirebasePark data)
   sliderActionCallback;
 
   final SlidableController

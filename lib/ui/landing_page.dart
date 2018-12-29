@@ -42,6 +42,8 @@ class _LandingPageState extends State<LandingPage> {
       status = AuthStatus.loggedIn;
       widget.auth.getCurrentUser().then((user){
         userID = user.uid.toString();
+        print(userID);
+        widget.db.storeUserID(userID);
       });
     });
   }
@@ -50,6 +52,7 @@ class _LandingPageState extends State<LandingPage> {
     setState((){
       status = AuthStatus.notLoggedIn;
       userID = "";
+      widget.db.clearUserID();
     });
   }
 

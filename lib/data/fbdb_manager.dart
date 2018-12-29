@@ -1,5 +1,4 @@
 import 'package:firebase_database/firebase_database.dart';
-import 'dart:convert';
 
 enum DatabasePath {
   USER_DETAILS,
@@ -25,14 +24,27 @@ Map<DatabasePath, String> _databasePathStrings = {
 
 abstract class BaseDB {
   Query getSortedQueryForUser({DatabasePath path, String userID, String key});
-  void addEntryToPath({DatabasePath path, String userID, String key, Map<String, dynamic> payload});
-  void removeEntryFromPath({DatabasePath path, String userID, String key});
+  Query getFilteredQuery({DatabasePath path, String userID, String key, dynamic value});
+  Query getQueryForUser({DatabasePath path, String userID, String key});
   void setEntryAtPath({DatabasePath path, String userID, String key, dynamic payload});
+  void removeEntryFromPath({DatabasePath path, String userID, String key});
   Future<bool> doesEntryExistAtPath({DatabasePath path, String userID, String key});
+  Future<dynamic> getEntryAtPath({DatabasePath path, String userID, String key});
+  void storeUserID(String userID);
+  void clearUserID();
 }
 
 class DatabaseManager implements BaseDB {
   final FirebaseDatabase _firebaseDatabase = FirebaseDatabase.instance;
+  String _savedID;
+
+  void storeUserID(String userID){
+    _savedID = userID ?? null;
+  }
+
+  void clearUserID(){
+    _savedID = null;
+  }
   
   DatabaseReference _getReference(DatabasePath path){
     String childPath = _databasePathStrings[path];
@@ -40,24 +52,35 @@ class DatabaseManager implements BaseDB {
   }
 
   Query getSortedQueryForUser({DatabasePath path, String userID, String key}){
-    return _getReference(path).child(userID).orderByChild(key);
+    return _getReference(path).child(userID ?? _savedID).orderByChild(key);
   }
 
-  void addEntryToPath({DatabasePath path, String userID, String key, Map<String, dynamic> payload}){
-    _getReference(path).child(userID).child(key).set(payload);
+  Query getFilteredQuery({DatabasePath path, String userID, String key, dynamic value}){
+    return _getReference(path).child(userID ?? _savedID).orderByChild(key).equalTo(value);
+  }
+
+  Query getQueryForUser({DatabasePath path, String userID, String key}) {
+    return _getReference(path).child(userID ?? _savedID).orderByKey();
   }
 
   void removeEntryFromPath({DatabasePath path, String userID, String key}){
-    _getReference(path).child(userID).child(key).remove();
+    _getReference(path).child(userID ?? _savedID).child(key).remove();
   }
 
   void setEntryAtPath({DatabasePath path, String userID, String key, dynamic payload}){
-    _getReference(path).child(userID).child(key).set(payload);
+    _getReference(path).child(userID ?? _savedID).child(key).set(payload);
   }
 
   Future<bool> doesEntryExistAtPath({DatabasePath path, String userID, String key}) {
-    return _getReference(path).child(userID).child(key).once().then((DataSnapshot snapshot) {
+    return _getReference(path).child(userID ?? _savedID).child(key).once().then((DataSnapshot snapshot) {
       return snapshot.value != null;
     });
   }
+
+  Future<dynamic> getEntryAtPath({DatabasePath path, String userID, String key}) {
+    return _getReference(path).child(userID ?? _savedID).child(key).once().then((DataSnapshot snapshot) {
+      return snapshot.value;
+    });
+  }
+
 }
