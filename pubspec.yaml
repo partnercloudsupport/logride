@@ -28,9 +28,9 @@ dependencies:
   # Used for sliding controls on list entries
   flutter_slidable: "^0.4.9"
   # Used for easy model manipulation
-  scoped_model: ^1.0.1
+  #scoped_model: ^1.0.1
   # Used to animate list entries but only on their first time
-  after_layout: ^1.0.7
+  #after_layout: ^1.0.7
 
   google_sign_in: ^3.2.4
 
@@ -43,7 +43,7 @@ dependencies:
       ref: a444ad120418d622c4dea2882190968722abbcfe
       path: packages/firebase_auth
   firebase_database: ^1.0.5
-  firebase_analytics: ^1.0.6
+  #firebase_analytics: ^1.0.6
 
   font_awesome_flutter: ^8.2.0
 
