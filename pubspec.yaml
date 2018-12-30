@@ -45,9 +45,14 @@ dependencies:
   firebase_database: ^1.0.5
   #firebase_analytics: ^1.0.6
 
+  # Used for icons where material icons fail
   font_awesome_flutter: ^8.2.0
 
+  # Used throughout the app for launching external links
   url_launcher: ^4.0.3
+
+  # Used for the "shiny" effect on completed progress bars
+  shimmer: 0.0.6
 
 dev_dependencies:
   flutter_test:

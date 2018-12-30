@@ -13,6 +13,7 @@ import '../data/fbdb_manager.dart';
 import '../animations/slide_up_transition.dart';
 import '../ui/standard_page_structure.dart';
 import '../ui/all_park_search.dart';
+import '../ui/attractions_list_page.dart';
 
 enum SectionFocus { favorites, all, balanced }
 
@@ -30,9 +31,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<BluehostPark> allParks;
-  List<BluehostPark> userParkData;
-
   double _favesHeight;
   double _allHeight;
 
@@ -137,6 +135,15 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _handleEntryCallback(FirebasePark park) {
+    Navigator.push(
+        context,
+        SlideUpRoute(
+            widget: AttractionsPage(
+          pm: _parksManager,
+          db: widget.db,
+          userParkData: park,
+          serverParkData: getBluehostParkByID(_parksManager.allParksInfo, park.parkID),
+        )));
     print("THOMAS - Open up attraction list page for ${park.name}");
   }
 
