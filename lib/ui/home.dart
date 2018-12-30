@@ -177,8 +177,6 @@ class _HomePageState extends State<HomePage> {
     _favesHeight = _calculateSectionHeight(true, focus);
     _allHeight = _calculateSectionHeight(false, focus);
 
-    //_calculateHasContent();
-
     Widget arrowIcon = Transform(
         transform: Matrix4.translationValues(-10, -10, 0.0),
         child: Icon(
@@ -250,7 +248,6 @@ class _HomePageState extends State<HomePage> {
           size: 38,
         ),
         onPressed: () {
-          print(_parksManager.allParksInfo.length);
           Navigator.push(
               context,
               SlideUpRoute(

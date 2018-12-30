@@ -1,4 +1,46 @@
-class Attraction {
+
+class UnifiedAttraction {
+  FirebaseAttraction userData;
+  BluehostAttraction serverData;
+
+  UnifiedAttraction();
+
+  factory UnifiedAttraction.fromBluehost(BluehostAttraction bh){
+    UnifiedAttraction uni = UnifiedAttraction();
+    uni.serverData = bh;
+    uni.userData = null;
+    return uni;
+  }
+}
+
+class FirebaseAttraction {
+  final int rideID;
+  int numberOfTimesRidden = 0;
+  DateTime firstRideDate = DateTime.fromMillisecondsSinceEpoch(0);
+  DateTime lastRideDate = DateTime.fromMillisecondsSinceEpoch(0);
+
+  FirebaseAttraction({this.rideID});
+
+  factory FirebaseAttraction.fromMap(Map<String, dynamic> map){
+    FirebaseAttraction newAttraction = FirebaseAttraction(rideID: map["rideID"]);
+    newAttraction.numberOfTimesRidden = map["numberOfTimesRidden"];
+    newAttraction.firstRideDate = map["firstRideDate"];
+    newAttraction.lastRideDate = map["lastRideDate"];
+    return newAttraction;
+  }
+
+  Map toMap() {
+    return {
+      "rideID": this.rideID,
+      "numberOfTimesRidden": this.numberOfTimesRidden,
+      "firstRideDate": this.firstRideDate.millisecondsSinceEpoch,
+      "lastRideDate": this.lastRideDate.millisecondsSinceEpoch,
+    };
+  }
+}
+
+
+class BluehostAttraction {
   String attractionName;
   final int attractionID;
   int parkID;
@@ -33,14 +75,11 @@ class Attraction {
   DateTime lastUpdated;
   DateTime created;
 
-  num timesExperienced;
-  List<num> scores;
+  BluehostAttraction({this.attractionID});
 
-  Attraction({this.attractionID});
+  factory BluehostAttraction.fromJson(Map<String, dynamic> json){
 
-  factory Attraction.fromJson(Map<String, dynamic> json){
-
-    Attraction newAttraction = Attraction(attractionID: num.parse(json["RideID"]));
+    BluehostAttraction newAttraction = BluehostAttraction(attractionID: num.parse(json["RideID"]));
 
     newAttraction.attractionName = json["Name"];
     newAttraction.parkID = num.parse(json["ParkID"]);
@@ -85,6 +124,11 @@ class Attraction {
     newAttraction.lastUpdated = DateTime.parse(json["DateTime_LastUpdated"]);
     newAttraction.created = DateTime.parse(json["DateTime_Created"]);
 
+    return newAttraction;
+  }
+
+  FirebaseAttraction toNewFirebaseAttraction(){
+    FirebaseAttraction newAttraction = FirebaseAttraction(rideID: this.attractionID);
     return newAttraction;
   }
 }

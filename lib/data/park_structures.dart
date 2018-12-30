@@ -1,13 +1,6 @@
 import 'attraction_structures.dart';
 import 'package:latlong/latlong.dart';
 
-class Park {
-  FirebasePark userData;
-  BluehostPark serverData;
-
-  List<Attraction> attractions;
-}
-
 class FirebasePark {
   bool checkedInToday = false;
   bool favorite = false;
@@ -16,6 +9,7 @@ class FirebasePark {
   String location = "";
   String name = "";
   int numberOfCheckIns = 0;
+  int numDefunctRidden = 0;
   final int parkID;
   int ridesRidden = 0;
   bool showDefunct = false;
@@ -53,6 +47,28 @@ class FirebasePark {
       "totalRides": this.totalRides
     };
   }
+
+  void updateAttractionCount({BluehostPark targetPark}){
+    if(targetPark == null){
+      this.numDefunctRidden = 0;
+      this.ridesRidden = 0;
+      this.totalRides = 0;
+      return;
+    }
+    int numAttractions = 0;
+    int numRidden = 0;
+    int numDefunct = 0;
+    for(int i = 0; i < targetPark.attractions.length; i++){
+      if(!targetPark.attractions[i].serverData.active) {numDefunct++; continue;}
+
+      numAttractions++;
+      if(targetPark.attractions[i].userData?.numberOfTimesRidden ?? -1 > 0) numRidden++;
+    }
+
+    this.numDefunctRidden = numDefunct;
+    this.ridesRidden = numRidden;
+    this.totalRides = numAttractions;
+  }
 }
 
 /// Used to hold data pertaining to parks
@@ -75,6 +91,7 @@ class BluehostPark {
 
   bool filled = false; // Used to document whether data has been filled for it or not
 
+  List<UnifiedAttraction> attractions;
 
   BluehostPark({this.id});
 
@@ -103,6 +120,7 @@ class BluehostPark {
     FirebasePark newPark = FirebasePark(parkID: this.id, name: this.parkName, location: this.parkCity);
     return newPark;
   }
+
 }
 
 /// Returns the [BluehostPark] which matches the provided [idToSearchFor].

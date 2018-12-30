@@ -1,6 +1,8 @@
 import '../data/fbdb_manager.dart';
 import '../data/park_structures.dart';
+import '../data/attraction_structures.dart';
 import '../data/webfetcher.dart';
+import 'dart:convert';
 
 class ParksManager {
   ParksManager({this.db, this.wf});
@@ -20,10 +22,9 @@ class ParksManager {
     // The 'filled' tag is used in the all-parks-search to show the user they
     // have that park.
     db.getEntryAtPath(path: DatabasePath.PARKS, key: "").then((snap) {
-      //print(snap.value);
-      Map entries = Map.from(snap);
-      for(int i = 0; i < entries.keys.length; i++) {
-        int entryID = num.parse(entries.keys.elementAt(i));
+      Map<dynamic, dynamic> values = jsonDecode(jsonEncode(snap));
+      for(int i = 0; i < values.keys.length; i++) {
+        int entryID = num.parse(values.keys.elementAt(i));
         getBluehostParkByID(allParksInfo, entryID).filled = true;
       }
     });
@@ -35,9 +36,15 @@ class ParksManager {
     if (exists)
       return; // If the park is already there, ignore it
 
-    // Get our targeted park, translate it into one that firebase can read
+    // Get our targeted park, calculate ride
     BluehostPark targetPark = getBluehostParkByID(allParksInfo, targetParkID);
+    targetPark.attractions = (await wf.getAllAttractionData(parkID: targetParkID)).map((BluehostAttraction element) {
+      // Wrap all server data into unified attraction objects.
+      return UnifiedAttraction.fromBluehost(element);
+    }).toList();
+    print("Target ID: $targetParkID, TargetPark Attraction Length: ${targetPark.attractions.length}");
     FirebasePark translated = targetPark.toNewFirebaseEntry();
+    translated.updateAttractionCount(targetPark: targetPark);
 
     // Push the translated park into the database
     db.setEntryAtPath(
@@ -65,7 +72,7 @@ class ParksManager {
 
   void removeParkFromFavorites(num targetID) async {
     // Check to see if we're actually in favorites
-    bool isInFavorites = await db.getEntryAtPath(path: DatabasePath.PARKS, key: targetID.toString() + "/favorite");
+    bool isInFavorites = (await db.getEntryAtPath(path: DatabasePath.PARKS, key: targetID.toString() + "/favorite"));
     if(!isInFavorites) return;
 
     // Set the favorite flag for the park
