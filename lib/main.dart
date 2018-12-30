@@ -17,6 +17,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
             primaryColor: new Color.fromARGB(255, 57, 164, 72),
             accentColor: new Color.fromARGB(255, 91, 220, 70),
+            buttonColor: new Color.fromARGB(255, 57, 164, 72),
             textTheme: TextTheme(
                 subhead:
                     TextStyle(fontSize: 22.0, fontWeight: FontWeight.normal),
