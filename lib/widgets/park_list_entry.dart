@@ -107,7 +107,7 @@ class ParkListEntry extends StatelessWidget {
                     ),
                     ParkProgress(
                         numRides: parkData.totalRides,
-                        numRidden: 0)
+                        numRidden: parkData.ridesRidden)
                   ],
                 )),
             onTap: () {
