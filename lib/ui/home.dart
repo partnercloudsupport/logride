@@ -135,16 +135,15 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _handleEntryCallback(FirebasePark park) {
+    print("Opening up attraction page for park ${park.name}");
     Navigator.push(
         context,
         SlideUpRoute(
             widget: AttractionsPage(
           pm: _parksManager,
           db: widget.db,
-          userParkData: park,
           serverParkData: getBluehostParkByID(_parksManager.allParksInfo, park.parkID),
         )));
-    print("THOMAS - Open up attraction list page for ${park.name}");
   }
 
   void _handleAddCallback(BluehostPark park) async {

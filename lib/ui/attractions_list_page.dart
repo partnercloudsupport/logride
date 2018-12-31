@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:firebase_database/firebase_database.dart';
 import '../ui/standard_page_structure.dart';
 import '../data/parks_manager.dart';
 import '../data/park_structures.dart';
@@ -9,13 +10,16 @@ import '../data/attraction_structures.dart';
 import '../data/fbdb_manager.dart';
 import '../widgets/content_frame.dart';
 import '../widgets/park_progress.dart';
+import 'dart:convert';
 
 class AttractionsPage extends StatefulWidget {
-  AttractionsPage({this.pm, this.db, this.userParkData, this.serverParkData});
+  AttractionsPage(
+      {this.pm,
+      this.db,
+      this.serverParkData});
 
   final ParksManager pm;
   final BaseDB db;
-  final FirebasePark userParkData;
   final BluehostPark serverParkData;
 
   @override
@@ -25,9 +29,18 @@ class AttractionsPage extends StatefulWidget {
 class _AttractionsPageState extends State<AttractionsPage> {
   final SlidableController _slidableController = SlidableController();
 
+  Stream<Event> _parkStream;
+
   void _handleExperienceTap(num parkID) {}
 
   void _handleExperienceLongTap(num parkID) {}
+
+  @override
+  void initState() {
+    _parkStream = widget.db.getLiveEntryAtPath(
+        path: DatabasePath.PARKS, key: widget.serverParkData.id.toString());
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,24 +61,39 @@ class _AttractionsPageState extends State<AttractionsPage> {
       child: Card(
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-        child: Column(
-          children: <Widget>[
-            Padding(padding: EdgeInsets.only(top: 34), child: Container(),),
-            // Titlebar w/ info and settings buttons
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: _buildTitleBar(context),
-            ),
-            // Percentage Complete bar
-            ParkProgressFullBar(
-              numRidden: widget.userParkData.ridesRidden,
-              numRides: widget.userParkData.totalRides,
-              defunctRidden: widget.userParkData.numDefunctRidden,
-              showDefunct: widget.userParkData.showDefunct,
-            )
-            // Listview (Expanded)
-          ],
-        ),
+        child: StreamBuilder<Event>(
+            stream: _parkStream,
+            builder: (BuildContext context, AsyncSnapshot<Event> stream) {
+              if(!stream.hasData) {
+                return Container(constraints: BoxConstraints.expand(),child: CircularProgressIndicator());
+              } else {
+                Map parkDataMap = jsonDecode(jsonEncode(stream.data.snapshot.value));
+                FirebasePark parkData = FirebasePark.fromMap(parkDataMap);
+                print("Successfully recived parkData for attractions list page");
+                return Column(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.only(top: 34),
+                      child: Container(),
+                    ),
+                    // Titlebar w/ info and settings buttons
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: _buildTitleBar(context),
+                    ),
+                    // Percentage Complete bar
+
+                    ParkProgressFullBar(
+                      numRidden: parkData.ridesRidden,
+                      numRides: parkData.totalRides,
+                      defunctRidden: parkData.numDefunctRidden,
+                      showDefunct: parkData.showDefunct,
+                    )
+                    // Listview (Expanded)
+                  ],
+                );
+              }
+            }),
       ),
     );
   }
@@ -79,7 +107,8 @@ class _AttractionsPageState extends State<AttractionsPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           // Left icon
-          _buildTitleBarIcon(context, icon: FontAwesomeIcons.info, onTap: () => print("Info")),
+          _buildTitleBarIcon(context,
+              icon: FontAwesomeIcons.info, onTap: () => print("Info")),
           // Label
           Expanded(
             child: AutoSizeText(
@@ -90,17 +119,22 @@ class _AttractionsPageState extends State<AttractionsPage> {
             ),
           ),
           // Right icon
-          _buildTitleBarIcon(context, icon: FontAwesomeIcons.cog, onTap: () => print("Setings")),
+          _buildTitleBarIcon(context,
+              icon: FontAwesomeIcons.cog, onTap: () => print("Setings")),
         ],
       )),
     );
   }
 
-  Widget _buildTitleBarIcon(BuildContext context, {IconData icon, Function onTap}){
+  Widget _buildTitleBarIcon(BuildContext context,
+      {IconData icon, Function onTap}) {
     num iconSize = 26.0;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: Icon(icon, color: Theme.of(context).buttonColor, size: iconSize,)
-    );
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        child: Icon(
+          icon,
+          color: Theme.of(context).buttonColor,
+          size: iconSize,
+        ));
   }
 }

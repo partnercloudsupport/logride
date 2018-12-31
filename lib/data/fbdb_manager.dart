@@ -30,6 +30,7 @@ abstract class BaseDB {
   void removeEntryFromPath({DatabasePath path, String userID, String key});
   Future<bool> doesEntryExistAtPath({DatabasePath path, String userID, String key});
   Future<dynamic> getEntryAtPath({DatabasePath path, String userID, String key});
+  Stream<Event> getLiveEntryAtPath({DatabasePath path, String userID, String key});
   void storeUserID(String userID);
   void clearUserID();
 }
@@ -81,6 +82,10 @@ class DatabaseManager implements BaseDB {
     return _getReference(path).child(userID ?? _savedID).child(key).once().then((DataSnapshot snapshot) {
       return snapshot.value;
     });
+  }
+
+  Stream<Event> getLiveEntryAtPath({DatabasePath path, String userID, String key}) {
+    return _getReference(path).child(userID ?? _savedID).child(key).onValue;
   }
 
 }
