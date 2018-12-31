@@ -13,10 +13,7 @@ import '../widgets/park_progress.dart';
 import 'dart:convert';
 
 class AttractionsPage extends StatefulWidget {
-  AttractionsPage(
-      {this.pm,
-      this.db,
-      this.serverParkData});
+  AttractionsPage({this.pm, this.db, this.serverParkData});
 
   final ParksManager pm;
   final BaseDB db;
@@ -47,6 +44,7 @@ class _AttractionsPageState extends State<AttractionsPage> {
     return Scaffold(
         backgroundColor: Colors.transparent,
         body: StandardPageStructure(
+          // IconFunction and IconDecoration relate to the homeIcon
           iconFunction: () => Navigator.of(context).pop(),
           iconDecoration: Container(
             child: Icon(Icons.home, size: 60, color: Colors.white),
@@ -64,32 +62,41 @@ class _AttractionsPageState extends State<AttractionsPage> {
         child: StreamBuilder<Event>(
             stream: _parkStream,
             builder: (BuildContext context, AsyncSnapshot<Event> stream) {
-              if(!stream.hasData) {
-                return Container(constraints: BoxConstraints.expand(),child: CircularProgressIndicator());
+              if (!stream.hasData) {
+                return Container(
+                    constraints: BoxConstraints.expand(),
+                    child: CircularProgressIndicator());
               } else {
-                Map parkDataMap = jsonDecode(jsonEncode(stream.data.snapshot.value));
+                Map parkDataMap =
+                    jsonDecode(jsonEncode(stream.data.snapshot.value));
                 FirebasePark parkData = FirebasePark.fromMap(parkDataMap);
-                print("Successfully recived parkData for attractions list page");
+                print(
+                    "Successfully recived parkData for attractions list page");
                 return Column(
                   children: <Widget>[
+                    // Padding used to make sure the iconButton doesn't overlap
+                    // our header.
                     Padding(
                       padding: EdgeInsets.only(top: 34),
                       child: Container(),
                     ),
+
                     // Titlebar w/ info and settings buttons
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: _buildTitleBar(context),
                     ),
-                    // Percentage Complete bar
 
+                    // Percentage Complete bar
                     ParkProgressFullBar(
                       numRidden: parkData.ridesRidden,
                       numRides: parkData.totalRides,
                       defunctRidden: parkData.numDefunctRidden,
                       showDefunct: parkData.showDefunct,
                     )
+
                     // Listview (Expanded)
+                    // TODO: Implement ListView display for the attractions themselves
                   ],
                 );
               }
@@ -98,6 +105,9 @@ class _AttractionsPageState extends State<AttractionsPage> {
     );
   }
 
+  /// Returns the titlebar used in [AttractionListPage]. Contains two buttons,
+  /// settings and info, separated by an expanded text that contains the name of
+  /// the park.
   Widget _buildTitleBar(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
@@ -126,15 +136,21 @@ class _AttractionsPageState extends State<AttractionsPage> {
     );
   }
 
+  /// Returns the properly stylized buttons used in the titlebar of an attractions
+  /// list page.
   Widget _buildTitleBarIcon(BuildContext context,
       {IconData icon, Function onTap}) {
     num iconSize = 26.0;
-    return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: Icon(
-          icon,
-          color: Theme.of(context).buttonColor,
-          size: iconSize,
-        ));
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Icon(
+            icon,
+            color: Theme.of(context).buttonColor,
+            size: iconSize,
+          )),
+    );
   }
 }
