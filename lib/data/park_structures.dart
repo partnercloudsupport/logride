@@ -1,9 +1,91 @@
 import 'attraction_structures.dart';
 import 'package:latlong/latlong.dart';
 
+class FirebasePark {
+  bool checkedInToday = false;
+  bool favorite = false;
+  bool incrementorEnabled = false;
+  DateTime lastDayVisited = DateTime.fromMillisecondsSinceEpoch(0);
+  String location = "";
+  String name = "";
+  int numberOfCheckIns = 0;
+  int numDefunctRidden = 0;
+  final int parkID;
+  int ridesRidden = 0;
+  bool showDefunct = false;
+  int totalRides = 0;
+
+  FirebasePark({this.parkID, this.name, this.location});
+
+  factory FirebasePark.fromMap(Map<String, dynamic> data) {
+    FirebasePark newPark = FirebasePark(parkID: data["parkID"]);
+    newPark.checkedInToday = data["checkedInToday"];
+    newPark.favorite = data["favorite"];
+    newPark.incrementorEnabled = data["incrementorEnabled"];
+    newPark.lastDayVisited =
+        DateTime.fromMicrosecondsSinceEpoch(data["lastDayVisited"]);
+    newPark.location = data["location"];
+    newPark.name = data["name"];
+    newPark.numberOfCheckIns = data["numberOfCheckIns"];
+    newPark.ridesRidden = data["ridesRidden"];
+    newPark.showDefunct = data["showDefunct"];
+    newPark.totalRides = data["totalRides"];
+    return newPark;
+  }
+
+  Map toMap() {
+    return {
+      "parkID": this.parkID,
+      "checkedInToday": this.checkedInToday,
+      "favorite": this.favorite,
+      "incrementorEnabled": this.incrementorEnabled,
+      "lastDayVisited": this.lastDayVisited.millisecondsSinceEpoch,
+      "location": this.location,
+      "name": this.name,
+      "numberOfCheckIns": this.numberOfCheckIns,
+      "ridesRidden": this.ridesRidden,
+      "showDefunct": this.showDefunct,
+      "totalRides": this.totalRides
+    };
+  }
+
+  void updateAttractionCount(
+      {BluehostPark targetPark, List<FirebaseAttraction> userData}) {
+    if (targetPark == null) {
+      this.numDefunctRidden = 0;
+      this.ridesRidden = 0;
+      this.totalRides = 0;
+      return;
+    }
+    // Create an empty list so the search doesn't fail
+    if (userData == null) userData = List<FirebaseAttraction>();
+
+    int numAttractions = 0;
+    int numRidden = 0;
+    int numDefunct = 0;
+
+    for (int i = 0; i < targetPark.attractions.length; i++) {
+      FirebaseAttraction userAttraction = getFirebaseAttractionFromList(
+          userData, targetPark.attractions[i].attractionID);
+      if (!targetPark.attractions[i].active &&
+          (userAttraction?.numberOfTimesRidden ?? -1) > 0) {
+        numDefunct++;
+        continue;
+      }
+
+      numAttractions++;
+      if ((userAttraction?.numberOfTimesRidden ?? -1) > 0) numRidden++;
+    }
+
+    this.numDefunctRidden = numDefunct;
+    this.ridesRidden = numRidden;
+    this.totalRides = numAttractions;
+  }
+}
+
 /// Used to hold data pertaining to parks
-class ParkData {
-  final num parkID;
+class BluehostPark {
+  final num id;
   String parkName;
   String parkCity;
   String parkCountry;
@@ -19,68 +101,48 @@ class ParkData {
   DateTime created;
   DateTime lastUpdated;
 
-  bool filled = false; // Used to document whether data has been filled for it or not
+  bool filled =
+      false; // Used to document whether data has been filled for it or not
 
-  num numAttractions = 0;
-  num numDefunct = 0;
-  num numRidden = 0;
-  List<Attraction> attractions;
+  List<BluehostAttraction> attractions;
 
-  bool favorite = false;
+  BluehostPark({this.id});
 
-  ParkData({
-      this.parkID});
-
-  factory ParkData.fromJson(Map<String, dynamic> json) {
-    ParkData newParkData = ParkData(parkID: num.parse(json["id"]));
+  factory BluehostPark.fromJson(Map<String, dynamic> json) {
+    BluehostPark newParkData = BluehostPark(id: num.parse(json["id"]));
 
     newParkData.parkName = json["Name"];
     newParkData.parkCity = json["City"];
     newParkData.parkCountry = json["Country"];
-    newParkData.active = (json["Active"] == "1");
+    newParkData.active = bool.fromEnvironment(json["Active"]);
     newParkData.yearOpen = num.parse(json["YearOpen"]);
     newParkData.yearClosed = num.parse(json["YearClosed"]);
-    newParkData.location = LatLng(num.parse(json["Latitude"]), num.parse(json["Longitude"]));
+    newParkData.location =
+        LatLng(num.parse(json["Latitude"]), num.parse(json["Longitude"]));
     newParkData.previousNames = json["PreviousNames"];
     newParkData.type = json["Type"];
-    newParkData.seasonal = (json["Seasonal"] == "1") ?? false;
+    newParkData.seasonal = bool.fromEnvironment(json["Seasonal"]);
     newParkData.website = json["website"];
     newParkData.username = json["userName"];
     newParkData.created = DateTime.parse(json["DateTime_Created"]);
     newParkData.lastUpdated = DateTime.parse(json["DateTime_LastUpdated"]);
 
-    newParkData.filled = true; // Yup, we've filled the data
-
     return newParkData;
   }
 
-  /// Resets all values to initial, excluding identifying information like name, id, and city
-  void reset(){
-    parkCountry = null;
-    active = null;
-    yearOpen = null;
-    yearClosed = null;
-    location = null;
-    previousNames = null;
-    type = null;
-    seasonal = null;
-    website = null;
-    username = null;
-    created = null;
-    lastUpdated = null;
-    attractions = null;
-    filled = false;
-    numAttractions = 0;
-    numDefunct = 0;
-    numRidden = 0;
+  FirebasePark toNewFirebaseEntry() {
+    FirebasePark newPark = FirebasePark(
+        parkID: this.id, name: this.parkName, location: this.parkCity);
+    return newPark;
   }
 }
 
-/// Returns the [ParkData] which matches the provided [idToSearchFor].
+/// Returns the [BluehostPark] which matches the provided [idToSearchFor].
 /// Returns null if target is not present
-ParkData getParkByID(List<ParkData> listToSearch, num idToSearchFor){
-  for(int i = 0; i < listToSearch.length; i++){
-    if(listToSearch[i].parkID == idToSearchFor) {
+BluehostPark getBluehostParkByID(
+    List<BluehostPark> listToSearch, num idToSearchFor) {
+  for (int i = 0; i < listToSearch.length; i++) {
+    if (listToSearch[i].id == idToSearchFor) {
       return listToSearch[i];
     }
   }
@@ -88,11 +150,24 @@ ParkData getParkByID(List<ParkData> listToSearch, num idToSearchFor){
   return null;
 }
 
+/// Returns the [FirebasePark] which matches the provided id.
+/// Returns null if target is not present
+FirebasePark getFirebasePark(
+    List<FirebasePark> listToSearch, num idToSearchFor) {
+  for (int i = 0; i < listToSearch.length; i++) {
+    if (listToSearch[i].parkID == idToSearchFor) {
+      return listToSearch[i];
+    }
+  }
+
+  return null;
+}
+
 /// Returns the number of favorite parks inside the list to search
-int countFavoriteParks(List<ParkData> listToSearch){
+int countFavoriteParks(List<FirebasePark> listToSearch) {
   int numFaves = 0;
-  for(int i = 0; i < listToSearch.length; i++){
-    if(listToSearch[i].favorite) numFaves++;
+  for (int i = 0; i < listToSearch.length; i++) {
+    if (listToSearch[i].favorite) numFaves++;
   }
   return numFaves;
 }

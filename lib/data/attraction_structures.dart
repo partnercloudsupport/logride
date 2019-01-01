@@ -1,4 +1,32 @@
-class Attraction {
+
+class FirebaseAttraction {
+  final int rideID;
+  int numberOfTimesRidden = 0;
+  DateTime firstRideDate = DateTime.fromMillisecondsSinceEpoch(0);
+  DateTime lastRideDate = DateTime.fromMillisecondsSinceEpoch(0);
+
+  FirebaseAttraction({this.rideID});
+
+  factory FirebaseAttraction.fromMap(Map<String, dynamic> map){
+    FirebaseAttraction newAttraction = FirebaseAttraction(rideID: map["rideID"]);
+    newAttraction.numberOfTimesRidden = map["numberOfTimesRidden"];
+    newAttraction.firstRideDate = map["firstRideDate"];
+    newAttraction.lastRideDate = map["lastRideDate"];
+    return newAttraction;
+  }
+
+  Map toMap() {
+    return {
+      "rideID": this.rideID,
+      "numberOfTimesRidden": this.numberOfTimesRidden,
+      "firstRideDate": this.firstRideDate.millisecondsSinceEpoch,
+      "lastRideDate": this.lastRideDate.millisecondsSinceEpoch,
+    };
+  }
+}
+
+
+class BluehostAttraction {
   String attractionName;
   final int attractionID;
   int parkID;
@@ -33,14 +61,16 @@ class Attraction {
   DateTime lastUpdated;
   DateTime created;
 
-  num timesExperienced;
-  List<num> scores;
+  // This is established by the webfetcher using data taken from the server.
+  // Note: this isn't from the same bluehost request as the rest of the
+  // attraction data.
+  String typeLabel;
 
-  Attraction({this.attractionID});
+  BluehostAttraction({this.attractionID});
 
-  factory Attraction.fromJson(Map<String, dynamic> json){
+  factory BluehostAttraction.fromJson(Map<String, dynamic> json){
 
-    Attraction newAttraction = Attraction(attractionID: num.parse(json["RideID"]));
+    BluehostAttraction newAttraction = BluehostAttraction(attractionID: num.parse(json["RideID"]));
 
     newAttraction.attractionName = json["Name"];
     newAttraction.parkID = num.parse(json["ParkID"]);
@@ -87,4 +117,23 @@ class Attraction {
 
     return newAttraction;
   }
+
+  FirebaseAttraction toNewFirebaseAttraction(){
+    FirebaseAttraction newAttraction = FirebaseAttraction(rideID: this.attractionID);
+    return newAttraction;
+  }
+}
+
+FirebaseAttraction getFirebaseAttractionFromList(List<FirebaseAttraction> toSearch, int attractionID){
+  for(int i = 0; i < toSearch.length; i++){
+    if(toSearch[i].rideID == attractionID) return toSearch[i];
+  }
+  return null;
+}
+
+BluehostAttraction getBluehostAttractionFromList(List<BluehostAttraction> toSearch, int attractionID){
+  for(int i = 0; i < toSearch.length; i++){
+    if(toSearch[i].attractionID == attractionID) return toSearch[i];
+  }
+  return null;
 }

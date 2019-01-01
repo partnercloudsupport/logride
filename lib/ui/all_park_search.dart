@@ -7,8 +7,8 @@ import 'standard_page_structure.dart';
 class SearchParksCard extends StatefulWidget {
   SearchParksCard({Key key, this.parkList, this.tapBack}) : super(key: key);
 
-  final List<ParkData> parkList;
-  final Function(ParkData) tapBack;
+  final List<BluehostPark> parkList;
+  final Function(BluehostPark) tapBack;
 
   @override
   _SearchParksCardState createState() => new _SearchParksCardState();
@@ -17,7 +17,7 @@ class SearchParksCard extends StatefulWidget {
 class _SearchParksCardState extends State<SearchParksCard> {
   TextEditingController editingController = TextEditingController();
 
-  var workingList = List<ParkData>();
+  var workingList = List<BluehostPark>();
 
   @override
   void initState() {
@@ -26,10 +26,10 @@ class _SearchParksCardState extends State<SearchParksCard> {
   }
 
   void filterListBySearch(String search) {
-    List<ParkData> tempToSearch = List<ParkData>();
+    List<BluehostPark> tempToSearch = List<BluehostPark>();
     tempToSearch.addAll(widget.parkList);
     if (search.isNotEmpty) {
-      List<ParkData> tempToDisplay = List<ParkData>();
+      List<BluehostPark> tempToDisplay = List<BluehostPark>();
       tempToSearch.forEach((park) {
         // Searching for both the park name or location, with case ignored
         if (park.parkName.toLowerCase().contains(search.toLowerCase()) ||
@@ -86,8 +86,8 @@ class _SearchParksCardState extends State<SearchParksCard> {
 class AllParkSearchCard extends StatelessWidget {
   AllParkSearchCard({this.allParkData, this.tapBack});
 
-  final List<ParkData> allParkData;
-  final Function(ParkData) tapBack;
+  final List<BluehostPark> allParkData;
+  final Function(BluehostPark) tapBack;
 
   @override
   Widget build(BuildContext context) {
@@ -103,8 +103,8 @@ class AllParkSearchCard extends StatelessWidget {
 class AllParkSearchPage extends StatelessWidget {
   AllParkSearchPage({this.allParks, this.tapBack});
 
-  final List<ParkData> allParks;
-  final Function(ParkData) tapBack;
+  final List<BluehostPark> allParks;
+  final Function(BluehostPark) tapBack;
 
   @override
   Widget build(BuildContext context) {

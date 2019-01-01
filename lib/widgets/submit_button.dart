@@ -10,7 +10,7 @@ class SubmitButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
         decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor,
+            color: Theme.of(context).buttonColor,
             borderRadius: BorderRadius.circular(15.0),
             boxShadow: [
               BoxShadow(

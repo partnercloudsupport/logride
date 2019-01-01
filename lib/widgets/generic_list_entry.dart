@@ -5,8 +5,8 @@ import '../data/park_structures.dart';
 class GenericListEntry extends StatefulWidget{
   GenericListEntry({this.park, this.onTap});
 
-  final ParkData park;
-  final Function(ParkData) onTap;
+  final BluehostPark park;
+  final Function(BluehostPark) onTap;
 
   @override
   _GenericListState createState() => _GenericListState();

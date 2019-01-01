@@ -13,7 +13,7 @@ class HomeIconButton extends StatelessWidget{
 
     if(decoration != null){
       decor = decoration;
-      colorOverlay = Colors.grey[600];
+      colorOverlay = Colors.black54;
     } else {
       decor = Container();
       colorOverlay = Colors.transparent;
@@ -24,7 +24,7 @@ class HomeIconButton extends StatelessWidget{
         Center(
           child: Padding(
             padding: const EdgeInsets.only(top: 4.0),
-            child: InkWell(
+            child: GestureDetector(
               onTap: onTap != null ? onTap : (){}, // Pass an empty function if we don't have a tap function
               child: Container(
                 height: 85.4,
@@ -37,7 +37,7 @@ class HomeIconButton extends StatelessWidget{
                         decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             image: DecorationImage(
-                                colorFilter: ColorFilter.mode(colorOverlay, BlendMode.screen),
+                                colorFilter: ColorFilter.mode(colorOverlay, BlendMode.multiply),
                                 image: AssetImage('assets/appicon.png')),
                             border: Border.all(
                               color: Colors.white,
@@ -52,7 +52,7 @@ class HomeIconButton extends StatelessWidget{
                             ]),
                       ),
                     ),
-                    decor
+                    decor,
                   ],
                 ),
               ),

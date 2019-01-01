@@ -6,28 +6,31 @@ import '../widgets/park_list_widget.dart';
 import '../widgets/park_list_entry.dart';
 import '../widgets/content_frame.dart';
 import '../data/park_structures.dart';
+import '../data/parks_manager.dart';
 import '../data/webfetcher.dart';
 import '../data/auth_manager.dart';
+import '../data/fbdb_manager.dart';
 import '../animations/slide_up_transition.dart';
 import '../ui/standard_page_structure.dart';
 import '../ui/all_park_search.dart';
+import '../ui/attractions_list_page.dart';
 
 enum SectionFocus { favorites, all, balanced }
 
 class HomePage extends StatefulWidget {
-  HomePage({Key key, this.auth, this.onSignedOut}) : super(key: key);
+  HomePage({Key key, this.auth, this.db, this.uid, this.onSignedOut})
+      : super(key: key);
 
   final BaseAuth auth;
+  final BaseDB db;
   final Function onSignedOut;
+  final String uid;
 
   @override
   _HomePageState createState() => new _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  List<ParkData> allParks;
-  List<ParkData> userParkData;
-
   double _favesHeight;
   double _allHeight;
 
@@ -37,6 +40,10 @@ class _HomePageState extends State<HomePage> {
   SectionFocus focus = SectionFocus.balanced;
 
   final SlidableController _slidableController = SlidableController();
+  ParksManager _parksManager = ParksManager();
+  WebFetcher _webFetcher = WebFetcher();
+
+  Future<bool> initialized;
 
   double _calculateSectionHeight(bool isFavorites, SectionFocus focus) {
     // Get our total possible height
@@ -47,7 +54,8 @@ class _HomePageState extends State<HomePage> {
     screenHeight -= 50.0; // Remove the floating icon's padding
     // We now have our total height to play with
     double titleBarHeight = 61.0;
-    double allParksTtileBarHeight = 82.0; // AllParks is slightly bigger thanks to the icon for the search
+    double allParksTtileBarHeight =
+        82.0; // AllParks is slightly bigger thanks to the icon for the search
     // If we're not in focus, fall back to the titlebarheight
     switch (focus) {
       case SectionFocus.balanced:
@@ -58,7 +66,9 @@ class _HomePageState extends State<HomePage> {
         return isFavorites ? titleBarHeight : screenHeight - titleBarHeight;
       case SectionFocus.favorites:
         // Opposite of favorites
-        return isFavorites ? screenHeight - allParksTtileBarHeight : allParksTtileBarHeight;
+        return isFavorites
+            ? screenHeight - allParksTtileBarHeight
+            : allParksTtileBarHeight;
     }
     print("Error - calculateSectionHeight was given an improper focus");
     return 0.0;
@@ -86,17 +96,14 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void _handleSlidableCallback(ParkSlideActionType actionType, ParkData park) {
+  void _handleSlidableCallback(
+      ParkSlideActionType actionType, FirebasePark park) {
     switch (actionType) {
       case ParkSlideActionType.faveAdd:
-        setState(() {
-          park.favorite = true;
-        });
+        _parksManager.addParkToFavorites(park.parkID);
         break;
       case ParkSlideActionType.faveRemove:
-        setState(() {
-          park.favorite = false;
-        });
+        _parksManager.removeParkFromFavorites(park.parkID);
         break;
       case ParkSlideActionType.delete:
         showDialog(
@@ -105,7 +112,7 @@ class _HomePageState extends State<HomePage> {
               return AlertDialog(
                 title: Text("Delete Park Data?"),
                 content: Text(
-                    "This will permanately delete your progress for ${park.parkName}"),
+                    "This will permanately delete your progress for ${park.name}"),
                 actions: <Widget>[
                   FlatButton(
                     child: Text("Cancel"),
@@ -117,9 +124,9 @@ class _HomePageState extends State<HomePage> {
                     child: Text("Delete"),
                     onPressed: () {
                       setState(() {
-                        userParkData.remove(park);
-                        park.reset();
+                        _parksManager.removeParkFromUserData(park.parkID);
                         Navigator.of(context).pop();
+                        setState(() {});
                       });
                     },
                   )
@@ -129,23 +136,34 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void _handleEntryCallback(ParkData park) {
-    print("THOMAS - Open up attraction list page for ${park.parkName}");
+  void _handleEntryCallback(FirebasePark park) {
+    BluehostPark serverPark = getBluehostParkByID(_parksManager.allParksInfo, park.parkID);
+
+    // This should only happen on the rare occasion that the user opens the app
+    // then immidiately taps on a park tile. Making it so that nothing happens
+    // means the user will think they missed, hopefully giving us enough time to
+    // actually load park data.
+    if(serverPark.attractions == null) {print("User is attempting to open a page that doesn't have data yet."); return;}
+
+    print("Opening up attraction page for park ${park.name}");
+    Navigator.push(
+        context,
+        SlideUpRoute(
+            widget: AttractionsPage(
+          pm: _parksManager,
+          db: widget.db,
+          serverParkData: serverPark,
+        )));
   }
 
-  void _handleAddCallback(ParkData park) async {
-    if (userParkData.contains(park)) return;
-
-    userParkData.add(park);
-    await populateParkData(park);
-    if (mounted) {
-      setState(() {});
-    }
+  void _handleAddCallback(BluehostPark park) async {
+    _parksManager.addParkToUser(park.id);
   }
 
   void _signOut() async {
     try {
       await widget.auth.signOut();
+      //widget.db.clearUserID();
       widget.onSignedOut();
     } catch (e) {
       print(e);
@@ -158,17 +176,19 @@ class _HomePageState extends State<HomePage> {
     // Fetch global parks list
     // Fetch user information
     // Build specific parks from user information & parks list
-    fetchInitialWebData().then((Map<String, dynamic> returnedMap) {
-      setState(() {
-        allParks = returnedMap["global"];
-        userParkData = returnedMap["visited"];
-      });
-    });
+    //widget.db.storeUserID(widget.uid);
+
+    _webFetcher = WebFetcher();
+    _parksManager = ParksManager(db: widget.db, wf: _webFetcher);
+    initialized = _parksManager.init();
+
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    widget.db.storeUserID(widget.uid);
+
     _favesHeight = _calculateSectionHeight(true, focus);
     _allHeight = _calculateSectionHeight(false, focus);
 
@@ -181,54 +201,83 @@ class _HomePageState extends State<HomePage> {
 
     Duration animationDuration = const Duration(milliseconds: 400);
 
-    Widget content = ContentFrame(
-        child: Container(
-            child: Column(
-      children: <Widget>[
-        AnimatedContainer(
-          curve: Curves.linear,
-          duration: animationDuration,
-          height: _favesHeight,
-          child: ParkListView(
-            parksData: userParkData,
-            favorites: true,
-            slidableController: _slidableController,
-            sliderActionCallback: _handleSlidableCallback,
-            headerCallback: _handleHeaderCallback,
-            onTap: _handleEntryCallback,
-            arrowWidget: Transform(
-              transform: Matrix4.translationValues(10, 10, 0.0),
-              child: AnimatedContainer(
-                  curve: Curves.linear,
-                  duration: animationDuration,
-                  transform: _favesArrowRotation,
-                  child: arrowIcon),
-            ),
-          ),
-        ),
-        AnimatedContainer(
-          curve: Curves.linear,
-          duration: animationDuration,
-          height: _allHeight,
-          child: ParkListView(
-              parksData: userParkData,
-              favorites: false,
-              slidableController: _slidableController,
-              headerCallback: _handleHeaderCallback,
-              onTap: _handleEntryCallback,
-              sliderActionCallback: _handleSlidableCallback,
-              arrowWidget: Transform(
-                transform: Matrix4.translationValues(10, 10, 0.0),
-                child: AnimatedContainer(
-                    curve: Curves.linear,
-                    duration: animationDuration,
-                    transform: _allArrowRotation,
-                    alignment: Alignment(0.0, 30.0),
-                    child: arrowIcon),
-              )),
-        )
-      ],
-    )));
+    Widget content = FutureBuilder(
+      future: initialized,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Center(
+              child: Card(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        CircularProgressIndicator(),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text("Loading Park Information..."),
+                        )
+                      ],
+                    ),
+                  )));
+        } else if (snapshot.data) {
+          // Since data is a bool, if it's true, we'll do this thing
+          return ContentFrame(
+              child: Container(
+                  child: Column(
+            children: <Widget>[
+              AnimatedContainer(
+                curve: Curves.linear,
+                duration: animationDuration,
+                height: _favesHeight,
+                child: ParkListView(
+                  parksData: widget.db.getFilteredQuery(
+                      path: DatabasePath.PARKS, key: "favorite", value: true),
+                  favorites: true,
+                  slidableController: _slidableController,
+                  sliderActionCallback: _handleSlidableCallback,
+                  headerCallback: _handleHeaderCallback,
+                  onTap: _handleEntryCallback,
+                  arrowWidget: Transform(
+                    transform: Matrix4.translationValues(10, 10, 0.0),
+                    child: AnimatedContainer(
+                        curve: Curves.linear,
+                        duration: animationDuration,
+                        transform: _favesArrowRotation,
+                        alignment: Alignment(0.0, 30.0),
+                        child: arrowIcon),
+                  ),
+                ),
+              ),
+              AnimatedContainer(
+                curve: Curves.linear,
+                duration: animationDuration,
+                height: _allHeight,
+                child: ParkListView(
+                    parksData: widget.db
+                        .getQueryForUser(path: DatabasePath.PARKS, key: ""),
+                    favorites: false,
+                    slidableController: _slidableController,
+                    headerCallback: _handleHeaderCallback,
+                    onTap: _handleEntryCallback,
+                    sliderActionCallback: _handleSlidableCallback,
+                    arrowWidget: Transform(
+                      transform: Matrix4.translationValues(10, 10, 0.0),
+                      child: AnimatedContainer(
+                          curve: Curves.linear,
+                          duration: animationDuration,
+                          transform: _allArrowRotation,
+                          alignment: Alignment(0.0, 30.0),
+                          child: arrowIcon),
+                    )),
+              )
+            ],
+          )));
+        }
+      },
+    );
 
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
@@ -240,15 +289,16 @@ class _HomePageState extends State<HomePage> {
           size: 38,
         ),
         onPressed: () {
+
+          if(!_parksManager.searchInitialized) {print("Search hasn't been initialized yet."); return;}
+
           Navigator.push(
               context,
               SlideUpRoute(
                   widget: AllParkSearchPage(
-                allParks: allParks,
+                allParks: _parksManager.allParksInfo,
                 tapBack: _handleAddCallback,
               )));
-          setState(
-              () {}); // We update our state so any changes done by the search page work
         },
         backgroundColor: Theme.of(context).primaryColor,
       ),
@@ -261,7 +311,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildMenuBar(BuildContext context){
+  Widget _buildMenuBar(BuildContext context) {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
@@ -286,7 +336,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildMenuIcon(IconData icon){
+  Widget _buildMenuIcon(IconData icon) {
     return Icon(icon, color: Colors.white);
   }
 }
