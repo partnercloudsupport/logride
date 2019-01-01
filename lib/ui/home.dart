@@ -137,6 +137,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _handleEntryCallback(FirebasePark park) {
+    BluehostPark serverPark = getBluehostParkByID(_parksManager.allParksInfo, park.parkID);
+
+    // This should only happen on the rare occasion that the user opens the app
+    // then immidiately taps on a park tile. Making it so that nothing happens
+    // means the user will think they missed, hopefully giving us enough time to
+    // actually load park data.
+    if(serverPark.attractions == null) {print("User is attempting to open a page that doesn't have data yet."); return;}
+
     print("Opening up attraction page for park ${park.name}");
     Navigator.push(
         context,
@@ -144,14 +152,12 @@ class _HomePageState extends State<HomePage> {
             widget: AttractionsPage(
           pm: _parksManager,
           db: widget.db,
-          serverParkData:
-              getBluehostParkByID(_parksManager.allParksInfo, park.parkID),
+          serverParkData: serverPark,
         )));
   }
 
   void _handleAddCallback(BluehostPark park) async {
     _parksManager.addParkToUser(park.id);
-    //_calculateHasContent();
   }
 
   void _signOut() async {

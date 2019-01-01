@@ -27,14 +27,23 @@ class ParksManager {
     // Go through and set-up the allParksInfo to match the user database.
     // The 'filled' tag is used in the all-parks-search to show the user they
     // have that park.
-    await db.getEntryAtPath(path: DatabasePath.PARKS, key: "").then((snap) async {
+    await db
+        .getEntryAtPath(path: DatabasePath.PARKS, key: "")
+        .then((snap) async {
       Map<dynamic, dynamic> values = jsonDecode(jsonEncode(snap));
       for (int i = 0; i < values.keys.length; i++) {
         int entryID = num.parse(values.keys.elementAt(i));
         BluehostPark targetPark = getBluehostParkByID(allParksInfo, entryID);
 
-        targetPark.attractions = await wf.getAllAttractionData(
-            parkID: targetPark.id, rideTypes: attractionTypes);
+        // This part appears to take the longest. I'm going to let it run async
+        // And just prevent the user from viewing the attraction page until
+        // the attractions != null
+        wf
+            .getAllAttractionData(
+                parkID: targetPark.id, rideTypes: attractionTypes)
+            .then((list){
+              targetPark.attractions = list;
+        });
         targetPark.filled = true;
       }
     });
@@ -51,8 +60,8 @@ class ParksManager {
 
     // Get our targeted park, calculate ride
     BluehostPark targetPark = getBluehostParkByID(allParksInfo, targetParkID);
-    targetPark.attractions =
-        await wf.getAllAttractionData(parkID: targetParkID, rideTypes: attractionTypes);
+    targetPark.attractions = await wf.getAllAttractionData(
+        parkID: targetParkID, rideTypes: attractionTypes);
 
     FirebasePark translated = targetPark.toNewFirebaseEntry();
 
