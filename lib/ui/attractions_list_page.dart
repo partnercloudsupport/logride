@@ -6,10 +6,10 @@ import 'package:firebase_database/firebase_database.dart';
 import '../ui/standard_page_structure.dart';
 import '../data/parks_manager.dart';
 import '../data/park_structures.dart';
-import '../data/attraction_structures.dart';
 import '../data/fbdb_manager.dart';
 import '../widgets/content_frame.dart';
 import '../widgets/park_progress.dart';
+import '../widgets/attraction_list_widget.dart';
 import 'dart:convert';
 
 class AttractionsPage extends StatefulWidget {
@@ -93,10 +93,18 @@ class _AttractionsPageState extends State<AttractionsPage> {
                       numRides: parkData.totalRides,
                       defunctRidden: parkData.numDefunctRidden,
                       showDefunct: parkData.showDefunct,
-                    )
+                    ),
 
                     // Listview (Expanded)
                     // TODO: Implement ListView display for the attractions themselves
+                    Expanded(
+                      child: AttractionsListView(
+                        sourceAttractions: widget.serverParkData.attractions,
+                        parentPark: parkData,
+                        db: widget.db,
+                        // Data here
+                      )
+                    )
                   ],
                 );
               }

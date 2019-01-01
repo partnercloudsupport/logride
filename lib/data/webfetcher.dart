@@ -44,7 +44,10 @@ class WebFetcher {
       List<dynamic> decoded = jsonDecode(response.body);
       for(int i =0; i < decoded.length; i++){
         BluehostAttraction newAttraction = BluehostAttraction.fromJson(decoded[i]);
-        newAttraction.typeLabel = rideTypes[newAttraction.rideType];
+
+        // Get our type label, or leave it blank if it doesn't exist
+        newAttraction.typeLabel = rideTypes[newAttraction.rideType] ?? "";
+
         data.add(newAttraction);
       }
     }
