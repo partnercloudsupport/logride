@@ -39,7 +39,7 @@ class ParksManager {
       }
     });
 
-    print("done");
+    print("ParksManager has been initialized");
     return true;
   }
 
