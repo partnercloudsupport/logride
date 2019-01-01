@@ -289,6 +289,9 @@ class _HomePageState extends State<HomePage> {
           size: 38,
         ),
         onPressed: () {
+
+          if(!_parksManager.searchInitialized) {print("Search hasn't been initialized yet."); return;}
+
           Navigator.push(
               context,
               SlideUpRoute(
@@ -296,8 +299,6 @@ class _HomePageState extends State<HomePage> {
                 allParks: _parksManager.allParksInfo,
                 tapBack: _handleAddCallback,
               )));
-          setState(
-              () {}); // We update our state so any changes done by the search page work
         },
         backgroundColor: Theme.of(context).primaryColor,
       ),

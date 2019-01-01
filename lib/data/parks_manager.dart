@@ -12,7 +12,8 @@ class ParksManager {
 
   List<BluehostPark> allParksInfo;
   Map<int, String> attractionTypes;
-  //List<Park> userParks; // Display lists are managed by FirebaseAnimatedLists, but we keep track of its contents on our own, too.
+
+  bool searchInitialized = false;
 
   /// init returns true once all web data has been fetched for parks
   Future<bool> init() async {
@@ -27,7 +28,7 @@ class ParksManager {
     // Go through and set-up the allParksInfo to match the user database.
     // The 'filled' tag is used in the all-parks-search to show the user they
     // have that park.
-    await db
+    db
         .getEntryAtPath(path: DatabasePath.PARKS, key: "")
         .then((snap) async {
       Map<dynamic, dynamic> values = jsonDecode(jsonEncode(snap));
@@ -46,6 +47,7 @@ class ParksManager {
         });
         targetPark.filled = true;
       }
+      searchInitialized = true;
     });
 
     print("ParksManager has been initialized");
