@@ -14,7 +14,8 @@ class ParksManager {
   Map<int, String> attractionTypes;
   //List<Park> userParks; // Display lists are managed by FirebaseAnimatedLists, but we keep track of its contents on our own, too.
 
-  void init() async {
+  /// init returns true once all web data has been fetched for parks
+  Future<bool> init() async {
     // Things to do:
     // Get allParks from bluehost
     allParksInfo = await wf.getAllParkData();
@@ -26,7 +27,7 @@ class ParksManager {
     // Go through and set-up the allParksInfo to match the user database.
     // The 'filled' tag is used in the all-parks-search to show the user they
     // have that park.
-    db.getEntryAtPath(path: DatabasePath.PARKS, key: "").then((snap) async {
+    await db.getEntryAtPath(path: DatabasePath.PARKS, key: "").then((snap) async {
       Map<dynamic, dynamic> values = jsonDecode(jsonEncode(snap));
       for (int i = 0; i < values.keys.length; i++) {
         int entryID = num.parse(values.keys.elementAt(i));
@@ -37,6 +38,9 @@ class ParksManager {
         targetPark.filled = true;
       }
     });
+
+    print("done");
+    return true;
   }
 
   void addParkToUser(num targetParkID) async {
@@ -48,9 +52,8 @@ class ParksManager {
     // Get our targeted park, calculate ride
     BluehostPark targetPark = getBluehostParkByID(allParksInfo, targetParkID);
     targetPark.attractions =
-        await wf.getAllAttractionData(parkID: targetParkID);
-    print(
-        "Target ID: $targetParkID, TargetPark Attraction Length: ${targetPark.attractions.length}");
+        await wf.getAllAttractionData(parkID: targetParkID, rideTypes: attractionTypes);
+
     FirebasePark translated = targetPark.toNewFirebaseEntry();
 
     translated.updateAttractionCount(targetPark: targetPark);

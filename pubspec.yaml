@@ -54,6 +54,9 @@ dependencies:
   # Used for the "shiny" effect on completed progress bars
   shimmer: 0.0.6
 
+  # Used in attractions views for sticky headers
+  sticky_headers: 0.1.7
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

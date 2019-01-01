@@ -43,6 +43,8 @@ class _HomePageState extends State<HomePage> {
   ParksManager _parksManager = ParksManager();
   WebFetcher _webFetcher = WebFetcher();
 
+  Future<bool> initialized;
+
   double _calculateSectionHeight(bool isFavorites, SectionFocus focus) {
     // Get our total possible height
     double screenHeight = MediaQuery.of(context).size.height;
@@ -142,7 +144,8 @@ class _HomePageState extends State<HomePage> {
             widget: AttractionsPage(
           pm: _parksManager,
           db: widget.db,
-          serverParkData: getBluehostParkByID(_parksManager.allParksInfo, park.parkID),
+          serverParkData:
+              getBluehostParkByID(_parksManager.allParksInfo, park.parkID),
         )));
   }
 
@@ -171,7 +174,7 @@ class _HomePageState extends State<HomePage> {
 
     _webFetcher = WebFetcher();
     _parksManager = ParksManager(db: widget.db, wf: _webFetcher);
-    _parksManager.init();
+    initialized = _parksManager.init();
 
     super.initState();
   }
@@ -192,57 +195,83 @@ class _HomePageState extends State<HomePage> {
 
     Duration animationDuration = const Duration(milliseconds: 400);
 
-    Widget content = ContentFrame(
-        child: Container(
-            child: Column(
-      children: <Widget>[
-        AnimatedContainer(
-          curve: Curves.linear,
-          duration: animationDuration,
-          height: _favesHeight,
-          child: ParkListView(
-            parksData: widget.db.getFilteredQuery(
-                path: DatabasePath.PARKS, key: "favorite", value: true),
-            favorites: true,
-            slidableController: _slidableController,
-            sliderActionCallback: _handleSlidableCallback,
-            headerCallback: _handleHeaderCallback,
-            onTap: _handleEntryCallback,
-            arrowWidget: Transform(
-              transform: Matrix4.translationValues(10, 10, 0.0),
-              child: AnimatedContainer(
-                  curve: Curves.linear,
-                  duration: animationDuration,
-                  transform: _favesArrowRotation,
-                  alignment: Alignment(0.0, 30.0),
-                  child: arrowIcon),
-            ),
-          ),
-        ),
-        AnimatedContainer(
-          curve: Curves.linear,
-          duration: animationDuration,
-          height: _allHeight,
-          child: ParkListView(
-              parksData:
-                  widget.db.getQueryForUser(path: DatabasePath.PARKS, key: ""),
-              favorites: false,
-              slidableController: _slidableController,
-              headerCallback: _handleHeaderCallback,
-              onTap: _handleEntryCallback,
-              sliderActionCallback: _handleSlidableCallback,
-              arrowWidget: Transform(
-                transform: Matrix4.translationValues(10, 10, 0.0),
-                child: AnimatedContainer(
-                    curve: Curves.linear,
-                    duration: animationDuration,
-                    transform: _allArrowRotation,
-                    alignment: Alignment(0.0, 30.0),
-                    child: arrowIcon),
-              )),
-        )
-      ],
-    )));
+    Widget content = FutureBuilder(
+      future: initialized,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Center(
+              child: Card(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        CircularProgressIndicator(),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text("Loading Park Information..."),
+                        )
+                      ],
+                    ),
+                  )));
+        } else if (snapshot.data) {
+          // Since data is a bool, if it's true, we'll do this thing
+          return ContentFrame(
+              child: Container(
+                  child: Column(
+            children: <Widget>[
+              AnimatedContainer(
+                curve: Curves.linear,
+                duration: animationDuration,
+                height: _favesHeight,
+                child: ParkListView(
+                  parksData: widget.db.getFilteredQuery(
+                      path: DatabasePath.PARKS, key: "favorite", value: true),
+                  favorites: true,
+                  slidableController: _slidableController,
+                  sliderActionCallback: _handleSlidableCallback,
+                  headerCallback: _handleHeaderCallback,
+                  onTap: _handleEntryCallback,
+                  arrowWidget: Transform(
+                    transform: Matrix4.translationValues(10, 10, 0.0),
+                    child: AnimatedContainer(
+                        curve: Curves.linear,
+                        duration: animationDuration,
+                        transform: _favesArrowRotation,
+                        alignment: Alignment(0.0, 30.0),
+                        child: arrowIcon),
+                  ),
+                ),
+              ),
+              AnimatedContainer(
+                curve: Curves.linear,
+                duration: animationDuration,
+                height: _allHeight,
+                child: ParkListView(
+                    parksData: widget.db
+                        .getQueryForUser(path: DatabasePath.PARKS, key: ""),
+                    favorites: false,
+                    slidableController: _slidableController,
+                    headerCallback: _handleHeaderCallback,
+                    onTap: _handleEntryCallback,
+                    sliderActionCallback: _handleSlidableCallback,
+                    arrowWidget: Transform(
+                      transform: Matrix4.translationValues(10, 10, 0.0),
+                      child: AnimatedContainer(
+                          curve: Curves.linear,
+                          duration: animationDuration,
+                          transform: _allArrowRotation,
+                          alignment: Alignment(0.0, 30.0),
+                          child: arrowIcon),
+                    )),
+              )
+            ],
+          )));
+        }
+      },
+    );
 
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
