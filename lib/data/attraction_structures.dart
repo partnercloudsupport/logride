@@ -1,18 +1,4 @@
 
-class UnifiedAttraction {
-  FirebaseAttraction userData;
-  BluehostAttraction serverData;
-
-  UnifiedAttraction();
-
-  factory UnifiedAttraction.fromBluehost(BluehostAttraction bh){
-    UnifiedAttraction uni = UnifiedAttraction();
-    uni.serverData = bh;
-    uni.userData = null;
-    return uni;
-  }
-}
-
 class FirebaseAttraction {
   final int rideID;
   int numberOfTimesRidden = 0;
@@ -75,6 +61,11 @@ class BluehostAttraction {
   DateTime lastUpdated;
   DateTime created;
 
+  // This is established by the webfetcher using data taken from the server.
+  // Note: this isn't from the same bluehost request as the rest of the
+  // attraction data.
+  String typeLabel;
+
   BluehostAttraction({this.attractionID});
 
   factory BluehostAttraction.fromJson(Map<String, dynamic> json){
@@ -131,4 +122,18 @@ class BluehostAttraction {
     FirebaseAttraction newAttraction = FirebaseAttraction(rideID: this.attractionID);
     return newAttraction;
   }
+}
+
+FirebaseAttraction getFirebaseAttractionFromList(List<FirebaseAttraction> toSearch, int attractionID){
+  for(int i = 0; i < toSearch.length; i++){
+    if(toSearch[i].rideID == attractionID) return toSearch[i];
+  }
+  return null;
+}
+
+BluehostAttraction getBluehostAttractionFromList(List<BluehostAttraction> toSearch, int attractionID){
+  for(int i = 0; i < toSearch.length; i++){
+    if(toSearch[i].attractionID == attractionID) return toSearch[i];
+  }
+  return null;
 }

@@ -7,14 +7,16 @@ import 'attraction_structures.dart';
 enum WebLocation {
   ALL_PARKS,
   PARK_ATTRACTIONS,
-  SPECIFIC_ATTRACTION
+  SPECIFIC_ATTRACTION,
+  ATTRACTION_TYPES,
 }
 
 class WebFetcher {
   final Map _serverURLS = {
     WebLocation.ALL_PARKS: "http://www.beingpositioned.com/theparksman/parksdbservice.php",
     WebLocation.PARK_ATTRACTIONS: "http://www.beingpositioned.com/theparksman/attractiondbservice.php?parkid=",
-    WebLocation.SPECIFIC_ATTRACTION: "http://www.beingpositioned.com/theparksman/getAttractionDetails.php?rideID="
+    WebLocation.SPECIFIC_ATTRACTION: "http://www.beingpositioned.com/theparksman/getAttractionDetails.php?rideID=",
+    WebLocation.ATTRACTION_TYPES: "http://www.beingpositioned.com/theparksman/attractionTypes.php"
   };
 
   Future<List<BluehostPark>> getAllParkData() async {
@@ -33,7 +35,7 @@ class WebFetcher {
     return data;
   }
 
-  Future<List<BluehostAttraction>> getAllAttractionData({num parkID}) async{
+  Future<List<BluehostAttraction>> getAllAttractionData({num parkID, Map<int, String> rideTypes}) async{
     List<BluehostAttraction> data = List<BluehostAttraction>();
 
     final response = await http.get(_serverURLS[WebLocation.PARK_ATTRACTIONS] + parkID.toString());
@@ -41,7 +43,9 @@ class WebFetcher {
     if(response.statusCode == 200){
       List<dynamic> decoded = jsonDecode(response.body);
       for(int i =0; i < decoded.length; i++){
-        data.add(BluehostAttraction.fromJson(decoded[i]));
+        BluehostAttraction newAttraction = BluehostAttraction.fromJson(decoded[i]);
+        newAttraction.typeLabel = rideTypes[newAttraction.rideType];
+        data.add(newAttraction);
       }
     }
 
@@ -53,6 +57,20 @@ class WebFetcher {
 
     if(response.statusCode == 200){
       return BluehostAttraction.fromJson(jsonDecode(response.body));
+    }
+
+    return null;
+  }
+
+  Future<Map<int, String>> getAttractionTypesMap() async {
+    final response = await http.get(_serverURLS[WebLocation.ATTRACTION_TYPES]);
+
+    if(response.statusCode == 200){
+      // The map from the PHP script has the keys as strings, but they're really ints
+      // We need to convert that first before we return it
+      return (jsonDecode(response.body) as Map).map((key, value) {
+        return MapEntry<int, String>(int.parse(key), value);
+      });
     }
 
     return null;
