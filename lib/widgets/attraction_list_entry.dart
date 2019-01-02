@@ -22,34 +22,33 @@ class AttractionListEntry extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget built;
 
-    Color tileColor = ignored || !attractionData.active ? Theme.of(context).disabledColor : Colors.white;
+    Color tileColor = ignored || !attractionData.active
+        ? Theme.of(context).disabledColor
+        : Colors.white;
 
-    built = InkWell(
-      onTap: _onInfoTap,
-      child: Container(
-        color: tileColor,
-        constraints: BoxConstraints.expand(height: 58.0),
-        padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 12.0),
-        child: Row(
-          children: <Widget>[
-            Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                AutoSizeText(
-                  attractionData.attractionName,
-                  maxLines: 1,
-                  style: Theme.of(context).textTheme.subhead,
-                ),
-                AutoSizeText(
-                  attractionData.typeLabel,
-                  maxLines: 1,
-                  style: Theme.of(context).textTheme.subtitle
-                )
-              ],
-            ))
-          ],
-        ),
+    built = Container(
+      color: tileColor,
+      constraints: BoxConstraints.expand(height: 58.0),
+      padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 12.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Expanded(
+              child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              AutoSizeText(
+                attractionData.attractionName,
+                maxLines: 1,
+                style: Theme.of(context).textTheme.subhead,
+              ),
+              AutoSizeText(attractionData.typeLabel,
+                  maxLines: 1, style: Theme.of(context).textTheme.subtitle)
+            ],
+          )),
+          buttonWidget ?? Container()
+        ],
       ),
     );
 

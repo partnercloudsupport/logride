@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import '../data/attraction_structures.dart';
 
-class AttractionButton extends StatelessWidget {
-  AttractionButton({this.enabled, this.count, this.onTap});
+class ExperienceButton extends StatelessWidget {
+  ExperienceButton({this.data, this.enabled});
 
+  final FirebaseAttraction data;
   final bool enabled;
-  final num count;
-  final Function onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -14,11 +14,11 @@ class AttractionButton extends StatelessWidget {
     Container textDisplay;
 
     // We only want the text to display if there exists a count on the button
-    if(count > 0){
+    if(data.numberOfTimesRidden > 0){
       textDisplay = Container(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Text(count.toString(),
+          child: Text(data.numberOfTimesRidden.toString(),
             textAlign: TextAlign.right,
             textScaleFactor: 1.3),
         )
@@ -33,7 +33,7 @@ class AttractionButton extends StatelessWidget {
 
     if(enabled){
       buttonColor = Theme.of(context).primaryColor;
-      if(count > 0){
+      if(data.numberOfTimesRidden > 0){
         // Plus button is displayed when there's at least one count
         buttonIcon = Icons.add_circle;
       } else {

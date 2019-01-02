@@ -88,4 +88,8 @@ class DatabaseManager implements BaseDB {
     return _getReference(path).child(userID ?? _savedID).child(key).onValue;
   }
 
+  Stream<Event> getLiveChildrenChanges({DatabasePath path, String userID, String key}) {
+    return _getReference(path).child(userID ?? _savedID).child(key).onChildChanged;
+  }
+
 }

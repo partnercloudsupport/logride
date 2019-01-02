@@ -6,6 +6,7 @@ import '../data/attraction_structures.dart';
 import '../data/park_structures.dart';
 import '../data/fbdb_manager.dart';
 import '../widgets/attraction_list_entry.dart';
+import '../widgets/experience_button.dart';
 
 class AttractionsListView extends StatefulWidget {
   AttractionsListView({this.sourceAttractions, this.db, this.parentPark});
@@ -57,8 +58,8 @@ class _AttractionsListViewState extends State<AttractionsListView> {
 
     Map<String, List<BluehostAttraction>> returnMap = Map();
 
-    if(_hasActive) returnMap["Active"] = activeList;
-    if(_hasDefunct) returnMap["Defunct"] = defunctList;
+    if (_hasActive) returnMap["Active"] = activeList;
+    if (_hasDefunct) returnMap["Defunct"] = defunctList;
 
     // Strings are used as headers for the list. These are checked for in the
     // Build functions for the listview.
@@ -80,38 +81,61 @@ class _AttractionsListViewState extends State<AttractionsListView> {
     return StreamBuilder(
       stream: _attractionsStream,
       builder: (context, AsyncSnapshot<Event> snap) {
-        return ListView.builder(
-            itemCount: displayLists.keys.length,
-            itemBuilder: (BuildContext context, int index) {
-              String key = displayLists.keys.elementAt(index);
-              return StickyHeader(
-                  header: _listHeader(context, key),
-                  content: _sectionContent(context, displayLists[key]));
-            });
+        print(snap.data?.snapshot?.value ??
+            "User data for this park hasn't loaded yet");
+
+        //  We're attempting to convert the event into the appropriate user data.
+        // If the data doesn't exist, we'll just have an empty list. If the data doesn't
+        // exist for a park, we'll pass null to the button. Simple.
+        List<FirebaseAttraction> userData = List<FirebaseAttraction>();
+        (snap.data?.snapshot?.value as Map)?.forEach((key, value) {
+          return userData.add(FirebaseAttraction.fromMap(Map.from(value)));
+        });
+
+        return ClipRRect(
+            borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(15),
+                bottomRight: Radius.circular(15)),
+            child: ListView.builder(
+                itemCount: displayLists.keys.length,
+                itemBuilder: (BuildContext context, int index) {
+                  String key = displayLists.keys.elementAt(index);
+                  return StickyHeader(
+                      header: _listHeader(context, key),
+                      content: _sectionContent(
+                          context, displayLists[key], userData));
+                }));
       },
     );
   }
 
   Widget _listHeader(BuildContext context, String text) {
     return Container(
-      width: double.infinity,
-      child: Padding(
-        padding: const EdgeInsets.only(left: 8.0),
-        child: Text(text),
-      ),
-      height: 20,
-      color: Colors.grey[200]
-    );
+        width: double.infinity,
+        child: Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Text(text),
+        ),
+        height: 20,
+        color: Colors.grey[200]);
   }
 
-  Widget _sectionContent(BuildContext context, List<BluehostAttraction> attractions){
-    return Column(children: List.generate(attractions.length, (int index){
+  Widget _sectionContent(BuildContext context,
+      List<BluehostAttraction> attractions, List<FirebaseAttraction> userData) {
+    return Column(
+        children: List.generate(attractions.length, (int index) {
+          BluehostAttraction serverData = attractions[index];
+          FirebaseAttraction entryData = getFirebaseAttractionFromList(userData, serverData.attractionID) ?? FirebaseAttraction(rideID: serverData.attractionID);
       return AttractionListEntry(
-        attractionData: attractions[index],
+        attractionData: serverData,
         slidableController: _slidableController,
         ignoreCallback: (attraction) => print("ignored"),
         ignored: false,
+        buttonWidget: ExperienceButton(
+          data: entryData,
+          enabled: serverData.active,
+        ),
       );
-    }),);
+    }));
   }
 }
