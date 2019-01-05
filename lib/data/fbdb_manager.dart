@@ -27,7 +27,7 @@ abstract class BaseDB {
   Query getFilteredQuery({DatabasePath path, String key, dynamic value});
   Query getQueryForUser({DatabasePath path, String key});
   void setEntryAtPath({DatabasePath path, String key, dynamic payload});
-  void updateEntryAtPath({DatabasePath path, String key, dynamic payload});
+  void updateEntryAtPath({DatabasePath path, String key, Map<String, dynamic> payload});
   void removeEntryFromPath({DatabasePath path, String key});
   Future<bool> doesEntryExistAtPath({DatabasePath path, String key});
   Future<dynamic> getEntryAtPath({DatabasePath path, String key});
@@ -73,7 +73,7 @@ class DatabaseManager implements BaseDB {
     _getReference(path).child(_savedID).child(key).set(payload);
   }
 
-  void updateEntryAtPath({DatabasePath path, String key, dynamic payload}) {
+  void updateEntryAtPath({DatabasePath path, String key, Map<String, dynamic> payload}) {
     _getReference(path).child(_savedID).child(key).update(payload);
   }
 

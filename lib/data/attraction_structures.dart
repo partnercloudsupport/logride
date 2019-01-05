@@ -5,6 +5,11 @@ class FirebaseAttraction {
   DateTime firstRideDate = DateTime.fromMillisecondsSinceEpoch(0);
   DateTime lastRideDate = DateTime.fromMillisecondsSinceEpoch(0);
 
+  // Note: This variable is NOT assigned or stored in the standard firebase map
+  // This is from a different portion, and is managed by the attraction list
+  // page's logic
+  bool ignored = false;
+
   FirebaseAttraction({this.rideID});
 
   factory FirebaseAttraction.fromMap(Map<String, dynamic> map){

@@ -108,4 +108,15 @@ class ParksManager {
         key: targetID.toString() + "/favorite",
         payload: false);
   }
+
+  void updateAttractionCount(FirebasePark targetFBPark, List<int> ignoredAttractionIDs, List<FirebaseAttraction> userAttractionData) {
+    BluehostPark targetBHPark = getBluehostParkByID(allParksInfo, targetFBPark.parkID);
+    targetFBPark.updateAttractionCount(targetPark: targetBHPark, userData: userAttractionData, ignored: ignoredAttractionIDs);
+
+    db.updateEntryAtPath(
+      path: DatabasePath.PARKS, key: targetFBPark.parkID.toString(),
+      payload: targetFBPark.toMap()
+    );
+
+  }
 }

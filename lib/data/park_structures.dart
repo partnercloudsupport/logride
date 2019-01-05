@@ -33,8 +33,8 @@ class FirebasePark {
     return newPark;
   }
 
-  Map toMap() {
-    return {
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
       "parkID": this.parkID,
       "checkedInToday": this.checkedInToday,
       "favorite": this.favorite,
@@ -50,7 +50,7 @@ class FirebasePark {
   }
 
   void updateAttractionCount(
-      {BluehostPark targetPark, List<FirebaseAttraction> userData}) {
+      {BluehostPark targetPark, List<FirebaseAttraction> userData, List<int> ignored}) {
     if (targetPark == null) {
       this.numDefunctRidden = 0;
       this.ridesRidden = 0;
@@ -59,25 +59,36 @@ class FirebasePark {
     }
     // Create an empty list so the search doesn't fail
     if (userData == null) userData = List<FirebaseAttraction>();
+    if (ignored == null) ignored = List<int>();
 
     int numAttractions = 0;
     int numRidden = 0;
-    int numDefunct = 0;
+    int numDefunctRidden = 0;
 
     for (int i = 0; i < targetPark.attractions.length; i++) {
+      BluehostAttraction serverAttraction = targetPark.attractions[i];
       FirebaseAttraction userAttraction = getFirebaseAttractionFromList(
-          userData, targetPark.attractions[i].attractionID);
-      if (!targetPark.attractions[i].active &&
-          (userAttraction?.numberOfTimesRidden ?? -1) > 0) {
-        numDefunct++;
+          userData, serverAttraction.attractionID);
+
+      // If it's ignored, it doesn't contribute to total ride count
+      if(ignored.contains(serverAttraction.attractionID)) continue;
+
+      // If it's defunct, it only adds to the defunct count if it's been ridden
+      if (!serverAttraction.active) {
+
+        if((userAttraction?.numberOfTimesRidden ?? -1) > 0) {
+          numDefunctRidden++;
+        }
+
         continue;
       }
 
+      // Add to the total count, but only add to the ridden count if it's actually been ridden
       numAttractions++;
       if ((userAttraction?.numberOfTimesRidden ?? -1) > 0) numRidden++;
     }
 
-    this.numDefunctRidden = numDefunct;
+    this.numDefunctRidden = numDefunctRidden;
     this.ridesRidden = numRidden;
     this.totalRides = numAttractions;
   }

@@ -15,12 +15,6 @@ class ParkProgressListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double progress;
-    if (numRides == 0) {
-      progress = 0.0;
-    } else {
-      progress = numRidden / numRides;
-    }
 
     return Container(
         // Hard-coding the size of the box in dp. This may change later.
@@ -141,7 +135,8 @@ class ParkProgressFullBar extends StatelessWidget {
   }
 }
 
-class RewardProgressBar extends StatelessWidget {
+// TODO: MAKE ANIMATED
+class RewardProgressBar extends StatelessWidget{
   RewardProgressBar({this.numerator, this.denominator});
 
   final num numerator;

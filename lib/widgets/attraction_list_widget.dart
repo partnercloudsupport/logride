@@ -1,19 +1,28 @@
+import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:sticky_headers/sticky_headers.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import '../data/attraction_structures.dart';
 import '../data/park_structures.dart';
+import '../data/parks_manager.dart';
 import '../data/fbdb_manager.dart';
 import '../widgets/attraction_list_entry.dart';
 import '../widgets/experience_button.dart';
 
 class AttractionsListView extends StatefulWidget {
-  AttractionsListView({this.sourceAttractions, this.db, this.parentPark});
+  AttractionsListView(
+      {this.sourceAttractions,
+      this.db,
+      this.pm,
+      this.slidableController,
+      this.parentPark});
 
   final List<BluehostAttraction> sourceAttractions;
   final BaseDB db;
+  final ParksManager pm;
   final FirebasePark parentPark;
+  final SlidableController slidableController;
 
   @override
   _AttractionsListViewState createState() => _AttractionsListViewState();
@@ -21,20 +30,18 @@ class AttractionsListView extends StatefulWidget {
 
 class _AttractionsListViewState extends State<AttractionsListView> {
   Map<String, List<BluehostAttraction>> displayLists;
-  Stream<Event> _attractionsStream;
-  SlidableController _slidableController;
+  List<int> ignoreList;
 
-  bool _hasActive = false;
-  bool _hasDefunct = false;
+  Stream<Event> _attractionsStream;
+
+  List<FirebaseAttraction> fullList;
 
   Map<String, List<BluehostAttraction>> _buildPreparedList() {
     List<BluehostAttraction> activeList = List<BluehostAttraction>(),
         seasonalList = List<BluehostAttraction>(),
-        defunctList = List<BluehostAttraction>(),
-        ignoredList = List<BluehostAttraction>();
+        defunctList = List<BluehostAttraction>();
     // Split each attraction into their separate lists (NOTE: SEASONAL IS NOT IMPLEMENTED YET)
     // TODO: Seasonal, once data is in place
-    // TODO: Ignored, once database is integrated
     for (int i = 0; i < widget.sourceAttractions.length; i++) {
       if (widget.sourceAttractions[i].active == true) {
         activeList.add(widget.sourceAttractions[i]);
@@ -50,8 +57,8 @@ class _AttractionsListViewState extends State<AttractionsListView> {
     activeList.sort(attractionComparator);
     defunctList.sort(attractionComparator);
 
-    _hasActive = (activeList.length != 0);
-    _hasDefunct = (defunctList.length != 0);
+    bool _hasActive = (activeList.length != 0);
+    bool _hasDefunct = (defunctList.length != 0);
 
     print("ActiveList => Data: $_hasActive | Length: ${activeList.length}");
     print("DefunctList => Data: $_hasDefunct | Length: ${defunctList.length}");
@@ -66,14 +73,52 @@ class _AttractionsListViewState extends State<AttractionsListView> {
     return returnMap;
   }
 
+  /// Simple function that sets the value of the current state to the inverse of whatever it currently is for the user.
+  void _ignoreCallbackHandler(
+      BluehostAttraction attraction, bool currentIgnoreState) {
+    String targetKey = [
+      widget.parentPark.parkID.toString(),
+      attraction.attractionID.toString(),
+      "rideID"
+    ].join("/");
+    // If we're ignored, we need to remove our self from the ignore list. If not, we add ourselves to it.
+    if (currentIgnoreState) {
+      widget.db.removeEntryFromPath(path: DatabasePath.IGNORE, key: targetKey);
+    } else {
+      widget.db.setEntryAtPath(
+          path: DatabasePath.IGNORE,
+          key: targetKey,
+          payload: attraction.attractionID);
+    }
+  }
+
+  void _handleIgnoreData(Event event) async {
+    print(event?.snapshot?.value ?? "Ignore data hasn't been fetched yet.");
+
+    ignoreList = List<int>();
+    (event.snapshot.value as Map)?.forEach((key, value) {
+      ignoreList.add(int.parse(key));
+    });
+
+    // Updating the park entry (which this does) results in a re-build of this entire widget.
+    widget.pm.updateAttractionCount(widget.parentPark, ignoreList, fullList);
+  }
+
   // Load all
   @override
   void initState() {
+    super.initState();
+
     displayLists = _buildPreparedList();
+
     _attractionsStream = widget.db.getLiveEntryAtPath(
         path: DatabasePath.ATTRACTIONS,
         key: widget.parentPark.parkID.toString());
-    super.initState();
+
+    widget.db
+        .getLiveEntryAtPath(
+            path: DatabasePath.IGNORE, key: widget.parentPark.parkID.toString())
+        .listen(_handleIgnoreData);
   }
 
   @override
@@ -82,7 +127,7 @@ class _AttractionsListViewState extends State<AttractionsListView> {
       stream: _attractionsStream,
       builder: (context, AsyncSnapshot<Event> snap) {
         print(snap.data?.snapshot?.value ??
-            "User data for this park hasn't loaded yet");
+            "User data for this park either doesn't exist or hasn't loaded yet");
 
         //  We're attempting to convert the event into the appropriate user data.
         // If the data doesn't exist, we'll just have an empty list. If the data doesn't
@@ -90,6 +135,25 @@ class _AttractionsListViewState extends State<AttractionsListView> {
         List<FirebaseAttraction> userData = List<FirebaseAttraction>();
         (snap.data?.snapshot?.value as Map)?.forEach((key, value) {
           return userData.add(FirebaseAttraction.fromMap(Map.from(value)));
+        });
+
+        if(userData.length != 0){
+          fullList = List<FirebaseAttraction>();
+          fullList.addAll(userData);
+        } else {
+          fullList = null;
+        }
+
+        // Establish ignored states
+        ignoreList?.forEach((id) {
+          FirebaseAttraction target =
+              getFirebaseAttractionFromList(userData, id);
+          if (target == null) {
+            target = FirebaseAttraction(rideID: id);
+            userData.add(target);
+          }
+
+          target.ignored = true;
         });
 
         return ClipRRect(
@@ -122,20 +186,26 @@ class _AttractionsListViewState extends State<AttractionsListView> {
 
   Widget _sectionContent(BuildContext context,
       List<BluehostAttraction> attractions, List<FirebaseAttraction> userData) {
-    return Column(
-        children: List.generate(attractions.length, (int index) {
-          BluehostAttraction serverData = attractions[index];
-          FirebaseAttraction entryData = getFirebaseAttractionFromList(userData, serverData.attractionID) ?? FirebaseAttraction(rideID: serverData.attractionID);
-      return AttractionListEntry(
-        attractionData: serverData,
-        slidableController: _slidableController,
-        ignoreCallback: (attraction) => print("ignored"),
-        ignored: false,
-        buttonWidget: ExperienceButton(
-          data: entryData,
-          enabled: serverData.active,
-        ),
-      );
-    }));
+    return ListBody(
+      children: List.generate(attractions.length, (int index) {
+        BluehostAttraction serverData = attractions[index];
+        FirebaseAttraction entryData =
+            getFirebaseAttractionFromList(userData, serverData.attractionID) ??
+                FirebaseAttraction(rideID: serverData.attractionID);
+        return AttractionListEntry(
+          attractionData: serverData,
+          slidableController: widget.slidableController,
+          ignoreCallback: _ignoreCallbackHandler,
+          ignored: entryData.ignored,
+          buttonWidget: ExperienceButton(
+            parentPark: widget.parentPark,
+            data: entryData,
+            ignored: entryData.ignored,
+          ),
+        );
+      }),
+      mainAxis: Axis.vertical,
+    );
+
   }
 }

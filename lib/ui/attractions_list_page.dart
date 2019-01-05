@@ -89,18 +89,19 @@ class _AttractionsPageState extends State<AttractionsPage> {
 
                     // Percentage Complete bar
                     ParkProgressFullBar(
-                      numRidden: parkData.ridesRidden,
-                      numRides: parkData.totalRides,
-                      defunctRidden: parkData.numDefunctRidden,
-                      showDefunct: parkData.showDefunct,
-                    ),
+                        numRidden: parkData.ridesRidden,
+                        numRides: parkData.totalRides,
+                        defunctRidden: parkData.numDefunctRidden,
+                        showDefunct: parkData.showDefunct,
+                      ),
 
                     // Listview (Expanded)
-                    // TODO: Implement ListView display for the attractions themselves
                     Expanded(
                       child: AttractionsListView(
                         sourceAttractions: widget.serverParkData.attractions,
                         parentPark: parkData,
+                        slidableController: _slidableController,
+                        pm: widget.pm,
                         db: widget.db,
                         // Data here
                       )
