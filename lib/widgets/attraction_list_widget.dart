@@ -38,14 +38,19 @@ class _AttractionsListViewState extends State<AttractionsListView> {
 
   Map<String, List<BluehostAttraction>> _buildPreparedList() {
     headedList = List<dynamic>();
+
     List<BluehostAttraction> activeList = List<BluehostAttraction>(),
         seasonalList = List<BluehostAttraction>(),
         defunctList = List<BluehostAttraction>();
-    // Split each attraction into their separate lists (NOTE: SEASONAL IS NOT IMPLEMENTED YET)
-    // TODO: Seasonal, once data is in place
+
+    // Split each attraction into their separate lists
     for (int i = 0; i < widget.sourceAttractions.length; i++) {
-      if (widget.sourceAttractions[i].active == true) {
-        activeList.add(widget.sourceAttractions[i]);
+      if (widget.sourceAttractions[i].active) {
+        if(widget.sourceAttractions[i].seasonal) {
+          seasonalList.add(widget.sourceAttractions[i]);
+        } else {
+          activeList.add(widget.sourceAttractions[i]);
+        }
       } else {
         defunctList.add(widget.sourceAttractions[i]);
       }
@@ -56,17 +61,21 @@ class _AttractionsListViewState extends State<AttractionsListView> {
     }
 
     activeList.sort(attractionComparator);
+    seasonalList.sort(attractionComparator);
     defunctList.sort(attractionComparator);
 
     bool _hasActive = (activeList.length != 0);
+    bool _hasSeasonal = (seasonalList.length != 0);
     bool _hasDefunct = (defunctList.length != 0);
 
     print("ActiveList => Data: $_hasActive | Length: ${activeList.length}");
+    print("SeasonalList => Data: $_hasSeasonal | Length: ${seasonalList.length}");
     print("DefunctList => Data: $_hasDefunct | Length: ${defunctList.length}");
 
     Map<String, List<BluehostAttraction>> returnMap = Map();
 
     if (_hasActive) returnMap["Active"] = activeList;
+    if (_hasSeasonal) returnMap["Seasonal"] = seasonalList;
     if (_hasDefunct) returnMap["Defunct"] = defunctList;
 
     // Strings are used as headers for the list. These are checked for in the
@@ -77,10 +86,16 @@ class _AttractionsListViewState extends State<AttractionsListView> {
       headedList.addAll(activeList);
     }
 
+    if (_hasSeasonal) {
+      headedList.add("Seasonal");
+      headedList.addAll(seasonalList);
+    }
+
     if (_hasDefunct) {
       headedList.add("Defunct");
       headedList.addAll(defunctList);
     }
+
 
     return returnMap;
   }

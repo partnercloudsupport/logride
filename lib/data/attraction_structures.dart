@@ -39,6 +39,7 @@ class BluehostAttraction {
   int yearOpen;
   int yearClosed;
   bool active;
+  bool seasonal;
   bool scoreCard;
   String manufacturer;
   String additionalContributors;
@@ -84,6 +85,7 @@ class BluehostAttraction {
     newAttraction.yearClosed = num.parse(json["YearClosed"]);
 
     newAttraction.active = (json["Active"] == "1");
+    newAttraction.seasonal = (json["Seasonal"] == "1");
     newAttraction.scoreCard = (json["ScoreCard"] == "1");
     newAttraction.manufacturer = json["Manufacturer"];
     newAttraction.additionalContributors = json["additionalContributors"];

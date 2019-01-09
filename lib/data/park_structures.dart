@@ -13,6 +13,7 @@ class FirebasePark {
   final int parkID;
   int ridesRidden = 0;
   bool showDefunct = false;
+  bool showSeasonal = true;
   int totalRides = 0;
 
   FirebasePark({this.parkID, this.name, this.location});
@@ -29,6 +30,7 @@ class FirebasePark {
     newPark.numberOfCheckIns = data["numberOfCheckIns"];
     newPark.ridesRidden = data["ridesRidden"];
     newPark.showDefunct = data["showDefunct"];
+    newPark.showSeasonal = data["showSeasonal"] ?? true;
     newPark.totalRides = data["totalRides"];
     return newPark;
   }
@@ -45,6 +47,7 @@ class FirebasePark {
       "numberOfCheckIns": this.numberOfCheckIns,
       "ridesRidden": this.ridesRidden,
       "showDefunct": this.showDefunct,
+      "showSeasonal": this.showSeasonal,
       "totalRides": this.totalRides
     };
   }
