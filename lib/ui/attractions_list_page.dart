@@ -28,10 +28,6 @@ class _AttractionsPageState extends State<AttractionsPage> {
 
   Stream<Event> _parkStream;
 
-  void _handleExperienceTap(num parkID) {}
-
-  void _handleExperienceLongTap(num parkID) {}
-
   @override
   void initState() {
     _parkStream = widget.db.getLiveEntryAtPath(

@@ -32,8 +32,6 @@ class _AttractionsListViewState extends State<AttractionsListView> {
   Map<String, List<BluehostAttraction>> displayLists;
   List<int> ignoreList;
 
-  Stream<Event> _attractionsStream;
-
   List<FirebaseAttraction> fullList;
 
   List<dynamic> headedList;

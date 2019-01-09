@@ -35,7 +35,6 @@ class _FirebaseAttractionListViewState
   FirebaseList _ignoreList;
 
   List<FirebaseAttraction> _builtAttractionList;
-  List<int> _builtIgnoreList;
 
   bool _ignoreLoaded = false;
   bool _attractionLoaded = false;
