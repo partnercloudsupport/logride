@@ -60,7 +60,7 @@ class _SetExperienceDialogBoxState extends State<SetExperienceDialogBox> {
                   _buildButton(_ButtonType.SUBTRACT_ONE),
                   _buildButton(_ButtonType.SUBTRACT_MANY),
                   Container(
-                    width: 50,
+                    width: 60,
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(5.0),
