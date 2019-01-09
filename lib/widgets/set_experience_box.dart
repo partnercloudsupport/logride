@@ -39,7 +39,14 @@ class _SetExperienceDialogBoxState extends State<SetExperienceDialogBox> {
 
   @override
   Widget build(BuildContext context) {
+    // Establishing the text every time we build ensures that the text is always up to date.
     _editingController.text = currentCount.toString();
+
+    // Used to direct the user's cursor to the end of the text field each time the widget rebuilds and the user is editing.
+    // This means it typically happens when the user first taps on the widget and the keyboard rolls up.
+    _editingController.selection =
+        TextSelection.collapsed(offset: currentCount.toString().length);
+
     return Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         child: Padding(
@@ -47,6 +54,7 @@ class _SetExperienceDialogBoxState extends State<SetExperienceDialogBox> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
+              // Title/header section
               Padding(
                 padding: const EdgeInsets.only(bottom: 16.0, top: 8.0),
                 child: Text(
@@ -54,43 +62,45 @@ class _SetExperienceDialogBoxState extends State<SetExperienceDialogBox> {
                   style: Theme.of(context).textTheme.title,
                 ),
               ),
+
+              // Section responsible for direct user input/interaction
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  _buildButton(_ButtonType.SUBTRACT_ONE),
-                  _buildButton(_ButtonType.SUBTRACT_MANY),
+                  _buildInputIconButton(_ButtonType.SUBTRACT_ONE),
+                  _buildInputIconButton(_ButtonType.SUBTRACT_MANY),
                   Container(
                     width: 60,
                     child: Container(
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
-                        color: Colors.grey[100]
-                      ),
+                          borderRadius: BorderRadius.circular(5.0),
+                          color: Colors.grey[100]),
                       child: TextField(
                         controller: _editingController,
                         textAlign: TextAlign.center,
                         keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          border: InputBorder.none
-                        ),
+                        decoration: InputDecoration(border: InputBorder.none),
                         onChanged: (value) {
                           currentCount = int.parse(value);
                         },
-                        inputFormatters: [
-                          LengthLimitingTextInputFormatter(4)
-                        ],
                       ),
                     ),
                   ),
-                  _buildButton(_ButtonType.ADD_MANY),
-                  _buildButton(_ButtonType.ADD_ONE)
+                  _buildInputIconButton(_ButtonType.ADD_MANY),
+                  _buildInputIconButton(_ButtonType.ADD_ONE)
                 ],
               ),
+
+              // Confirm/cancel buttons for user input. Tapping on the background also cancels, but just in case.
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
-                  _buildConfirmButton(FontAwesomeIcons.times, Colors.grey[350], () => Navigator.of(context).pop(widget.originalCount)),
-                  _buildConfirmButton(FontAwesomeIcons.check, Theme.of(context).buttonColor, () => Navigator.of(context).pop(currentCount))
+                  _buildConfirmButton(FontAwesomeIcons.times, Colors.grey[350],
+                      () => Navigator.of(context).pop(widget.originalCount)),
+                  _buildConfirmButton(
+                      FontAwesomeIcons.check,
+                      Theme.of(context).buttonColor,
+                      () => Navigator.of(context).pop(currentCount))
                 ],
               )
             ],
@@ -98,22 +108,26 @@ class _SetExperienceDialogBoxState extends State<SetExperienceDialogBox> {
         ));
   }
 
-  Widget _buildButton(_ButtonType type) {
+  // Used in the manipulation of user data
+  Widget _buildInputIconButton(_ButtonType type) {
     return IconButton(
       icon: Icon(_buttonImageMap[type]),
       onPressed: () {
         FocusScope.of(context).requestFocus(new FocusNode());
         switch (type) {
+          // Addition cases are easy - we really can't overflow with this.
           case _ButtonType.ADD_MANY:
             setState(() {
               currentCount += 5;
             });
             break;
+
           case _ButtonType.ADD_ONE:
             setState(() {
               currentCount++;
             });
             break;
+
           case _ButtonType.SUBTRACT_MANY:
             int valueRemoved = 5;
             // If we're going to go negative, only remove as much as is needed
@@ -126,6 +140,7 @@ class _SetExperienceDialogBoxState extends State<SetExperienceDialogBox> {
               currentCount -= valueRemoved;
             });
             break;
+
           case _ButtonType.SUBTRACT_ONE:
             // Keeping us from going negative
             if (currentCount - 1 < 0) return;
@@ -138,7 +153,9 @@ class _SetExperienceDialogBoxState extends State<SetExperienceDialogBox> {
     );
   }
 
-  Widget _buildConfirmButton(IconData data, Color iconColor, Function tapHandler){
+  // Simple wrapper to clean up the creation of confirmation/cancel buttons
+  Widget _buildConfirmButton(
+      IconData data, Color iconColor, Function tapHandler) {
     return IconButton(
       icon: Icon(data, color: iconColor, size: 32),
       onPressed: tapHandler,
