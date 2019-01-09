@@ -61,19 +61,25 @@ class _SetExperienceDialogBoxState extends State<SetExperienceDialogBox> {
                   _buildButton(_ButtonType.SUBTRACT_MANY),
                   Container(
                     width: 50,
-                    child: TextField(
-                      controller: _editingController,
-                      textAlign: TextAlign.center,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5.0),
+                        color: Colors.grey[100]
                       ),
-                      onChanged: (value) {
-                        currentCount = int.parse(value);
-                      },
-                      inputFormatters: [
-                        LengthLimitingTextInputFormatter(4)
-                      ],
+                      child: TextField(
+                        controller: _editingController,
+                        textAlign: TextAlign.center,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          border: InputBorder.none
+                        ),
+                        onChanged: (value) {
+                          currentCount = int.parse(value);
+                        },
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(4)
+                        ],
+                      ),
                     ),
                   ),
                   _buildButton(_ButtonType.ADD_MANY),
