@@ -1,14 +1,14 @@
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:sticky_headers/sticky_headers.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import '../data/attraction_structures.dart';
 import '../data/park_structures.dart';
 import '../data/parks_manager.dart';
 import '../data/fbdb_manager.dart';
-import '../widgets/attraction_list_entry.dart';
 import '../widgets/experience_button.dart';
+import '../widgets/firebase_attraction_list.dart';
+import '../widgets/set_experience_box.dart';
 
 class AttractionsListView extends StatefulWidget {
   AttractionsListView(
@@ -36,7 +36,10 @@ class _AttractionsListViewState extends State<AttractionsListView> {
 
   List<FirebaseAttraction> fullList;
 
+  List<dynamic> headedList;
+
   Map<String, List<BluehostAttraction>> _buildPreparedList() {
+    headedList = List<dynamic>();
     List<BluehostAttraction> activeList = List<BluehostAttraction>(),
         seasonalList = List<BluehostAttraction>(),
         defunctList = List<BluehostAttraction>();
@@ -70,12 +73,23 @@ class _AttractionsListViewState extends State<AttractionsListView> {
 
     // Strings are used as headers for the list. These are checked for in the
     // Build functions for the listview.
+
+    if (_hasActive) {
+      headedList.add("Active");
+      headedList.addAll(activeList);
+    }
+
+    if (_hasDefunct) {
+      headedList.add("Defunct");
+      headedList.addAll(defunctList);
+    }
+
     return returnMap;
   }
 
   /// Simple function that sets the value of the current state to the inverse of whatever it currently is for the user.
   void _ignoreCallbackHandler(
-      BluehostAttraction attraction, bool currentIgnoreState) {
+      BluehostAttraction attraction, bool currentIgnoreState) async {
     String targetKey = [
       widget.parentPark.parkID.toString(),
       attraction.attractionID.toString(),
@@ -92,120 +106,91 @@ class _AttractionsListViewState extends State<AttractionsListView> {
     }
   }
 
-  void _handleIgnoreData(Event event) async {
-    print(event?.snapshot?.value ?? "Ignore data hasn't been fetched yet.");
-
-    ignoreList = List<int>();
-    (event.snapshot.value as Map)?.forEach((key, value) {
-      ignoreList.add(int.parse(key));
-    });
-
-    // Updating the park entry (which this does) results in a re-build of this entire widget.
-    widget.pm.updateAttractionCount(widget.parentPark, ignoreList, fullList);
-  }
-
   // Load all
   @override
   void initState() {
     super.initState();
 
     displayLists = _buildPreparedList();
-
-    _attractionsStream = widget.db.getLiveEntryAtPath(
-        path: DatabasePath.ATTRACTIONS,
-        key: widget.parentPark.parkID.toString());
-
-    widget.db
-        .getLiveEntryAtPath(
-            path: DatabasePath.IGNORE, key: widget.parentPark.parkID.toString())
-        .listen(_handleIgnoreData);
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: _attractionsStream,
-      builder: (context, AsyncSnapshot<Event> snap) {
-        print(snap.data?.snapshot?.value ??
-            "User data for this park either doesn't exist or hasn't loaded yet");
+    return ClipRRect(
+        borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(15), bottomRight: Radius.circular(15)),
+        child: FirebaseAttractionListView(
+          parentPark: widget.parentPark,
+          headedList: headedList,
+          attractionQuery: widget.db.getQueryForUser(
+              path: DatabasePath.ATTRACTIONS,
+              key: widget.parentPark.parkID.toString()),
+          ignoreQuery: widget.db.getQueryForUser(
+              path: DatabasePath.IGNORE,
+              key: widget.parentPark.parkID.toString()),
+          interactHandler: experienceCallbackHandler,
+          ignoreCallback: _ignoreCallbackHandler,
+        ));
+  }
 
-        //  We're attempting to convert the event into the appropriate user data.
-        // If the data doesn't exist, we'll just have an empty list. If the data doesn't
-        // exist for a park, we'll pass null to the button. Simple.
-        List<FirebaseAttraction> userData = List<FirebaseAttraction>();
-        (snap.data?.snapshot?.value as Map)?.forEach((key, value) {
-          return userData.add(FirebaseAttraction.fromMap(Map.from(value)));
-        });
+  void experienceCallbackHandler(
+      ExperienceAction action, FirebaseAttraction data) async {
+    print("Callback triggered");
+    switch (action) {
+      case ExperienceAction.SET:
 
-        if(userData.length != 0){
-          fullList = List<FirebaseAttraction>();
-          fullList.addAll(userData);
+        // You can't set the value if it's just toggleable.
+        if (!widget.parentPark.incrementorEnabled) return;
+
+        int result = await showDialog(
+            context: context,
+            builder: (BuildContext context) =>
+                SetExperienceDialogBox(data.numberOfTimesRidden ?? 0));
+
+        if (result == null) return;
+        if (result == data.numberOfTimesRidden) return;
+
+        data.numberOfTimesRidden = result;
+
+        widget.db.setEntryAtPath(
+            path: DatabasePath.ATTRACTIONS,
+            key: widget.parentPark.parkID.toString() +
+                "/" +
+                data.rideID.toString(),
+            payload: data.toMap());
+        break;
+      case ExperienceAction.ADD:
+        // TODO - Improve speed of interaction
+        if (!widget.parentPark.incrementorEnabled) {
+          if (data.numberOfTimesRidden == 0) {
+            data.numberOfTimesRidden = 1;
+          } else {
+            data.numberOfTimesRidden = 0;
+          }
         } else {
-          fullList = null;
+          data.numberOfTimesRidden++;
         }
 
-        // Establish ignored states
-        ignoreList?.forEach((id) {
-          FirebaseAttraction target =
-              getFirebaseAttractionFromList(userData, id);
-          if (target == null) {
-            target = FirebaseAttraction(rideID: id);
-            userData.add(target);
-          }
-
-          target.ignored = true;
-        });
-
-        return ClipRRect(
-            borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(15),
-                bottomRight: Radius.circular(15)),
-            child: ListView.builder(
-                itemCount: displayLists.keys.length,
-                itemBuilder: (BuildContext context, int index) {
-                  String key = displayLists.keys.elementAt(index);
-                  return StickyHeader(
-                      header: _listHeader(context, key),
-                      content: _sectionContent(
-                          context, displayLists[key], userData));
-                }));
-      },
-    );
-  }
-
-  Widget _listHeader(BuildContext context, String text) {
-    return Container(
-        width: double.infinity,
-        child: Padding(
-          padding: const EdgeInsets.only(left: 8.0),
-          child: Text(text),
-        ),
-        height: 20,
-        color: Colors.grey[200]);
-  }
-
-  Widget _sectionContent(BuildContext context,
-      List<BluehostAttraction> attractions, List<FirebaseAttraction> userData) {
-    return ListBody(
-      children: List.generate(attractions.length, (int index) {
-        BluehostAttraction serverData = attractions[index];
-        FirebaseAttraction entryData =
-            getFirebaseAttractionFromList(userData, serverData.attractionID) ??
-                FirebaseAttraction(rideID: serverData.attractionID);
-        return AttractionListEntry(
-          attractionData: serverData,
-          slidableController: widget.slidableController,
-          ignoreCallback: _ignoreCallbackHandler,
-          ignored: entryData.ignored,
-          buttonWidget: ExperienceButton(
-            parentPark: widget.parentPark,
-            data: entryData,
-            ignored: entryData.ignored,
-          ),
-        );
-      }),
-      mainAxis: Axis.vertical,
-    );
-
+        widget.db.setEntryAtPath(
+            path: DatabasePath.ATTRACTIONS,
+            key: widget.parentPark.parkID.toString() +
+                "/" +
+                data.rideID.toString(),
+            payload: data.toMap());
+        break;
+      case ExperienceAction.REMOVE:
+        // TODO - Improve speed of interaction
+        // We don't want this going negative.
+        if (data.numberOfTimesRidden > 0) {
+          data.numberOfTimesRidden--;
+          widget.db.setEntryAtPath(
+              path: DatabasePath.ATTRACTIONS,
+              key: widget.parentPark.parkID.toString() +
+                  "/" +
+                  data.rideID.toString(),
+              payload: data.toMap());
+        }
+        break;
+    }
   }
 }

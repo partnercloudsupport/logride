@@ -23,6 +23,7 @@ Map<DatabasePath, String> _databasePathStrings = {
 };
 
 abstract class BaseDB {
+  void init();
   Query getSortedQueryForUser({DatabasePath path, String key});
   Query getFilteredQuery({DatabasePath path, String key, dynamic value});
   Query getQueryForUser({DatabasePath path, String key});
@@ -32,6 +33,7 @@ abstract class BaseDB {
   Future<bool> doesEntryExistAtPath({DatabasePath path, String key});
   Future<dynamic> getEntryAtPath({DatabasePath path, String key});
   Stream<Event> getLiveEntryAtPath({DatabasePath path, String key});
+  Stream<Event> getLiveChildrenChanges({DatabasePath path, String key});
   void storeUserID(String userID);
   void clearUserID();
 }
@@ -39,6 +41,10 @@ abstract class BaseDB {
 class DatabaseManager implements BaseDB {
   final FirebaseDatabase _firebaseDatabase = FirebaseDatabase.instance;
   String _savedID;
+
+  void init(){
+    _firebaseDatabase.setPersistenceEnabled(true);
+  }
 
   void storeUserID(String userID){
     _savedID = userID ?? null;
@@ -62,7 +68,7 @@ class DatabaseManager implements BaseDB {
   }
 
   Query getQueryForUser({DatabasePath path, String key}) {
-    return _getReference(path).child(_savedID).orderByKey();
+    return _getReference(path).child(_savedID).child(key).orderByKey();
   }
 
   void removeEntryFromPath({DatabasePath path, String key}){

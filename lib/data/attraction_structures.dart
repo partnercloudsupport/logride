@@ -15,8 +15,8 @@ class FirebaseAttraction {
   factory FirebaseAttraction.fromMap(Map<String, dynamic> map){
     FirebaseAttraction newAttraction = FirebaseAttraction(rideID: map["rideID"]);
     newAttraction.numberOfTimesRidden = map["numberOfTimesRidden"];
-    newAttraction.firstRideDate = DateTime.fromMillisecondsSinceEpoch((map["firstRideDate"] as double).toInt());
-    newAttraction.lastRideDate = DateTime.fromMillisecondsSinceEpoch((map["lastRideDate"] as double).toInt());
+    newAttraction.firstRideDate = DateTime.fromMillisecondsSinceEpoch((map["firstRideDate"] as num).toInt());
+    newAttraction.lastRideDate = DateTime.fromMillisecondsSinceEpoch((map["lastRideDate"] as num).toInt());
     return newAttraction;
   }
 

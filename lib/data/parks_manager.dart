@@ -28,9 +28,12 @@ class ParksManager {
     // Go through and set-up the allParksInfo to match the user database.
     // The 'filled' tag is used in the all-parks-search to show the user they
     // have that park.
-    db
-        .getEntryAtPath(path: DatabasePath.PARKS, key: "")
-        .then((snap) async {
+    db.getEntryAtPath(path: DatabasePath.PARKS, key: "").then((snap) async {
+      if (snap == null) {
+        print("User has no data currently. Returning.");
+        searchInitialized = true;
+        return;
+      }
       Map<dynamic, dynamic> values = jsonDecode(jsonEncode(snap));
       for (int i = 0; i < values.keys.length; i++) {
         int entryID = num.parse(values.keys.elementAt(i));
@@ -42,8 +45,8 @@ class ParksManager {
         wf
             .getAllAttractionData(
                 parkID: targetPark.id, rideTypes: attractionTypes)
-            .then((list){
-              targetPark.attractions = list;
+            .then((list) {
+          targetPark.attractions = list;
         });
         targetPark.filled = true;
       }
@@ -109,14 +112,20 @@ class ParksManager {
         payload: false);
   }
 
-  void updateAttractionCount(FirebasePark targetFBPark, List<int> ignoredAttractionIDs, List<FirebaseAttraction> userAttractionData) {
-    BluehostPark targetBHPark = getBluehostParkByID(allParksInfo, targetFBPark.parkID);
-    targetFBPark.updateAttractionCount(targetPark: targetBHPark, userData: userAttractionData, ignored: ignoredAttractionIDs);
+  void updateAttractionCount(
+      FirebasePark targetFBPark,
+      List<int> ignoredAttractionIDs,
+      List<FirebaseAttraction> userAttractionData) {
+    BluehostPark targetBHPark =
+        getBluehostParkByID(allParksInfo, targetFBPark.parkID);
+    targetFBPark.updateAttractionCount(
+        targetPark: targetBHPark,
+        userData: userAttractionData,
+        ignored: ignoredAttractionIDs);
 
     db.updateEntryAtPath(
-      path: DatabasePath.PARKS, key: targetFBPark.parkID.toString(),
-      payload: targetFBPark.toMap()
-    );
-
+        path: DatabasePath.PARKS,
+        key: targetFBPark.parkID.toString(),
+        payload: targetFBPark.toMap());
   }
 }

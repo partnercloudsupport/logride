@@ -84,7 +84,7 @@ class _AttractionsPageState extends State<AttractionsPage> {
                     // Titlebar w/ info and settings buttons
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: _buildTitleBar(context),
+                      child: _buildTitleBar(context, parkData),
                     ),
 
                     // Percentage Complete bar
@@ -117,7 +117,7 @@ class _AttractionsPageState extends State<AttractionsPage> {
   /// Returns the titlebar used in [AttractionListPage]. Contains two buttons,
   /// settings and info, separated by an expanded text that contains the name of
   /// the park.
-  Widget _buildTitleBar(BuildContext context) {
+  Widget _buildTitleBar(BuildContext context, FirebasePark parkData) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Container(
@@ -138,8 +138,12 @@ class _AttractionsPageState extends State<AttractionsPage> {
             ),
           ),
           // Right icon
+          /// TODO: REPLACE WITH PROPER SETTINGS PAGE
           _buildTitleBarIcon(context,
-              icon: FontAwesomeIcons.cog, onTap: () => print("Setings")),
+              icon: FontAwesomeIcons.cog, onTap: () {
+              parkData.incrementorEnabled = !parkData.incrementorEnabled;
+              widget.db.setEntryAtPath(path: DatabasePath.PARKS, key: parkData.parkID.toString(), payload: parkData.toMap());
+            })
         ],
       )),
     );

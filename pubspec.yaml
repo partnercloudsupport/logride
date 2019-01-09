@@ -57,6 +57,9 @@ dependencies:
   # Used in attractions views for sticky headers
   sticky_headers: 0.1.7
 
+  # Alternate sticky header package (more efficient?)
+  sticky_header_list: 1.0.6
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

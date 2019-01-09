@@ -3,12 +3,19 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../data/attraction_structures.dart';
 import '../data/park_structures.dart';
 
+enum ExperienceAction {
+  ADD,
+  REMOVE,
+  SET
+}
+
 class ExperienceButton extends StatelessWidget {
-  ExperienceButton({this.parentPark, this.data, this.ignored});
+  ExperienceButton({this.parentPark, this.data, this.ignored, this.interactHandler});
 
   final FirebasePark parentPark;
   final FirebaseAttraction data;
   final bool ignored;
+  final Function(ExperienceAction, FirebaseAttraction) interactHandler;
 
   @override
   Widget build(BuildContext context) {
@@ -73,17 +80,22 @@ class ExperienceButton extends StatelessWidget {
 
     children.add(buttonWidget);
 
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: 44,
-        minHeight: 44.0,
-        minWidth: 32.0
-      ),
-      child: Card(
-        child: Row(
-          children: children,
+    return GestureDetector(
+      child: Container(
+        constraints: BoxConstraints(
+          maxHeight: 44,
+          minHeight: 44.0,
+          minWidth: 32.0
+        ),
+        child: Card(
+          child: Row(
+            children: children,
+          ),
         ),
       ),
+      onTap: () => interactHandler(ExperienceAction.ADD, data),
+      onDoubleTap: () => interactHandler(ExperienceAction.SET, data),
+      onLongPress: () => interactHandler(ExperienceAction.REMOVE, data),
     );
   }
 }

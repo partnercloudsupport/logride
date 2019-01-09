@@ -146,7 +146,7 @@ class RewardProgressBar extends StatelessWidget{
   Widget build(BuildContext context) {
     num ratio;
     if (denominator == 0) {
-      ratio = 0;
+      ratio = 0.01;
     } else {
       ratio = numerator / denominator;
     }

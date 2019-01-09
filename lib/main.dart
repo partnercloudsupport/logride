@@ -9,6 +9,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    BaseDB db = DatabaseManager();
+    db.init();
+
     return MaterialApp(
         title: 'LogRide',
         routes: <String, WidgetBuilder>{
@@ -30,7 +33,7 @@ class MyApp extends StatelessWidget {
                   fontSize: 28.0,
                   fontWeight: FontWeight.bold
                 ))),
-        home: LandingPage(auth: Auth(), db: DatabaseManager(),));
+        home: LandingPage(auth: Auth(), db: db,));
   }
 }
 

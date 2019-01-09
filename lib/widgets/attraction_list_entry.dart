@@ -3,26 +3,39 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../data/attraction_structures.dart';
+import '../data/park_structures.dart';
+import '../widgets/experience_button.dart';
 
-class AttractionListEntry extends StatelessWidget {
+class AttractionListEntry extends StatefulWidget {
   AttractionListEntry(
       {this.attractionData,
-      this.buttonWidget,
-      this.ignored,
-      this.slidableController,
-      this.ignoreCallback});
+        this.userData,
+        this.slidableController,
+        this.ignoreCallback,
+      this.interactHandler,
+      this.parentPark});
 
   final BluehostAttraction attractionData;
-  final Widget buttonWidget;
-  final bool ignored;
+  final FirebaseAttraction userData;
+  final FirebasePark parentPark;
   final SlidableController slidableController;
   final Function(BluehostAttraction, bool) ignoreCallback;
+  final Function interactHandler;
+
+  @override
+  State<StatefulWidget> createState() => AttractionListState();
+}
+
+
+class AttractionListState extends State<AttractionListEntry>{
 
   @override
   Widget build(BuildContext context) {
     Widget built;
 
-    Color tileColor = ignored || !attractionData.active
+    bool ignored = widget.userData.ignored;
+
+    Color tileColor = ignored || !widget.attractionData.active
         ? Theme.of(context).disabledColor
         : Colors.white;
 
@@ -42,16 +55,21 @@ class AttractionListEntry extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               AutoSizeText(
-                attractionData.attractionName,
+                widget.attractionData.attractionName,
                 maxLines: 1,
                 style: Theme.of(context).textTheme.subhead,
               ),
-              AutoSizeText(attractionData.typeLabel,
+              AutoSizeText(widget.attractionData.typeLabel,
                   maxLines: 1, style: Theme.of(context).textTheme.subtitle)
             ],
           )),
           // If the button's not there for any reason, just show an empty container instead. Prevents null errors.
-          buttonWidget ?? Container()
+          ExperienceButton(
+            interactHandler: widget.interactHandler,
+            parentPark: widget.parentPark,
+            ignored: ignored ?? false,
+            data: widget.userData ?? FirebaseAttraction(rideID: widget.attractionData.attractionID),
+          )
         ],
       ),
     );
@@ -59,11 +77,10 @@ class AttractionListEntry extends StatelessWidget {
     // Logic for selecting whether or not there are any slide interactions with
     // this list entry.
     Widget slideAction;
-    if (!attractionData.active) slideAction = null; // Already ignored thanks to defunct, no point in ignoring it more
-    if (attractionData.active) {
+    if (!widget.attractionData.active) slideAction = null; // Already ignored thanks to defunct, no point in ignoring it more
+    if (widget.attractionData.active) {
       // If we're ignored, show the include slide. If we're included, show the ignore slide.
-      slideAction =
-          ignored ? _buildIncludeSlideAction() : _buildIgnoreSlideAction();
+      slideAction = ignored ? _buildIncludeSlideAction() : _buildIgnoreSlideAction();
     }
 
     // This is kinda ugly, but if there's no action that happens on slide,
@@ -75,8 +92,7 @@ class AttractionListEntry extends StatelessWidget {
             actionExtentRatio: 0.25,
             child: built,
             actions: <Widget>[slideAction],
-            controller: slidableController,
-            // TODO: Insert unique key if needed.
+            controller: widget.slidableController,
           );
   }
 
@@ -85,7 +101,7 @@ class AttractionListEntry extends StatelessWidget {
       icon: FontAwesomeIcons.ban,
       color: Color.fromARGB(255, 221, 222, 224),
       caption: "Ignore",
-      onTap: () => ignoreCallback(this.attractionData, ignored),
+      onTap: () => widget.ignoreCallback(widget.attractionData, widget.userData.ignored),
     );
   }
 
@@ -94,13 +110,13 @@ class AttractionListEntry extends StatelessWidget {
       icon: FontAwesomeIcons.check,
       color: Color.fromARGB(255, 135, 207, 129),
       caption: "Include",
-      onTap: () => ignoreCallback(this.attractionData, ignored),
+      onTap: () => widget.ignoreCallback(widget.attractionData, widget.userData.ignored),
     );
   }
 
   void _onInfoTap() {
     //TODO: Open attraction info panel
     print(
-        "NOT YET IMPLEMENTED: Thomas, open an attraction panel for ${this.attractionData.attractionName}");
+        "NOT YET IMPLEMENTED: Thomas, open an attraction panel for ${widget.attractionData.attractionName}");
   }
 }
