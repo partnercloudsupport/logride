@@ -172,25 +172,35 @@ class _AttractionsListViewState extends State<AttractionsListView> {
                 data.rideID.toString(),
             payload: data.toMap());
         break;
-      case ExperienceAction.ADD:
-        // TODO - Improve speed of interaction
-        if (!widget.parentPark.incrementorEnabled) {
-          if (data.numberOfTimesRidden == 0) {
-            data.numberOfTimesRidden = 1;
-          } else {
-            data.numberOfTimesRidden = 0;
-          }
-        } else {
-          data.numberOfTimesRidden++;
-        }
 
-        widget.db.setEntryAtPath(
-            path: DatabasePath.ATTRACTIONS,
-            key: widget.parentPark.parkID.toString() +
-                "/" +
-                data.rideID.toString(),
-            payload: data.toMap());
+      case ExperienceAction.ADD:
+
+        // Use of a transaction here prevents any possible race conditions from occurring
+        widget.db.performTransaction(path: DatabasePath.ATTRACTIONS, key: widget.parentPark.parkID.toString()+"/"+data.rideID.toString(), transactionHandler: (transaction) {
+
+          // If there's currently no entry in the firebase for this attraction,
+          // our value will be null. In this case, we're relying on our backup
+          // local data.
+          FirebaseAttraction attraction;
+          if(transaction.value == null){
+            attraction = data;
+          } else {
+            attraction = FirebaseAttraction.fromMap(Map.from(transaction.value));
+          }
+
+          // If we're not using the incrementor, we'll be toggling the number of times ridden.
+          if(!widget.parentPark.incrementorEnabled){
+            attraction.numberOfTimesRidden = (attraction.numberOfTimesRidden== 0) ? 1 : 0;
+          } else {
+            attraction.numberOfTimesRidden = attraction.numberOfTimesRidden + 1;
+          }
+
+          // Return it back to the map/json form before giving it back to the transaction
+          transaction.value = attraction.toMap();
+          return transaction;
+        });
         break;
+
       case ExperienceAction.REMOVE:
         // TODO - Improve speed of interaction
         // We don't want this going negative.
