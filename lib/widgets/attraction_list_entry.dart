@@ -12,7 +12,7 @@ class AttractionListEntry extends StatefulWidget {
         this.userData,
         this.slidableController,
         this.ignoreCallback,
-      this.interactHandler,
+      this.experienceHandler,
       this.parentPark});
 
   final BluehostAttraction attractionData;
@@ -20,7 +20,7 @@ class AttractionListEntry extends StatefulWidget {
   final FirebasePark parentPark;
   final SlidableController slidableController;
   final Function(BluehostAttraction, bool) ignoreCallback;
-  final Function interactHandler;
+  final Function(ExperienceAction, FirebaseAttraction) experienceHandler;
 
   @override
   State<StatefulWidget> createState() => AttractionListState();
@@ -65,7 +65,7 @@ class AttractionListState extends State<AttractionListEntry>{
           )),
           // If the button's not there for any reason, just show an empty container instead. Prevents null errors.
           ExperienceButton(
-            interactHandler: widget.interactHandler,
+            interactHandler: widget.experienceHandler,
             parentPark: widget.parentPark,
             ignored: ignored ?? false,
             data: widget.userData ?? FirebaseAttraction(rideID: widget.attractionData.attractionID),

@@ -5,6 +5,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import '../data/attraction_structures.dart';
 import '../data/park_structures.dart';
 import '../widgets/attraction_list_entry.dart';
+import '../widgets/experience_button.dart';
 
 class FirebaseAttractionListView extends StatefulWidget {
   FirebaseAttractionListView(
@@ -13,7 +14,8 @@ class FirebaseAttractionListView extends StatefulWidget {
       this.headedList,
       this.parentPark,
       this.ignoreCallback,
-      this.interactHandler});
+      this.experienceHandler,
+      this.countHandler});
 
   final Query attractionQuery;
   final Query ignoreQuery;
@@ -21,8 +23,9 @@ class FirebaseAttractionListView extends StatefulWidget {
   final List<dynamic> headedList;
   final FirebasePark parentPark;
 
-  final Function ignoreCallback;
-  final Function interactHandler;
+  final Function(BluehostAttraction target, bool currentState) ignoreCallback;
+  final Function(ExperienceAction, FirebaseAttraction) experienceHandler;
+  final Function(List<FirebaseAttraction> userData, List<int> ignoreData) countHandler;
 
   @override
   _FirebaseAttractionListViewState createState() =>
@@ -35,6 +38,7 @@ class _FirebaseAttractionListViewState
   FirebaseList _ignoreList;
 
   List<FirebaseAttraction> _builtAttractionList;
+  List<int> _builtIgnoreList;
 
   bool _ignoreLoaded = false;
   bool _attractionLoaded = false;
@@ -117,6 +121,7 @@ class _FirebaseAttractionListViewState
       _builtAttractionList.add(parsed);
     });
 
+    _builtIgnoreList = List<int>();
     _ignoreList.forEach((snap) {
       bool newEntry = false;
 
@@ -131,6 +136,7 @@ class _FirebaseAttractionListViewState
 
       target.ignored = true;
       if (newEntry) _builtAttractionList.add(target);
+      _builtIgnoreList.add(targetID);
     });
   }
 
@@ -155,7 +161,7 @@ class _FirebaseAttractionListViewState
     return AttractionListEntry(
       attractionData: target,
       parentPark: widget.parentPark,
-      interactHandler: widget.interactHandler,
+      experienceHandler: widget.experienceHandler,
       ignoreCallback: widget.ignoreCallback,
       slidableController: _slidableController,
       userData: attraction,
@@ -166,6 +172,7 @@ class _FirebaseAttractionListViewState
   Widget build(BuildContext context) {
     if (_ignoreLoaded && _attractionLoaded) {
       _buildLists();
+      widget.countHandler(_builtAttractionList, _builtIgnoreList);
       print("Rebuilding");
       return ListView.builder(
         itemCount: widget.headedList.length,
