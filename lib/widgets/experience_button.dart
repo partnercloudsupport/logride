@@ -102,7 +102,7 @@ class ExperienceButton extends StatelessWidget {
             children: children,
           ),
           onTap: () => interactHandler(ExperienceAction.ADD, data),
-          onDoubleTap: () => interactHandler(ExperienceAction.SET, data),
+          //onDoubleTap: () => interactHandler(ExperienceAction.SET, data),
           onLongPress: () => interactHandler(ExperienceAction.REMOVE, data),
         ),
       ),

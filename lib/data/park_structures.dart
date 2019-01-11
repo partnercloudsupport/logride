@@ -9,7 +9,9 @@ class FirebasePark {
   String location = "";
   String name = "";
   int numberOfCheckIns = 0;
-  int numDefunctRidden = 0;
+  int numDefunctRidden =
+      0; // These two num riddens are not stored in the firebase
+  int numSeasonalRidden = 0; // Calculated by clients
   final int parkID;
   int ridesRidden = 0;
   bool showDefunct = false;
@@ -53,9 +55,12 @@ class FirebasePark {
   }
 
   void updateAttractionCount(
-      {BluehostPark targetPark, List<FirebaseAttraction> userData, List<int> ignored}) {
+      {BluehostPark targetPark,
+      List<FirebaseAttraction> userData,
+      List<int> ignored}) {
     if (targetPark == null) {
       this.numDefunctRidden = 0;
+      this.numSeasonalRidden = 0;
       this.ridesRidden = 0;
       this.totalRides = 0;
       return;
@@ -67,6 +72,7 @@ class FirebasePark {
     int numAttractions = 0;
     int numRidden = 0;
     int numDefunctRidden = 0;
+    int numSeasonalRidden = 0;
 
     for (int i = 0; i < targetPark.attractions.length; i++) {
       BluehostAttraction serverAttraction = targetPark.attractions[i];
@@ -74,15 +80,20 @@ class FirebasePark {
           userData, serverAttraction.attractionID);
 
       // If it's ignored, it doesn't contribute to total ride count
-      if(ignored.contains(serverAttraction.attractionID)) continue;
+      if (ignored.contains(serverAttraction.attractionID)) continue;
 
       // If it's defunct, it only adds to the defunct count if it's been ridden
       if (!serverAttraction.active) {
-
-        if((userAttraction?.numberOfTimesRidden ?? -1) > 0) {
+        if ((userAttraction?.numberOfTimesRidden ?? -1) > 0) {
           numDefunctRidden++;
         }
+        continue;
+      }
 
+      if (serverAttraction.seasonal) {
+        if ((userAttraction?.numberOfTimesRidden ?? -1) > 0) {
+          numSeasonalRidden++;
+        }
         continue;
       }
 
@@ -92,6 +103,7 @@ class FirebasePark {
     }
 
     this.numDefunctRidden = numDefunctRidden;
+    this.numSeasonalRidden = numSeasonalRidden;
     this.ridesRidden = numRidden;
     this.totalRides = numAttractions;
   }

@@ -23,10 +23,15 @@ class AttractionsPage extends StatefulWidget {
   _AttractionsPageState createState() => _AttractionsPageState();
 }
 
-class _AttractionsPageState extends State<AttractionsPage> {
+class _AttractionsPageState extends State<AttractionsPage>
+    with SingleTickerProviderStateMixin {
   final SlidableController _slidableController = SlidableController();
 
   Stream<Event> _parkStream;
+
+  double lastRatio = 0.0;
+
+  /// TODO: ANIMATE AND MANAGE THE STATE OF THESE FOR THE THING
 
   @override
   void initState() {
@@ -52,62 +57,66 @@ class _AttractionsPageState extends State<AttractionsPage> {
 
   Widget _buildAttractionsCard(BuildContext context) {
     return ContentFrame(
-      child: Card(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-        child: StreamBuilder<Event>(
-            stream: _parkStream,
-            builder: (BuildContext context, AsyncSnapshot<Event> stream) {
-              if (!stream.hasData) {
-                return Container(
-                    constraints: BoxConstraints.expand(),
-                    child: CircularProgressIndicator());
-              } else {
-                Map parkDataMap =
-                    jsonDecode(jsonEncode(stream.data.snapshot.value));
-                FirebasePark parkData = FirebasePark.fromMap(parkDataMap);
-                print(
-                    "Successfully recived parkData for attractions list page");
-                return Column(
-                  children: <Widget>[
-                    // Padding used to make sure the iconButton doesn't overlap
-                    // our header.
-                    Padding(
-                      padding: EdgeInsets.only(top: 34),
-                      child: Container(),
-                    ),
+        child: Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+      child: StreamBuilder<Event>(
+          stream: _parkStream,
+          builder: (BuildContext context, AsyncSnapshot<Event> stream) {
+            if (!stream.hasData) {
+              return Container(
+                  constraints: BoxConstraints.expand(),
+                  child: CircularProgressIndicator());
+            } else {
+              Map parkDataMap =
+                  jsonDecode(jsonEncode(stream.data.snapshot.value));
+              FirebasePark parkData = FirebasePark.fromMap(parkDataMap);
+              print("Successfully recived parkData for attractions list page");
 
-                    // Titlebar w/ info and settings buttons
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: _buildTitleBar(context, parkData),
-                    ),
 
-                    // Percentage Complete bar
-                    ParkProgressFullBar(
-                        numRidden: parkData.ridesRidden,
-                        numRides: parkData.totalRides,
-                        defunctRidden: parkData.numDefunctRidden,
-                        showDefunct: parkData.showDefunct,
-                      ),
+              double tempOldRatio = lastRatio;
+              lastRatio = 0.0;
+              if(parkData.totalRides != 0) lastRatio = parkData.ridesRidden / parkData.totalRides;
 
-                    // Listview (Expanded)
-                    Expanded(
-                      child: AttractionsListView(
-                        sourceAttractions: widget.serverParkData.attractions,
-                        parentPark: parkData,
-                        slidableController: _slidableController,
-                        pm: widget.pm,
-                        db: widget.db,
-                        // Data here
-                      )
-                    )
-                  ],
-                );
-              }
-            }),
-      ),
-    );
+              return Column(children: <Widget>[
+                // Padding used to make sure the iconButton doesn't overlap
+                // our header.
+                Padding(
+                  padding: EdgeInsets.only(top: 34),
+                  child: Container(),
+                ),
+
+                // Titlebar w/ info and settings buttons
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: _buildTitleBar(context, parkData),
+                ),
+
+                // Percentage Complete bar
+                FullParkProgressBar(
+                  showDefunct: parkData.showDefunct,
+                  showSeasonal:  parkData.showSeasonal,
+                  totalCount: parkData.totalRides,
+                  riddenCount: parkData.ridesRidden,
+                  defunctCount: parkData.numDefunctRidden,
+                  seasonalCount: parkData.numSeasonalRidden,
+                  oldRatio: tempOldRatio,
+                ),
+
+                // Listview (Expanded)
+
+                Expanded(
+                    child: AttractionsListView(
+                  sourceAttractions: widget.serverParkData.attractions,
+                  parentPark: parkData,
+                  slidableController: _slidableController,
+                  pm: widget.pm,
+                  db: widget.db,
+                  // Data here
+                ))
+              ]);
+            }
+          }),
+    ));
   }
 
   /// Returns the titlebar used in [AttractionListPage]. Contains two buttons,
@@ -135,11 +144,13 @@ class _AttractionsPageState extends State<AttractionsPage> {
           ),
           // Right icon
           /// TODO: REPLACE WITH PROPER SETTINGS PAGE
-          _buildTitleBarIcon(context,
-              icon: FontAwesomeIcons.cog, onTap: () {
-              parkData.incrementorEnabled = !parkData.incrementorEnabled;
-              widget.db.setEntryAtPath(path: DatabasePath.PARKS, key: parkData.parkID.toString(), payload: parkData.toMap());
-            })
+          _buildTitleBarIcon(context, icon: FontAwesomeIcons.cog, onTap: () {
+            parkData.incrementorEnabled = !parkData.incrementorEnabled;
+            widget.db.setEntryAtPath(
+                path: DatabasePath.PARKS,
+                key: parkData.parkID.toString(),
+                payload: parkData.toMap());
+          })
         ],
       )),
     );
