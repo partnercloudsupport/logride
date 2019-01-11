@@ -73,8 +73,8 @@ class _AttractionsListViewState extends State<AttractionsListView> {
     Map<String, List<BluehostAttraction>> returnMap = Map();
 
     if (_hasActive) returnMap["Active"] = activeList;
-    if (_hasSeasonal) returnMap["Seasonal"] = seasonalList;
-    if (_hasDefunct) returnMap["Defunct"] = defunctList;
+    if (_hasSeasonal && widget.parentPark.showSeasonal) returnMap["Seasonal"] = seasonalList;
+    if (_hasDefunct && widget.parentPark.showDefunct) returnMap["Defunct"] = defunctList;
 
     // Strings are used as headers for the list. These are checked for in the
     // Build functions for the listview.
@@ -85,13 +85,13 @@ class _AttractionsListViewState extends State<AttractionsListView> {
       fullList.addAll(activeList);
     }
 
-    if (_hasSeasonal) {
+    if (_hasSeasonal && widget.parentPark.showSeasonal) {
       headedList.add("Seasonal");
       headedList.addAll(seasonalList);
       fullList.addAll(seasonalList);
     }
 
-    if (_hasDefunct) {
+    if (_hasDefunct && widget.parentPark.showDefunct) {
       headedList.add("Defunct");
       headedList.addAll(defunctList);
       fullList.addAll(seasonalList);
@@ -128,12 +128,12 @@ class _AttractionsListViewState extends State<AttractionsListView> {
   @override
   void initState() {
     super.initState();
-
-    displayLists = _buildPreparedList();
+    //displayLists = _buildPreparedList();
   }
 
   @override
   Widget build(BuildContext context) {
+    displayLists = _buildPreparedList();
     return ClipRRect(
         borderRadius: BorderRadius.only(
             bottomLeft: Radius.circular(15), bottomRight: Radius.circular(15)),
