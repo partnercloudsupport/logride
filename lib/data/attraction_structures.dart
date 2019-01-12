@@ -5,13 +5,18 @@ class FirebaseAttraction {
   DateTime firstRideDate = DateTime.fromMillisecondsSinceEpoch(0);
   DateTime lastRideDate = DateTime.fromMillisecondsSinceEpoch(0);
 
+  // Note: This variable is NOT assigned or stored in the standard firebase map
+  // This is from a different portion, and is managed by the attraction list
+  // page's logic
+  bool ignored = false;
+
   FirebaseAttraction({this.rideID});
 
   factory FirebaseAttraction.fromMap(Map<String, dynamic> map){
     FirebaseAttraction newAttraction = FirebaseAttraction(rideID: map["rideID"]);
     newAttraction.numberOfTimesRidden = map["numberOfTimesRidden"];
-    newAttraction.firstRideDate = map["firstRideDate"];
-    newAttraction.lastRideDate = map["lastRideDate"];
+    newAttraction.firstRideDate = DateTime.fromMillisecondsSinceEpoch((map["firstRideDate"] as num).toInt());
+    newAttraction.lastRideDate = DateTime.fromMillisecondsSinceEpoch((map["lastRideDate"] as num).toInt());
     return newAttraction;
   }
 
@@ -34,6 +39,7 @@ class BluehostAttraction {
   int yearOpen;
   int yearClosed;
   bool active;
+  bool seasonal;
   bool scoreCard;
   String manufacturer;
   String additionalContributors;
@@ -79,6 +85,7 @@ class BluehostAttraction {
     newAttraction.yearClosed = num.parse(json["YearClosed"]);
 
     newAttraction.active = (json["Active"] == "1");
+    newAttraction.seasonal = (json["Seasonal"] == "1");
     newAttraction.scoreCard = (json["ScoreCard"] == "1");
     newAttraction.manufacturer = json["Manufacturer"];
     newAttraction.additionalContributors = json["additionalContributors"];

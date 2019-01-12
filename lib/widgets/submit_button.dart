@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
 class SubmitButton extends StatelessWidget {
-  SubmitButton({this.text, this.onTap});
+  SubmitButton({this.text, this.onTap, this.insets});
 
   final String text;
   final Function onTap;
+  final EdgeInsets insets;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +25,7 @@ class SubmitButton extends StatelessWidget {
           highlightColor: Colors.transparent,
           splashColor: Theme.of(context).accentColor,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 42),
+            padding: insets ?? const EdgeInsets.symmetric(vertical: 10, horizontal: 42),
             child: Text(text.toUpperCase(), style: TextStyle(
               color: Colors.white,
               fontSize: 25.0

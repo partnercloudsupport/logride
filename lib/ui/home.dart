@@ -206,22 +206,29 @@ class _HomePageState extends State<HomePage> {
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Center(
-              child: Card(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        CircularProgressIndicator(),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: Text("Loading Park Information..."),
-                        )
-                      ],
-                    ),
-                  )));
+              child: Container(
+                width: MediaQuery.of(context).size.width * 2 / 5,
+                child: Card(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15)),
+                      child: AspectRatio(
+                          aspectRatio: 1,
+                          child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            CircularProgressIndicator(),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Text("Loading Park Information...", textAlign: TextAlign.center,),
+                            )
+                          ],
+                        ),
+                      )),
+                ),
+              ));
         } else if (snapshot.data) {
           // Since data is a bool, if it's true, we'll do this thing
           return ContentFrame(

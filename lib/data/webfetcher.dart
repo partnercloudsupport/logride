@@ -25,6 +25,7 @@ class WebFetcher {
     final response = await http.get(_serverURLS[WebLocation.ALL_PARKS]);
 
     if(response.statusCode == 200){
+
       List<dynamic> decoded = json.decode(response.body);
 
       for(int i = 0; i < decoded.length; i++){
@@ -44,6 +45,7 @@ class WebFetcher {
       List<dynamic> decoded = jsonDecode(response.body);
       for(int i =0; i < decoded.length; i++){
         BluehostAttraction newAttraction = BluehostAttraction.fromJson(decoded[i]);
+        _fixBluehostText(newAttraction);
 
         // Get our type label, or leave it blank if it doesn't exist
         newAttraction.typeLabel = rideTypes[newAttraction.rideType] ?? "";
@@ -59,6 +61,8 @@ class WebFetcher {
     final response = await http.get(_serverURLS[WebLocation.SPECIFIC_ATTRACTION] + attractionID.toString());
 
     if(response.statusCode == 200){
+      BluehostAttraction createdAttraction = BluehostAttraction.fromJson(jsonDecode(response.body));
+      _fixBluehostText(createdAttraction);
       return BluehostAttraction.fromJson(jsonDecode(response.body));
     }
 
@@ -78,4 +82,22 @@ class WebFetcher {
 
     return null;
   }
+}
+
+String rosettaStoneDecode(String input, {bool insertAmpersands = true, bool insertSpaces = true}){
+  String result = input;
+  if(insertAmpersands) result = result.replaceAll("!A?", "&");
+  if(insertSpaces) result = result.replaceAll("_", " ");
+
+  return result;
+}
+
+/// This is used to swap specific characters out that couldn't be used in standard web GET requests.
+/// These characters were swapped by the original app during the submission process, which used
+/// GET requests. These alternate characters were stored in the database. Now we
+/// must filter them out for the text to be readable.
+void _fixBluehostText(BluehostAttraction toFix){
+  if(toFix.attractionName != null) toFix.attractionName = rosettaStoneDecode(toFix.attractionName);
+  if(toFix.manufacturer != null) toFix.manufacturer = rosettaStoneDecode(toFix.manufacturer, insertSpaces: false);
+  return;
 }
