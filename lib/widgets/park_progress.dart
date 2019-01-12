@@ -65,8 +65,8 @@ class FullParkProgressBar extends StatelessWidget {
           // Background bar, full width
           // Text overlay - Progress
           _buildProgressLabel(context),
-          showDefunct ? _buildDefunctLabel(context) : Container(),
-          showSeasonal ? _buildSeasonalLabel(context) : Container()
+          showDefunct && (defunctCount != 0) ? _buildDefunctLabel(context) : Container(),
+          showSeasonal && (seasonalCount != 0) ? _buildSeasonalLabel(context) : Container()
         ],
       ),
     );
