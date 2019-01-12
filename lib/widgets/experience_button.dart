@@ -46,9 +46,9 @@ class ExperienceButton extends StatelessWidget {
     if (!ignored) {
       buttonColor = Theme.of(context).primaryColor;
       if (data.numberOfTimesRidden > 0) {
-        // Plus button is displayed when there's at least one count
+        // Plus button is displayed when there's at least one count and incrementor isn't on
         iconWidget = Icon(
-          FontAwesomeIcons.solidCheckCircle,
+          parentPark.incrementorEnabled ? FontAwesomeIcons.plusCircle : FontAwesomeIcons.solidCheckCircle,
           color: buttonColor,
           size: 32.0,
         );
@@ -103,7 +103,7 @@ class ExperienceButton extends StatelessWidget {
           ),
           onTap: () => interactHandler(ExperienceAction.ADD, data),
           //onDoubleTap: () => interactHandler(ExperienceAction.SET, data),
-          onLongPress: () => interactHandler(ExperienceAction.REMOVE, data),
+          onLongPress: () => interactHandler(ExperienceAction.SET, data), // If a user wants to remove a value, they have to set it. I doubt they use the single remove often.
         ),
       ),
     );
