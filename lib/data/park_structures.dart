@@ -9,9 +9,8 @@ class FirebasePark {
   String location = "";
   String name = "";
   int numberOfCheckIns = 0;
-  int numDefunctRidden =
-      0; // These two num riddens are not stored in the firebase
-  int numSeasonalRidden = 0; // Calculated by clients
+  int numDefunctRidden = 0;
+  int numSeasonalRidden = 0;
   final int parkID;
   int ridesRidden = 0;
   bool showDefunct = false;
@@ -31,6 +30,8 @@ class FirebasePark {
     newPark.name = data["name"];
     newPark.numberOfCheckIns = data["numberOfCheckIns"];
     newPark.ridesRidden = data["ridesRidden"];
+    newPark.numDefunctRidden = data["defunctRidden"] ?? 0;
+    newPark.numSeasonalRidden = data["seasonalRidden"] ?? 0;
     newPark.showDefunct = data["showDefunct"];
     newPark.showSeasonal = data["showSeasonal"] ?? true;
     newPark.totalRides = data["totalRides"];
@@ -48,6 +49,8 @@ class FirebasePark {
       "name": this.name,
       "numberOfCheckIns": this.numberOfCheckIns,
       "ridesRidden": this.ridesRidden,
+      "defunctRidden": this.numDefunctRidden,
+      "seasonalRidden": this.numSeasonalRidden,
       "showDefunct": this.showDefunct,
       "showSeasonal": this.showSeasonal,
       "totalRides": this.totalRides

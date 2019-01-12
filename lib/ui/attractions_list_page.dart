@@ -31,8 +31,6 @@ class _AttractionsPageState extends State<AttractionsPage>
 
   double lastRatio = 0.0;
 
-  /// TODO: ANIMATE AND MANAGE THE STATE OF THESE FOR THE THING
-
   @override
   void initState() {
     _parkStream = widget.db.getLiveEntryAtPath(
@@ -72,10 +70,10 @@ class _AttractionsPageState extends State<AttractionsPage>
               FirebasePark parkData = FirebasePark.fromMap(parkDataMap);
               print("Successfully recived parkData for attractions list page");
 
-
               double tempOldRatio = lastRatio;
               lastRatio = 0.0;
-              if(parkData.totalRides != 0) lastRatio = parkData.ridesRidden / parkData.totalRides;
+              if (parkData.totalRides != 0)
+                lastRatio = parkData.ridesRidden / parkData.totalRides;
 
               return Column(children: <Widget>[
                 // Padding used to make sure the iconButton doesn't overlap
@@ -93,13 +91,13 @@ class _AttractionsPageState extends State<AttractionsPage>
 
                 // Percentage Complete bar
                 FullParkProgressBar(
+                  oldRatio: tempOldRatio,
+                  showSeasonal: parkData.showSeasonal,
                   showDefunct: parkData.showDefunct,
-                  showSeasonal:  parkData.showSeasonal,
                   totalCount: parkData.totalRides,
                   riddenCount: parkData.ridesRidden,
-                  defunctCount: parkData.numDefunctRidden,
                   seasonalCount: parkData.numSeasonalRidden,
-                  oldRatio: tempOldRatio,
+                  defunctCount: parkData.numDefunctRidden,
                 ),
 
                 // Listview (Expanded)
