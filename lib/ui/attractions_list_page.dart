@@ -3,6 +3,8 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:firebase_database/firebase_database.dart';
+import '../animations/slide_up_transition.dart';
+import '../ui/details_page.dart';
 import '../ui/standard_page_structure.dart';
 import '../data/parks_manager.dart';
 import '../data/park_structures.dart';
@@ -130,7 +132,21 @@ class _AttractionsPageState extends State<AttractionsPage>
         children: <Widget>[
           // Left icon
           _buildTitleBarIcon(context,
-              icon: FontAwesomeIcons.info, onTap: () => print("Info")),
+              icon: FontAwesomeIcons.info,
+              onTap: () => Navigator.push(
+                  context,
+                  SlideUpRoute(
+                      widget: DetailsPage(
+                    detailsMap: {
+                      DetailsType.MAP_CONTENT: {
+                        widget.serverParkData.parkName: widget.serverParkData.location
+                      }
+                    },
+                    headerText: {
+                      HeaderText.TITLE: widget.serverParkData.parkName,
+                      HeaderText.TYPE: widget.serverParkData.type
+                    },
+                  )))),
           // Label
           Expanded(
             child: AutoSizeText(
