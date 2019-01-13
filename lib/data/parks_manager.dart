@@ -84,6 +84,10 @@ class ParksManager {
     db.removeEntryFromPath(path: DatabasePath.PARKS, key: targetID.toString());
     // And remove the 'filled' tag from the appropriate bluehost park
     getBluehostParkByID(allParksInfo, targetID).filled = false;
+    // And remove the attraction data for the user's parks
+    db.removeEntryFromPath(path: DatabasePath.ATTRACTIONS, key: targetID.toString());
+    // And remove ignored data for the user's parks
+    db.removeEntryFromPath(path: DatabasePath.IGNORE, key: targetID.toString());
   }
 
   void addParkToFavorites(num targetID) async {
