@@ -1,7 +1,9 @@
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:transparent_image/transparent_image.dart';
+import 'package:photo_view/photo_view.dart';
+import '../widgets/hero_network_image.dart';
+import '../animations/fade_in_widget.dart';
 
 class FirebaseAttractionImage extends StatefulWidget {
   FirebaseAttractionImage({this.parkID, this.attractionID});
@@ -66,19 +68,58 @@ class _FirebaseAttractionImageState extends State<FirebaseAttractionImage> {
             );
           } else {
             return Stack(children: <Widget>[
-              Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(_foregroundColor),)),
+              Center(
+                  child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(_foregroundColor),
+              )),
               Container(
-                constraints: BoxConstraints.expand(),
-                child: FadeInImage.memoryNetwork(
-                  placeholder: kTransparentImage,
-                  image: url.data,
-                  fit: BoxFit.cover,
-                ),
-              )
+                  constraints: BoxConstraints.expand(),
+                  child: HeroNetworkImage(
+                    url: url.data,
+                    fit: BoxFit.cover,
+                    onTap: () => _onImageTap(url.data),
+                  ))
             ]);
           }
         },
       ),
     );
+  }
+
+  void _onImageTap(String url){
+    Navigator.of(context).push(MaterialPageRoute<void>(
+        maintainState: true,
+        builder: (BuildContext context) {
+          return Scaffold(
+              body: Stack(children: [
+                PhotoView(
+                  imageProvider: NetworkImage(url),
+                  heroTag: url,
+                  transitionOnUserGestures: true,
+                  gaplessPlayback: true,
+                ),
+                FadeInWidget(
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Material(
+                        color: Theme.of(context).primaryColor,
+                        borderRadius: BorderRadius.circular(24.0),
+                        child: IconButton(
+                          alignment: Alignment.topLeft,
+                          icon: Icon(
+                            FontAwesomeIcons.arrowLeft,
+                            color: Colors.white,
+                            size: 32.0,
+                          ),
+                          onPressed: () =>
+                              Navigator.of(context).pop(),
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              ]));
+        }));
   }
 }
