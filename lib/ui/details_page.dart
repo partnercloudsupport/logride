@@ -5,7 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:latlong/latlong.dart' as oldLatLng;
 import '../data/fbdb_manager.dart';
 import '../widgets/content_frame.dart';
-import '../widgets/side-strike-text.dart';
+import '../widgets/side_strike_text.dart';
 import '../widgets/embedded_map_entry.dart';
 import '../ui/standard_page_structure.dart';
 import '../widgets/stored_image_widget.dart';
