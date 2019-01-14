@@ -6,7 +6,7 @@ const API_KEY = "AIzaSyDA8ZiyR1TeQtQHWEKj5T__5U4FJyya5V8";
 class EmbeddedMapEntry extends StatefulWidget {
   EmbeddedMapEntry({this.markers, this.center});
 
-  final Map<String, LatLng> markers;
+  final Map<List<String>, LatLng> markers;
   final LatLng center;
 
   @override
@@ -19,10 +19,10 @@ class _EmbeddedMapEntryState extends State<EmbeddedMapEntry> {
 
   void _onMapCreated(GoogleMapController controller){
     mapController = controller;
-    widget.markers.forEach((title, position){
+    widget.markers.forEach((textData, position){
       mapController.addMarker(MarkerOptions(
           position: position,
-          infoWindowText: InfoWindowText(title, ""),
+          infoWindowText: InfoWindowText(textData[0], textData[1]),
           icon: BitmapDescriptor.defaultMarker
       ));
     });
@@ -34,7 +34,7 @@ class _EmbeddedMapEntryState extends State<EmbeddedMapEntry> {
     return GoogleMap(
         onMapCreated: _onMapCreated,
         options: GoogleMapOptions(
-          cameraPosition: CameraPosition(target: widget.center, zoom: 14.0),
+          cameraPosition: CameraPosition(target: widget.center, zoom: 15.0),
           mapType: MapType.satellite
         ),
     );

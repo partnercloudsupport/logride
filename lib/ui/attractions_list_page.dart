@@ -139,7 +139,14 @@ class _AttractionsPageState extends State<AttractionsPage>
                       widget: DetailsPage(
                     detailsMap: {
                       DetailsType.MAP_CONTENT: {
-                        widget.serverParkData.parkName: widget.serverParkData.location
+                        [
+                          widget.serverParkData.parkName,
+                          widget.serverParkData.type
+                        ]: widget.serverParkData.location
+                      },
+                      DetailsType.MEDIA_CONTENT: {
+                        "parkID": 135,
+                        "attractionID": 206
                       }
                     },
                     headerText: {

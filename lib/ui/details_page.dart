@@ -8,12 +8,13 @@ import '../widgets/content_frame.dart';
 import '../widgets/side-strike-text.dart';
 import '../widgets/embedded_map_entry.dart';
 import '../ui/standard_page_structure.dart';
+import '../widgets/stored_image_widget.dart';
 
 enum HeaderText { TITLE, TYPE }
 
 enum DetailsType {
-  MEDIA_CONTENT,
-  MAP_CONTENT,
+  MEDIA_CONTENT, // done
+  MAP_CONTENT, // done
   OPENING_DATE,
   STATUS,
   CLOSING_DATE,
@@ -70,6 +71,9 @@ class _DetailsPageState extends State<DetailsPage> {
                 (widget.detailsMap.containsKey(DetailsType.MAP_CONTENT))
                     ? _buildMapSection(context)
                     : Container(),
+                (widget.detailsMap.containsKey(DetailsType.MEDIA_CONTENT))
+                    ? _buildMediaSection(context)
+                    : Container(),
                 // Status Section
                 // Further Details Section
               ],
@@ -86,10 +90,13 @@ class _DetailsPageState extends State<DetailsPage> {
         AutoSizeText(
           widget.headerText[HeaderText.TITLE] ?? "Placeholder Title",
           maxLines: 2,
+          style: Theme.of(context).textTheme.headline,
         ),
         SideStrikeText(
-          bodyText:
-              Text(widget.headerText[HeaderText.TYPE] ?? "Placeholder Type"),
+          bodyText: Text(
+            widget.headerText[HeaderText.TYPE] ?? "Placeholder Type",
+            textScaleFactor: 1.25,
+          ),
           strikeColor: Theme.of(context).primaryColor,
           strikeThickness: 4.0,
         )
@@ -99,15 +106,41 @@ class _DetailsPageState extends State<DetailsPage> {
 
   Widget _buildMapSection(BuildContext context) {
     // The detailsMap for map content should be a map of
-    Map<String, oldLatLng.LatLng> data = widget.detailsMap[DetailsType.MAP_CONTENT];
+    Map<List<String>, oldLatLng.LatLng> data =
+        widget.detailsMap[DetailsType.MAP_CONTENT];
 
-    Map<String, LatLng> markers = data.map((key, value) => MapEntry<String, LatLng>(key, _convertLatLng(value)));
+    Map<List<String>, LatLng> markers = data.map((key, value) =>
+        MapEntry<List<String>, LatLng>(key, _convertLatLng(value)));
 
     return Container(
       height: 250,
-      child: EmbeddedMapEntry(
-        center: markers.entries.first.value,
-        markers: markers,
+      child: _wrapAsWindow(
+        EmbeddedMapEntry(
+          center: markers.entries.first.value,
+          markers: markers,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMediaSection(BuildContext context) {
+    Map mediaData = widget.detailsMap[DetailsType.MEDIA_CONTENT];
+    assert(mediaData.containsKey("attractionID"));
+    assert(mediaData.containsKey("parkID"));
+    return Container(
+        height: 250,
+        child: _wrapAsWindow(FirebaseAttractionImage(
+          attractionID: mediaData["attractionID"],
+          parkID: mediaData["parkID"],
+        )));
+  }
+
+  Widget _wrapAsWindow(Widget child) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(15.0),
+        child: child,
       ),
     );
   }
