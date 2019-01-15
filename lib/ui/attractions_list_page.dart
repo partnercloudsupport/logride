@@ -59,63 +59,66 @@ class _AttractionsPageState extends State<AttractionsPage>
     return ContentFrame(
         child: Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-      child: StreamBuilder<Event>(
-          stream: _parkStream,
-          builder: (BuildContext context, AsyncSnapshot<Event> stream) {
-            if (!stream.hasData) {
-              return Container(
-                  constraints: BoxConstraints.expand(),
-                  child: CircularProgressIndicator());
-            } else {
-              Map parkDataMap =
-                  jsonDecode(jsonEncode(stream.data.snapshot.value));
-              FirebasePark parkData = FirebasePark.fromMap(parkDataMap);
-              print("Successfully recived parkData for attractions list page");
+      child: Material(
+        color: Colors.transparent,
+        child: StreamBuilder<Event>(
+            stream: _parkStream,
+            builder: (BuildContext context, AsyncSnapshot<Event> stream) {
+              if (!stream.hasData) {
+                return Container(
+                    constraints: BoxConstraints.expand(),
+                    child: CircularProgressIndicator());
+              } else {
+                Map parkDataMap =
+                    jsonDecode(jsonEncode(stream.data.snapshot.value));
+                FirebasePark parkData = FirebasePark.fromMap(parkDataMap);
+                print("Successfully recived parkData for attractions list page");
 
-              double tempOldRatio = lastRatio;
-              lastRatio = 0.0;
-              if (parkData.totalRides != 0)
-                lastRatio = parkData.ridesRidden / parkData.totalRides;
+                double tempOldRatio = lastRatio;
+                lastRatio = 0.0;
+                if (parkData.totalRides != 0)
+                  lastRatio = parkData.ridesRidden / parkData.totalRides;
 
-              return Column(children: <Widget>[
-                // Padding used to make sure the iconButton doesn't overlap
-                // our header.
-                Padding(
-                  padding: EdgeInsets.only(top: 34),
-                  child: Container(),
-                ),
+                return Column(children: <Widget>[
+                  // Padding used to make sure the iconButton doesn't overlap
+                  // our header.
+                  Padding(
+                    padding: EdgeInsets.only(top: 34),
+                    child: Container(),
+                  ),
 
-                // Titlebar w/ info and settings buttons
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: _buildTitleBar(context, parkData),
-                ),
+                  // Titlebar w/ info and settings buttons
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: _buildTitleBar(context, parkData),
+                  ),
 
-                // Percentage Complete bar
-                FullParkProgressBar(
-                  oldRatio: tempOldRatio,
-                  showSeasonal: parkData.showSeasonal,
-                  showDefunct: parkData.showDefunct,
-                  totalCount: parkData.totalRides,
-                  riddenCount: parkData.ridesRidden,
-                  seasonalCount: parkData.numSeasonalRidden,
-                  defunctCount: parkData.numDefunctRidden,
-                ),
+                  // Percentage Complete bar
+                  FullParkProgressBar(
+                    oldRatio: tempOldRatio,
+                    showSeasonal: parkData.showSeasonal,
+                    showDefunct: parkData.showDefunct,
+                    totalCount: parkData.totalRides,
+                    riddenCount: parkData.ridesRidden,
+                    seasonalCount: parkData.numSeasonalRidden,
+                    defunctCount: parkData.numDefunctRidden,
+                  ),
 
-                // Listview (Expanded)
+                  // Listview (Expanded)
 
-                Expanded(
-                    child: AttractionsListView(
-                  sourceAttractions: widget.serverParkData.attractions,
-                  parentPark: parkData,
-                  slidableController: _slidableController,
-                  pm: widget.pm,
-                  db: widget.db,
-                  // Data here
-                ))
-              ]);
-            }
-          }),
+                  Expanded(
+                      child: AttractionsListView(
+                    sourceAttractions: widget.serverParkData.attractions,
+                    parentPark: parkData,
+                    slidableController: _slidableController,
+                    pm: widget.pm,
+                    db: widget.db,
+                    // Data here
+                  ))
+                ]);
+              }
+            }),
+      ),
     ));
   }
 
@@ -144,10 +147,10 @@ class _AttractionsPageState extends State<AttractionsPage>
                           widget.serverParkData.type
                         ]: widget.serverParkData.location
                       },
-                      DetailsType.MEDIA_CONTENT: {
+                      /*DetailsType.MEDIA_CONTENT: {
                         "parkID": 135,
                         "attractionID": 206
-                      }
+                      }*/
                     },
                     headerText: {
                       HeaderText.TITLE: widget.serverParkData.parkName,
@@ -182,9 +185,8 @@ class _AttractionsPageState extends State<AttractionsPage>
   Widget _buildTitleBarIcon(BuildContext context,
       {IconData icon, Function onTap}) {
     num iconSize = 26.0;
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
-      behavior: HitTestBehavior.opaque,
       child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: Icon(
