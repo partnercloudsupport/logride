@@ -75,6 +75,7 @@ class _DetailsPageState extends State<DetailsPage> {
                     ? _buildMediaSection(context)
                     : Container(),
                 // Status Section
+                _buildStatusSection(context)
                 // Further Details Section
               ],
             ),
@@ -133,6 +134,76 @@ class _DetailsPageState extends State<DetailsPage> {
           attractionID: mediaData["attractionID"],
           parkID: mediaData["parkID"],
         )));
+  }
+
+  /// The status section's data is recieved as three keys - Opening, Closed, and Status
+  /// The status is compressed into a double digit - tens place containing the seasonal bool
+  /// and the ones place containing the active bool.
+  /// Opening is always displayed if present, and closed is displayed only when active is false
+  Widget _buildStatusSection(BuildContext context) {
+    int openingYear = widget.detailsMap[DetailsType.OPENING_DATE] ?? 0;
+    int closingYear = widget.detailsMap[DetailsType.CLOSING_DATE] ?? 0;
+    int onesPlace = (widget.detailsMap[DetailsType.STATUS] ?? 0) %
+        10; // Ones place - active/defunct
+    int tensPlace = (widget.detailsMap[DetailsType.STATUS] ?? 0) ~/
+        10; // tens place - seasonal/normal
+    bool active = (onesPlace == 1);
+    bool seasonal = (tensPlace == 1);
+
+    Widget _leftStatus = _buildYearStatusColumn(openingYear, "Opening Year");
+
+    Widget _rightStatus;
+
+    if (!active) {
+      _rightStatus = _buildYearStatusColumn(closingYear, "Closing Year");
+    } else if (seasonal) {
+      _rightStatus = _buildAttractionOperationColumn("Seasonal Operation");
+    } else {
+      _rightStatus = _buildAttractionOperationColumn("Active Operation");
+    }
+
+    Widget _statusContent = Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[_leftStatus, _rightStatus],
+    );
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Divider(),
+        _statusContent,
+        Divider(),
+      ],
+    );
+  }
+
+  /// If year == 0, we'll display "unknown" as our year
+  Widget _buildYearStatusColumn(int year, String bottom) {
+    String topString = (year == 0) ? "Unknown" : year.toString();
+
+    return Column(
+      children: <Widget>[
+        Text(
+          topString,
+          textScaleFactor: 1.8,
+        ),
+        Text(
+          bottom,
+          textScaleFactor: 1.0,
+        )
+      ],
+    );
+  }
+
+  Widget _buildAttractionOperationColumn(String display) {
+    display = display.replaceAll(" ", "\n");
+    return Text(
+      display,
+      textScaleFactor: 1.4,
+      textAlign: TextAlign.center,
+    );
   }
 
   Widget _wrapAsWindow(Widget child) {

@@ -147,10 +147,6 @@ class _AttractionsPageState extends State<AttractionsPage>
                           widget.serverParkData.type
                         ]: widget.serverParkData.location
                       },
-                      /*DetailsType.MEDIA_CONTENT: {
-                        "parkID": 135,
-                        "attractionID": 206
-                      }*/
                     },
                     headerText: {
                       HeaderText.TITLE: widget.serverParkData.parkName,

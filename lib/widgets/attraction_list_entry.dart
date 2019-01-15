@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../animations/slide_up_transition.dart';
 import '../data/attraction_structures.dart';
 import '../data/park_structures.dart';
 import '../widgets/experience_button.dart';
+import '../ui/details_page.dart';
 
 class AttractionListEntry extends StatefulWidget {
   AttractionListEntry(
@@ -124,7 +126,35 @@ class AttractionListState extends State<AttractionListEntry> {
   }
 
   void _onInfoTap() {
-    print(
-        "NOT YET IMPLEMENTED: Thomas, open an attraction panel for ${widget.attractionData.attractionName}");
+
+    // A compressed status contains two digits, the tenth place containing the
+    // seasonal bool for the attraction and the first place holding the active
+    // bool for the attraction.
+    int compressedStatus = widget.attractionData.seasonal ? 10 : 0;
+    compressedStatus += widget.attractionData.active ? 1 : 0;
+
+    Navigator.push(
+      context,
+      SlideUpRoute(
+        widget: DetailsPage(
+          headerText: {
+            HeaderText.TITLE: widget.attractionData.attractionName,
+            HeaderText.TYPE: widget.attractionData.typeLabel
+          },
+          detailsMap: {
+            DetailsType.MEDIA_CONTENT: {
+              "attractionID": widget.attractionData.attractionID,
+              "parkID": widget.attractionData.parkID
+            },
+            DetailsType.OPENING_DATE: widget.attractionData.yearOpen,
+            DetailsType.STATUS: compressedStatus,
+            DetailsType.CLOSING_DATE: widget.attractionData.yearClosed,
+            DetailsType.FURTHER_DETAILS: <String, Widget>{
+              "Test": Icon(Icons.check)
+            }
+          },
+        )
+      )
+    );
   }
 }
