@@ -209,9 +209,14 @@ class _DetailsPageState extends State<DetailsPage> {
   Widget _wrapAsWindow(Widget child) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(15.0),
-        child: child,
+      child: Container(
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15.0),
+            boxShadow: [BoxShadow(color: Colors.grey[300], offset: Offset(0, 4), blurRadius: 5)]),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(15.0),
+          child: child,
+        ),
       ),
     );
   }
