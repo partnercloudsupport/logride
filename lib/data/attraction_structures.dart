@@ -57,6 +57,7 @@ class BluehostAttraction {
   num inversions;
   num cost;
   num previousParkID;
+  String previousParkLabel = "";
   String photoArtist;
   String photoLink;
   String ccType;

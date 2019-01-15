@@ -44,7 +44,7 @@ class ParksManager {
         // the attractions != null
         wf
             .getAllAttractionData(
-                parkID: targetPark.id, rideTypes: attractionTypes)
+                parkID: targetPark.id, rideTypes: attractionTypes, allParks: allParksInfo)
             .then((list) {
           targetPark.attractions = list;
         });
@@ -66,7 +66,7 @@ class ParksManager {
     // Get our targeted park, calculate ride
     BluehostPark targetPark = getBluehostParkByID(allParksInfo, targetParkID);
     targetPark.attractions = await wf.getAllAttractionData(
-        parkID: targetParkID, rideTypes: attractionTypes);
+        parkID: targetParkID, rideTypes: attractionTypes, allParks: allParksInfo);
 
     FirebasePark translated = targetPark.toNewFirebaseEntry();
 
