@@ -72,7 +72,8 @@ class _AttractionsPageState extends State<AttractionsPage>
                 Map parkDataMap =
                     jsonDecode(jsonEncode(stream.data.snapshot.value));
                 FirebasePark parkData = FirebasePark.fromMap(parkDataMap);
-                print("Successfully recived parkData for attractions list page");
+                print(
+                    "Successfully recived parkData for attractions list page");
 
                 double tempOldRatio = lastRatio;
                 lastRatio = 0.0;
@@ -134,25 +135,11 @@ class _AttractionsPageState extends State<AttractionsPage>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           // Left icon
-          _buildTitleBarIcon(context,
-              icon: FontAwesomeIcons.info,
-              onTap: () => Navigator.push(
-                  context,
-                  SlideUpRoute(
-                      widget: DetailsPage(
-                    detailsMap: {
-                      DetailsType.MAP_CONTENT: {
-                        [
-                          widget.serverParkData.parkName,
-                          widget.serverParkData.type
-                        ]: widget.serverParkData.location
-                      },
-                    },
-                    headerText: {
-                      HeaderText.TITLE: widget.serverParkData.parkName,
-                      HeaderText.TYPE: widget.serverParkData.type
-                    },
-                  )))),
+          _buildTitleBarIcon(
+            context,
+            icon: FontAwesomeIcons.info,
+            onTap: _openDetailsPane,
+          ),
           // Label
           Expanded(
             child: AutoSizeText(
@@ -191,5 +178,31 @@ class _AttractionsPageState extends State<AttractionsPage>
             size: iconSize,
           )),
     );
+  }
+
+  void _openDetailsPane() {
+    int condensedStatus = widget.serverParkData.active ? 1 : 0;
+    condensedStatus += widget.serverParkData.seasonal ? 10 : 0;
+
+    print(condensedStatus.toString());
+
+    Navigator.push(
+        context,
+        SlideUpRoute(
+            widget: DetailsPage(
+          detailsMap: {
+            DetailsType.MAP_CONTENT: {
+              [widget.serverParkData.parkName, widget.serverParkData.type]:
+                  widget.serverParkData.location
+            },
+            DetailsType.STATUS: condensedStatus,
+            DetailsType.OPENING_DATE: widget.serverParkData.yearOpen,
+            DetailsType.CLOSING_DATE: widget.serverParkData.yearClosed,
+          },
+          headerText: {
+            HeaderText.TITLE: widget.serverParkData.parkName,
+            HeaderText.TYPE: widget.serverParkData.type
+          },
+        )));
   }
 }
