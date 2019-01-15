@@ -143,14 +143,14 @@ class BluehostPark {
     newParkData.parkName = json["Name"];
     newParkData.parkCity = json["City"];
     newParkData.parkCountry = json["Country"];
-    newParkData.active = bool.fromEnvironment(json["Active"]);
+    newParkData.active = (json["Active"] == "1");
     newParkData.yearOpen = num.parse(json["YearOpen"]);
     newParkData.yearClosed = num.parse(json["YearClosed"]);
     newParkData.location =
         LatLng(num.parse(json["Latitude"]), num.parse(json["Longitude"]));
     newParkData.previousNames = json["PreviousNames"];
     newParkData.type = json["Type"];
-    newParkData.seasonal = bool.fromEnvironment(json["Seasonal"]);
+    newParkData.seasonal = (json["Seasonal"] == "1");
     newParkData.website = json["website"];
     newParkData.username = json["userName"];
     newParkData.created = DateTime.parse(json["DateTime_Created"]);
