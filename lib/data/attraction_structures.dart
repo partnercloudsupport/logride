@@ -15,8 +15,11 @@ class FirebaseAttraction {
   factory FirebaseAttraction.fromMap(Map<String, dynamic> map){
     FirebaseAttraction newAttraction = FirebaseAttraction(rideID: map["rideID"]);
     newAttraction.numberOfTimesRidden = map["numberOfTimesRidden"];
-    newAttraction.firstRideDate = DateTime.fromMillisecondsSinceEpoch((map["firstRideDate"] as num).toInt());
-    newAttraction.lastRideDate = DateTime.fromMillisecondsSinceEpoch((map["lastRideDate"] as num).toInt());
+
+    // DateTime is defined as seconds since epoch on iOS. It's milliseconds since epoch on flutter. We need to fix this, so we multiply by 1000
+    newAttraction.firstRideDate = DateTime.fromMillisecondsSinceEpoch(((map["firstRideDate"] as num) * 1000).toInt());
+    newAttraction.lastRideDate = DateTime.fromMillisecondsSinceEpoch(((map["lastRideDate"] as num) * 1000).toInt());
+
     return newAttraction;
   }
 
@@ -24,8 +27,8 @@ class FirebaseAttraction {
     return {
       "rideID": this.rideID,
       "numberOfTimesRidden": this.numberOfTimesRidden,
-      "firstRideDate": this.firstRideDate.millisecondsSinceEpoch,
-      "lastRideDate": this.lastRideDate.millisecondsSinceEpoch,
+      "firstRideDate": this.firstRideDate.millisecondsSinceEpoch / 1000, // Again, milliseconds since epoch -> seconds since epoch
+      "lastRideDate": this.lastRideDate.millisecondsSinceEpoch / 1000,
     };
   }
 }
