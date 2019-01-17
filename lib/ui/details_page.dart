@@ -138,7 +138,7 @@ class _DetailsPageState extends State<DetailsPage> {
         SideStrikeText(
           bodyText: AutoSizeText(
             subtitleText,
-            style: TextStyle(fontSize: 24.0),
+            style: TextStyle(fontSize: 20.0),
           ),
           strikeColor: Theme.of(context).primaryColor,
           strikeThickness: 4.0,
