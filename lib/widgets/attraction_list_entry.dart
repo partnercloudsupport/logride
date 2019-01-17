@@ -134,44 +134,8 @@ class AttractionListState extends State<AttractionListEntry> {
             widget: DetailsPage(
           data: widget.attractionData,
           userData: widget.userData,
+          dateChangeHandler: (first, newTime) =>
+              widget.timeChanged(newTime, widget.userData, first),
         )));
   }
-
-  /*
-  Widget _buildRideWidget(BuildContext context, bool first) {
-    DateTime target =
-        first ? widget.userData.firstRideDate : widget.userData.lastRideDate;
-
-    return InkWell(
-      onTap: () => _showDatePicker(first),
-      child: Text(
-        DateFormat.yMMMMd("en_US").format(target),
-        textAlign: TextAlign.right,
-        style: TextStyle(color: Theme.of(context).primaryColor),
-      ),
-    );
-  }
-
-  void _showDatePicker(bool first) {
-    DateTime target =
-        first ? widget.userData.firstRideDate : widget.userData.lastRideDate;
-    DatePicker.showDatePicker(context,
-        showTitleActions: true,
-        initialYear: target.year,
-        initialMonth: target.month,
-        initialDate: target.day,
-        locale: 'en_US',
-        dateFormat: 'mmm-dd-yyyy', onConfirm: (year, month, date) {
-      DateTime newDateTime = DateTime.utc(year, month, date);
-      widget.timeChanged(newDateTime, widget.userData, first);
-    });
-  }
-}
-
-String _numSecondsToFormattedString(num duration) {
-  return "${duration ~/ 60}m ${duration % 60}s";
-}
-
-String _dollarsFormattedProperly(num input) {
-  return "${NumberFormat.compactCurrency(symbol: "\$").format(input)}";*/
 }
