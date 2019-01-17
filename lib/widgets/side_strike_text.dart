@@ -7,7 +7,7 @@ class SideStrikeText extends StatelessWidget {
       this.strikeThickness = 2.0,
       this.strikePadding = 8.0});
 
-  final Text bodyText;
+  final Widget bodyText;
   final Color strikeColor;
   final double strikeThickness;
   final double strikePadding;

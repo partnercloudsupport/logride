@@ -136,9 +136,9 @@ class _DetailsPageState extends State<DetailsPage> {
           style: Theme.of(context).textTheme.headline,
         ),
         SideStrikeText(
-          bodyText: Text(
+          bodyText: AutoSizeText(
             subtitleText,
-            textScaleFactor: 1.75,
+            style: TextStyle(fontSize: 24.0),
           ),
           strikeColor: Theme.of(context).primaryColor,
           strikeThickness: 4.0,
