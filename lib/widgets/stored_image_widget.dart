@@ -29,8 +29,7 @@ class _FirebaseAttractionImageState extends State<FirebaseAttractionImage> {
 
   @override
   void initState() {
-    _target = _storage
-        .ref()
+    _target = _storage.ref()
         .child(widget.parkID.toString())
         .child(widget.attractionID.toString() + ".jpg");
     super.initState();
@@ -43,7 +42,9 @@ class _FirebaseAttractionImageState extends State<FirebaseAttractionImage> {
       child: FutureBuilder(
         future: _getTargetURL(),
         builder: (BuildContext context, AsyncSnapshot<String> url) {
-          if (!url.hasData) {
+          // If the page 404's, we don't have a URL, and we don't have an image on our firebase.
+          // FirebaseStorage spews an error into the console, and I can't seem to prevent it. but it's ok.
+          if (!url.hasData || url.hasError){
             return Container(
               constraints: BoxConstraints.expand(),
               child: Column(
@@ -86,40 +87,39 @@ class _FirebaseAttractionImageState extends State<FirebaseAttractionImage> {
     );
   }
 
-  void _onImageTap(String url){
+  void _onImageTap(String url) {
     Navigator.of(context).push(MaterialPageRoute<void>(
         maintainState: true,
         builder: (BuildContext context) {
           return Scaffold(
               body: Stack(children: [
-                PhotoView(
-                  imageProvider: NetworkImage(url),
-                  heroTag: url,
-                  transitionOnUserGestures: true,
-                  gaplessPlayback: true,
-                ),
-                FadeInWidget(
-                  child: SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Material(
-                        color: Theme.of(context).primaryColor,
-                        borderRadius: BorderRadius.circular(24.0),
-                        child: IconButton(
-                          alignment: Alignment.topLeft,
-                          icon: Icon(
-                            FontAwesomeIcons.arrowLeft,
-                            color: Colors.white,
-                            size: 32.0,
-                          ),
-                          onPressed: () =>
-                              Navigator.of(context).pop(),
-                        ),
+            PhotoView(
+              imageProvider: NetworkImage(url),
+              heroTag: url,
+              transitionOnUserGestures: true,
+              gaplessPlayback: true,
+            ),
+            FadeInWidget(
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Material(
+                    color: Theme.of(context).primaryColor,
+                    borderRadius: BorderRadius.circular(24.0),
+                    child: IconButton(
+                      alignment: Alignment.topLeft,
+                      icon: Icon(
+                        FontAwesomeIcons.arrowLeft,
+                        color: Colors.white,
+                        size: 32.0,
                       ),
+                      onPressed: () => Navigator.of(context).pop(),
                     ),
                   ),
-                )
-              ]));
+                ),
+              ),
+            )
+          ]));
         }));
   }
 }
