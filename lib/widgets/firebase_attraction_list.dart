@@ -15,7 +15,8 @@ class FirebaseAttractionListView extends StatefulWidget {
       this.parentPark,
       this.ignoreCallback,
       this.experienceHandler,
-      this.countHandler});
+      this.countHandler,
+      this.dateHandler});
 
   final Query attractionQuery;
   final Query ignoreQuery;
@@ -26,6 +27,7 @@ class FirebaseAttractionListView extends StatefulWidget {
   final Function(BluehostAttraction target, bool currentState) ignoreCallback;
   final Function(ExperienceAction, FirebaseAttraction) experienceHandler;
   final Function(List<FirebaseAttraction> userData, List<int> ignoreData) countHandler;
+  final Function(DateTime, FirebaseAttraction, bool) dateHandler;
 
   @override
   _FirebaseAttractionListViewState createState() =>
@@ -165,6 +167,7 @@ class _FirebaseAttractionListViewState
       ignoreCallback: widget.ignoreCallback,
       slidableController: _slidableController,
       userData: attraction,
+      timeChanged: widget.dateHandler,
     );
   }
 

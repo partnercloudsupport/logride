@@ -15,7 +15,8 @@ class AttractionListEntry extends StatefulWidget {
       this.slidableController,
       this.ignoreCallback,
       this.experienceHandler,
-      this.parentPark});
+      this.parentPark,
+      this.timeChanged});
 
   final BluehostAttraction attractionData;
   final FirebaseAttraction userData;
@@ -23,6 +24,7 @@ class AttractionListEntry extends StatefulWidget {
   final SlidableController slidableController;
   final Function(BluehostAttraction, bool) ignoreCallback;
   final Function(ExperienceAction, FirebaseAttraction) experienceHandler;
+  final Function(DateTime, FirebaseAttraction, bool) timeChanged;
 
   @override
   State<StatefulWidget> createState() => AttractionListState();
@@ -126,35 +128,50 @@ class AttractionListState extends State<AttractionListEntry> {
   }
 
   void _onInfoTap() {
-
-    // A compressed status contains two digits, the tenth place containing the
-    // seasonal bool for the attraction and the first place holding the active
-    // bool for the attraction.
-    int compressedStatus = widget.attractionData.seasonal ? 10 : 0;
-    compressedStatus += widget.attractionData.active ? 1 : 0;
-
     Navigator.push(
-      context,
-      SlideUpRoute(
-        widget: DetailsPage(
-          headerText: {
-            HeaderText.TITLE: widget.attractionData.attractionName,
-            HeaderText.TYPE: widget.attractionData.typeLabel
-          },
-          detailsMap: {
-            DetailsType.MEDIA_CONTENT: {
-              "attractionID": widget.attractionData.attractionID,
-              "parkID": widget.attractionData.parkID
-            },
-            DetailsType.OPENING_DATE: widget.attractionData.yearOpen,
-            DetailsType.STATUS: compressedStatus,
-            DetailsType.CLOSING_DATE: widget.attractionData.yearClosed,
-            DetailsType.FURTHER_DETAILS: <String, Widget>{
-              "Test": Icon(Icons.check)
-            }
-          },
-        )
-      )
+        context,
+        SlideUpRoute(
+            widget: DetailsPage(
+          data: widget.attractionData,
+          userData: widget.userData,
+        )));
+  }
+
+  /*
+  Widget _buildRideWidget(BuildContext context, bool first) {
+    DateTime target =
+        first ? widget.userData.firstRideDate : widget.userData.lastRideDate;
+
+    return InkWell(
+      onTap: () => _showDatePicker(first),
+      child: Text(
+        DateFormat.yMMMMd("en_US").format(target),
+        textAlign: TextAlign.right,
+        style: TextStyle(color: Theme.of(context).primaryColor),
+      ),
     );
   }
+
+  void _showDatePicker(bool first) {
+    DateTime target =
+        first ? widget.userData.firstRideDate : widget.userData.lastRideDate;
+    DatePicker.showDatePicker(context,
+        showTitleActions: true,
+        initialYear: target.year,
+        initialMonth: target.month,
+        initialDate: target.day,
+        locale: 'en_US',
+        dateFormat: 'mmm-dd-yyyy', onConfirm: (year, month, date) {
+      DateTime newDateTime = DateTime.utc(year, month, date);
+      widget.timeChanged(newDateTime, widget.userData, first);
+    });
+  }
+}
+
+String _numSecondsToFormattedString(num duration) {
+  return "${duration ~/ 60}m ${duration % 60}s";
+}
+
+String _dollarsFormattedProperly(num input) {
+  return "${NumberFormat.compactCurrency(symbol: "\$").format(input)}";*/
 }

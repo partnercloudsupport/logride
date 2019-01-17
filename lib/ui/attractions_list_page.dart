@@ -190,19 +190,8 @@ class _AttractionsPageState extends State<AttractionsPage>
         context,
         SlideUpRoute(
             widget: DetailsPage(
-          detailsMap: {
-            DetailsType.MAP_CONTENT: {
-              [widget.serverParkData.parkName, widget.serverParkData.type]:
-                  widget.serverParkData.location
-            },
-            DetailsType.STATUS: condensedStatus,
-            DetailsType.OPENING_DATE: widget.serverParkData.yearOpen,
-            DetailsType.CLOSING_DATE: widget.serverParkData.yearClosed,
-          },
-          headerText: {
-            HeaderText.TITLE: widget.serverParkData.parkName,
-            HeaderText.TYPE: widget.serverParkData.type
-          },
+          data: widget.serverParkData,
+          db: widget.db,
         )));
   }
 }

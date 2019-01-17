@@ -124,6 +124,114 @@ class _AttractionsListViewState extends State<AttractionsListView> {
     widget.pm.updateAttractionCount(widget.parentPark, userIgnored, userRides);
   }
 
+  void _experienceCallbackHandler(
+      ExperienceAction action, FirebaseAttraction data) async {
+    switch (action) {
+      case ExperienceAction.SET:
+
+      // You can't set the value if it's just toggleable.
+        if (!widget.parentPark.incrementorEnabled) return;
+
+        int oldValue = data.numberOfTimesRidden ?? 0;
+
+        int result = await showDialog(
+            context: context,
+            builder: (BuildContext context) =>
+                SetExperienceDialogBox(data.numberOfTimesRidden ?? 0));
+
+        if (result == null) return;
+        if (result == data.numberOfTimesRidden) return;
+
+        data.numberOfTimesRidden = result;
+
+        // If our new result isn't zero and we used to be zero, we need to set our first ride date.
+        if(oldValue == 0 && result != 0){
+          data.firstRideDate = DateTime.now();
+        }
+
+        // If we're resetting our progress for this attraction, we're resetting our first ride date and last ride date
+        if(result == 0){
+          data.firstRideDate = DateTime.fromMillisecondsSinceEpoch(0);
+          data.lastRideDate = DateTime.fromMillisecondsSinceEpoch(0);
+        }
+
+        widget.db.setEntryAtPath(
+            path: DatabasePath.ATTRACTIONS,
+            key: widget.parentPark.parkID.toString() +
+                "/" +
+                data.rideID.toString(),
+            payload: data.toMap());
+        break;
+
+      case ExperienceAction.ADD:
+
+      // Use of a transaction here prevents any possible race conditions from occurring
+        widget.db.performTransaction(
+            path: DatabasePath.ATTRACTIONS,
+            key: widget.parentPark.parkID.toString() +
+                "/" +
+                data.rideID.toString(),
+            transactionHandler: (transaction) {
+              // If there's currently no entry in the firebase for this attraction,
+              // our value will be null. In this case, we're relying on our backup
+              // local data.
+              FirebaseAttraction attraction;
+              if (transaction.value == null) {
+                attraction = data;
+              } else {
+                attraction =
+                    FirebaseAttraction.fromMap(Map.from(transaction.value));
+              }
+
+              // If we're not using the incrementor, we'll be toggling the number of times ridden.
+              if (!widget.parentPark.incrementorEnabled) {
+                attraction.numberOfTimesRidden =
+                (attraction.numberOfTimesRidden == 0) ? 1 : 0;
+              } else {
+                attraction.numberOfTimesRidden =
+                    attraction.numberOfTimesRidden + 1;
+              }
+
+              attraction.lastRideDate = DateTime.now();
+              if(attraction.firstRideDate == DateTime.fromMillisecondsSinceEpoch(0))
+                attraction.firstRideDate = DateTime.now();
+
+              // Return it back to the map/json form before giving it back to the transaction
+              transaction.value = attraction.toMap();
+              return transaction;
+            });
+        break;
+
+      /// Technically deprecated, isn't used anywhere in the code
+      case ExperienceAction.REMOVE:
+      // We don't want this going negative.
+        if (data.numberOfTimesRidden > 0) {
+          data.numberOfTimesRidden--;
+          widget.db.setEntryAtPath(
+              path: DatabasePath.ATTRACTIONS,
+              key: widget.parentPark.parkID.toString() +
+                  "/" +
+                  data.rideID.toString(),
+              payload: data.toMap());
+        }
+        break;
+    }
+  }
+
+  void _dateUpdateHandler(DateTime newDate, FirebaseAttraction data, bool first) async{
+    if(first) {
+      data.firstRideDate = newDate;
+    } else {
+      data.lastRideDate = newDate;
+    }
+
+    widget.db.setEntryAtPath(
+      path: DatabasePath.ATTRACTIONS,
+      key: widget.parentPark.parkID.toString()+ "/" + data.rideID.toString(),
+      payload: data.toMap()
+    );
+  }
+
   // Load all
   @override
   void initState() {
@@ -146,87 +254,11 @@ class _AttractionsListViewState extends State<AttractionsListView> {
           ignoreQuery: widget.db.getQueryForUser(
               path: DatabasePath.IGNORE,
               key: widget.parentPark.parkID.toString()),
-          experienceHandler: experienceCallbackHandler,
+          experienceHandler: _experienceCallbackHandler,
           ignoreCallback: _ignoreCallbackHandler,
           countHandler: _updateCountHandler,
+          dateHandler: _dateUpdateHandler,
         ));
   }
 
-  void experienceCallbackHandler(
-      ExperienceAction action, FirebaseAttraction data) async {
-    print("Callback triggered");
-    switch (action) {
-      case ExperienceAction.SET:
-
-        // You can't set the value if it's just toggleable.
-        if (!widget.parentPark.incrementorEnabled) return;
-
-        int result = await showDialog(
-            context: context,
-            builder: (BuildContext context) =>
-                SetExperienceDialogBox(data.numberOfTimesRidden ?? 0));
-
-        if (result == null) return;
-        if (result == data.numberOfTimesRidden) return;
-
-        data.numberOfTimesRidden = result;
-
-        widget.db.setEntryAtPath(
-            path: DatabasePath.ATTRACTIONS,
-            key: widget.parentPark.parkID.toString() +
-                "/" +
-                data.rideID.toString(),
-            payload: data.toMap());
-        break;
-
-      case ExperienceAction.ADD:
-
-        // Use of a transaction here prevents any possible race conditions from occurring
-        widget.db.performTransaction(
-            path: DatabasePath.ATTRACTIONS,
-            key: widget.parentPark.parkID.toString() +
-                "/" +
-                data.rideID.toString(),
-            transactionHandler: (transaction) {
-              // If there's currently no entry in the firebase for this attraction,
-              // our value will be null. In this case, we're relying on our backup
-              // local data.
-              FirebaseAttraction attraction;
-              if (transaction.value == null) {
-                attraction = data;
-              } else {
-                attraction =
-                    FirebaseAttraction.fromMap(Map.from(transaction.value));
-              }
-
-              // If we're not using the incrementor, we'll be toggling the number of times ridden.
-              if (!widget.parentPark.incrementorEnabled) {
-                attraction.numberOfTimesRidden =
-                    (attraction.numberOfTimesRidden == 0) ? 1 : 0;
-              } else {
-                attraction.numberOfTimesRidden =
-                    attraction.numberOfTimesRidden + 1;
-              }
-
-              // Return it back to the map/json form before giving it back to the transaction
-              transaction.value = attraction.toMap();
-              return transaction;
-            });
-        break;
-
-      case ExperienceAction.REMOVE:
-        // TODO - Improve speed of interaction
-        // We don't want this going negative.
-        if (data.numberOfTimesRidden > 0) {
-          data.numberOfTimesRidden--;
-          widget.db.setEntryAtPath(
-              path: DatabasePath.ATTRACTIONS,
-              key: widget.parentPark.parkID.toString() +
-                  "/" +
-                  data.rideID.toString(),
-              payload: data.toMap());
-        }
-        break;
-    }
-  }
 }
