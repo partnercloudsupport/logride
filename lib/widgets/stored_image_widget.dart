@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:photo_view/photo_view.dart';
 import '../widgets/hero_network_image.dart';
 import '../animations/fade_in_widget.dart';
+import '../widgets/back_button.dart';
 
 class FirebaseAttractionImage extends StatefulWidget {
   FirebaseAttractionImage({this.parkID, this.attractionID});
@@ -98,27 +99,10 @@ class _FirebaseAttractionImageState extends State<FirebaseAttractionImage> {
               heroTag: url,
               transitionOnUserGestures: true,
               gaplessPlayback: true,
+              maxScale: PhotoViewComputedScale.covered * 5.0,
+              minScale: PhotoViewComputedScale.contained * 1.0,
             ),
-            FadeInWidget(
-              child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Material(
-                    color: Theme.of(context).primaryColor,
-                    borderRadius: BorderRadius.circular(24.0),
-                    child: IconButton(
-                      alignment: Alignment.topLeft,
-                      icon: Icon(
-                        FontAwesomeIcons.arrowLeft,
-                        color: Colors.white,
-                        size: 32.0,
-                      ),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  ),
-                ),
-              ),
-            )
+            RoundBackButton()
           ]));
         }));
   }
