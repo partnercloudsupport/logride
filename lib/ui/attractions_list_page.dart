@@ -12,6 +12,7 @@ import '../data/fbdb_manager.dart';
 import '../widgets/content_frame.dart';
 import '../widgets/park_progress.dart';
 import '../widgets/attraction_list_widget.dart';
+import '../widgets/title_bar_icon.dart';
 import 'dart:convert';
 
 class AttractionsPage extends StatefulWidget {
@@ -89,10 +90,7 @@ class _AttractionsPageState extends State<AttractionsPage>
                   ),
 
                   // Titlebar w/ info and settings buttons
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: _buildTitleBar(context, parkData),
-                  ),
+                  _buildTitleBar(context, parkData),
 
                   // Percentage Complete bar
                   FullParkProgressBar(
@@ -132,32 +130,30 @@ class _AttractionsPageState extends State<AttractionsPage>
       child: Container(
           child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           // Left icon
-          _buildTitleBarIcon(
-            context,
-            icon: FontAwesomeIcons.info,
-            onTap: _openDetailsPane,
-          ),
+          TitleBarIcon(icon: FontAwesomeIcons.info, onTap: _openDetailsPane),
           // Label
           Expanded(
             child: AutoSizeText(
               widget.serverParkData.parkName,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.headline,
-              maxLines: 2,
+              maxLines: 1,
             ),
           ),
           // Right icon
           /// TODO: REPLACE WITH PROPER SETTINGS PAGE
-          _buildTitleBarIcon(context, icon: FontAwesomeIcons.cog, onTap: () {
-            parkData.incrementorEnabled = !parkData.incrementorEnabled;
-            widget.db.setEntryAtPath(
-                path: DatabasePath.PARKS,
-                key: parkData.parkID.toString(),
-                payload: parkData.toMap());
-          })
+          TitleBarIcon(
+              icon: FontAwesomeIcons.cog,
+              onTap: () {
+                parkData.incrementorEnabled = !parkData.incrementorEnabled;
+                widget.db.setEntryAtPath(
+                    path: DatabasePath.PARKS,
+                    key: parkData.parkID.toString(),
+                    payload: parkData.toMap());
+              })
         ],
       )),
     );

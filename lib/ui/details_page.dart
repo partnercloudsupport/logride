@@ -6,14 +6,15 @@ import 'package:latlong/latlong.dart' as oldLatLng;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
-import '../data/fbdb_manager.dart';
-import '../widgets/content_frame.dart';
-import '../widgets/side_strike_text.dart';
-import '../widgets/embedded_map_entry.dart';
-import '../ui/standard_page_structure.dart';
-import '../widgets/stored_image_widget.dart';
 import '../data/attraction_structures.dart';
+import '../data/fbdb_manager.dart';
 import '../data/park_structures.dart';
+import '../widgets/content_frame.dart';
+import '../widgets/embedded_map_entry.dart';
+import '../widgets/side_strike_text.dart';
+import '../widgets/stored_image_widget.dart';
+import '../widgets/title_bar_icon.dart';
+import '../ui/standard_page_structure.dart';
 
 enum _DetailsType { PARK_DETAILS, ATTRACTION_DETAILS }
 
@@ -118,22 +119,54 @@ class _DetailsPageState extends State<DetailsPage> {
   }
 
   Widget _buildTitleBar(BuildContext context) {
-    String titleText = (_type == _DetailsType.PARK_DETAILS)
-        ? (widget.data as BluehostPark).parkName
-        : (widget.data as BluehostAttraction).attractionName;
-    if (titleText == null) titleText = "No Title";
+    // Empty container must match the size of the built widget so the expanded thing
+    // doesn't look odd
+    Widget _leftIcon = Container(height: 26.0, width: 50,);
+    Widget _rightIcon = Container(height: 26.0, width: 50,);
+    String titleText;
+    String subtitleText;
 
-    String subtitleText = (_type == _DetailsType.PARK_DETAILS)
-        ? (widget.data as BluehostPark).type
-        : (widget.data as BluehostAttraction).typeLabel;
+    if(_type == _DetailsType.PARK_DETAILS){
+      BluehostPark parkData = (widget.data as BluehostPark);
+      titleText = parkData.parkName;
+      subtitleText = parkData.type;
+
+    } else if(_type == _DetailsType.ATTRACTION_DETAILS) {
+      BluehostAttraction attractionData = (widget.data as BluehostAttraction);
+      titleText = attractionData.attractionName;
+      subtitleText = attractionData.typeLabel;
+
+      if(attractionData.scoreCard){
+        _leftIcon = TitleBarIcon(
+          icon: FontAwesomeIcons.trophy,
+          onTap: () => print("Scoreboard"), // TODO: Call up scoreboard page
+        );
+      }
+
+      _rightIcon = TitleBarIcon(
+        icon: FontAwesomeIcons.pencilAlt,
+        onTap: () => print("Edit"), // TODO: Call up attraction edit page
+      );
+    }
+
+    if (titleText == null) titleText = "No Title";
     if (subtitleText == null) subtitleText = "No Type";
 
     return Column(
       children: <Widget>[
-        AutoSizeText(
-          titleText,
-          maxLines: 1,
-          style: Theme.of(context).textTheme.headline,
+        Row(
+          children: <Widget>[
+            _leftIcon,
+            Expanded(
+              child: AutoSizeText(
+                titleText,
+                maxLines: 1,
+                style: Theme.of(context).textTheme.headline,
+                textAlign: TextAlign.center,
+              ),
+            ),
+            _rightIcon
+          ],
         ),
         SideStrikeText(
           bodyText: AutoSizeText(
