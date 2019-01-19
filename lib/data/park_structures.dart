@@ -25,7 +25,7 @@ class FirebasePark {
     newPark.favorite = data["favorite"];
     newPark.incrementorEnabled = data["incrementorEnabled"];
     newPark.lastDayVisited =
-        DateTime.fromMicrosecondsSinceEpoch(data["lastDayVisited"]);
+        DateTime.fromMillisecondsSinceEpoch((data["lastDayVisited"] ?? 0) * 1000);
     newPark.location = data["location"];
     newPark.name = data["name"];
     newPark.numberOfCheckIns = data["numberOfCheckIns"];
@@ -44,7 +44,7 @@ class FirebasePark {
       "checkedInToday": this.checkedInToday,
       "favorite": this.favorite,
       "incrementorEnabled": this.incrementorEnabled,
-      "lastDayVisited": this.lastDayVisited.millisecondsSinceEpoch,
+      "lastDayVisited": this.lastDayVisited.millisecondsSinceEpoch / 1000,
       "location": this.location,
       "name": this.name,
       "numberOfCheckIns": this.numberOfCheckIns,
