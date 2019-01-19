@@ -337,6 +337,8 @@ class _DetailsPageState extends State<DetailsPage> {
       if (attraction.modifyBy != "")
         details.add(_furtherDetailsTextEntry(
             "Entry Last Modified by", attraction.modifyBy));
+      if (attraction.notes != "")
+        details.add(_longDetailsEntry("Notes", attraction.notes));
       return details;
     }
 
@@ -370,6 +372,35 @@ class _DetailsPageState extends State<DetailsPage> {
         ],
       ),
     );
+  }
+
+  Widget _longDetailsEntry(String title, String content) {
+    return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+          Container(
+            width: double.infinity,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 4.0, bottom: 4.0),
+              child: Text(
+                title,
+                textAlign: TextAlign.left,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(7.5)),
+            constraints: BoxConstraints(minHeight: 100.0),
+            width: double.infinity,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(content),
+            ),
+          ),
+        ]));
   }
 
   Widget _urlTextButton(BuildContext context, String text, String url) {
