@@ -13,6 +13,7 @@ import '../widgets/content_frame.dart';
 import '../widgets/embedded_map_entry.dart';
 import '../widgets/side_strike_text.dart';
 import '../widgets/stored_image_widget.dart';
+import '../widgets/photo_credit_text.dart';
 import '../widgets/title_bar_icon.dart';
 import '../ui/standard_page_structure.dart';
 
@@ -112,7 +113,7 @@ class _DetailsPageState extends State<DetailsPage> {
                 ..addAll(furtherDetails)
                 ..addAll(userDetails),
             ),
-          )
+          ),
         ],
       ),
     ));
@@ -121,22 +122,27 @@ class _DetailsPageState extends State<DetailsPage> {
   Widget _buildTitleBar(BuildContext context) {
     // Empty container must match the size of the built widget so the expanded thing
     // doesn't look odd
-    Widget _leftIcon = Container(height: 26.0, width: 50,);
-    Widget _rightIcon = Container(height: 26.0, width: 50,);
+    Widget _leftIcon = Container(
+      height: 26.0,
+      width: 50,
+    );
+    Widget _rightIcon = Container(
+      height: 26.0,
+      width: 50,
+    );
     String titleText;
     String subtitleText;
 
-    if(_type == _DetailsType.PARK_DETAILS){
+    if (_type == _DetailsType.PARK_DETAILS) {
       BluehostPark parkData = (widget.data as BluehostPark);
       titleText = parkData.parkName;
       subtitleText = parkData.type;
-
-    } else if(_type == _DetailsType.ATTRACTION_DETAILS) {
+    } else if (_type == _DetailsType.ATTRACTION_DETAILS) {
       BluehostAttraction attractionData = (widget.data as BluehostAttraction);
       titleText = attractionData.attractionName;
       subtitleText = attractionData.typeLabel;
 
-      if(attractionData.scoreCard){
+      if (attractionData.scoreCard) {
         _leftIcon = TitleBarIcon(
           icon: FontAwesomeIcons.trophy,
           onTap: () => print("Scoreboard"), // TODO: Call up scoreboard page
@@ -210,11 +216,23 @@ class _DetailsPageState extends State<DetailsPage> {
 
   Widget _buildMediaSection(BuildContext context) {
     BluehostAttraction attraction = widget.data as BluehostAttraction;
+
+    Widget _credit;
+    if (_type == _DetailsType.ATTRACTION_DETAILS) {
+      _credit = PhotoCreditText(
+        photoUrl: attraction.photoLink,
+        username: attraction.photoArtist,
+        ccType: attraction.ccType,
+        style: TextStyle(color: Colors.white),
+      );
+    }
+
     return Container(
         height: 250,
         child: _wrapAsWindow(FirebaseAttractionImage(
           attractionID: attraction.attractionID,
           parkID: attraction.parkID,
+          overlay: _credit,
         )));
   }
 

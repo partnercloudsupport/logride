@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:photo_view/photo_view.dart';
 import '../widgets/hero_network_image.dart';
-import '../animations/fade_in_widget.dart';
 import '../widgets/back_button.dart';
 
 class FirebaseAttractionImage extends StatefulWidget {
-  FirebaseAttractionImage({this.parkID, this.attractionID});
+  FirebaseAttractionImage({this.parkID, this.attractionID, this.overlay});
 
   final int parkID;
   final int attractionID;
+  final Widget overlay;
 
   @override
   _FirebaseAttractionImageState createState() =>
@@ -30,7 +30,8 @@ class _FirebaseAttractionImageState extends State<FirebaseAttractionImage> {
 
   @override
   void initState() {
-    _target = _storage.ref()
+    _target = _storage
+        .ref()
         .child(widget.parkID.toString())
         .child(widget.attractionID.toString() + ".jpg");
     super.initState();
@@ -45,7 +46,7 @@ class _FirebaseAttractionImageState extends State<FirebaseAttractionImage> {
         builder: (BuildContext context, AsyncSnapshot<String> url) {
           // If the page 404's, we don't have a URL, and we don't have an image on our firebase.
           // FirebaseStorage spews an error into the console, and I can't seem to prevent it. but it's ok.
-          if (!url.hasData || url.hasError){
+          if (!url.hasData || url.hasError) {
             return Container(
               constraints: BoxConstraints.expand(),
               child: Column(
@@ -80,7 +81,22 @@ class _FirebaseAttractionImageState extends State<FirebaseAttractionImage> {
                     url: url.data,
                     fit: BoxFit.cover,
                     onTap: () => _onImageTap(url.data),
-                  ))
+                  )),
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: 20,
+                child: (widget.overlay != null)
+                    ? Container(
+                        color: Color.fromRGBO(0, 0, 0, 0.75),
+                        child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6.0, vertical: 2.0),
+                            child: widget.overlay),
+                      )
+                    : Container(),
+              )
             ]);
           }
         },
@@ -102,7 +118,21 @@ class _FirebaseAttractionImageState extends State<FirebaseAttractionImage> {
               maxScale: PhotoViewComputedScale.covered * 5.0,
               minScale: PhotoViewComputedScale.contained * 1.0,
             ),
-            RoundBackButton()
+            RoundBackButton(),
+            SafeArea(
+              child: (widget.overlay != null)
+                  ? Container(
+                      constraints: BoxConstraints.expand(),
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                          constraints: BoxConstraints.expand(height: 20),
+                          color: Color.fromRGBO(0, 0, 0, 0.75),
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 20.0),
+                            child: widget.overlay,
+                          )))
+                  : Container(),
+            )
           ]));
         }));
   }
