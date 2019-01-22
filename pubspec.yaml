@@ -27,10 +27,6 @@ dependencies:
   auto_size_text: ^0.3.0
   # Used for sliding controls on list entries
   flutter_slidable: "^0.4.9"
-  # Used for easy model manipulation
-  #scoped_model: ^1.0.1
-  # Used to animate list entries but only on their first time
-  #after_layout: ^1.0.7
 
   google_sign_in: ^3.2.4
 
@@ -44,6 +40,7 @@ dependencies:
       path: packages/firebase_auth
   firebase_database: ^1.0.5
   #firebase_analytics: ^1.0.6
+  firebase_storage: 1.0.4
 
   # Used for icons where material icons fail
   font_awesome_flutter: ^8.2.0
@@ -54,11 +51,16 @@ dependencies:
   # Used for the "shiny" effect on completed progress bars
   shimmer: 0.0.6
 
-  # Used in attractions views for sticky headers
-  sticky_headers: 0.1.7
+  # Used for map views
+  google_maps_flutter: 0.0.3
 
-  # Alternate sticky header package (more efficient?)
-  sticky_header_list: 1.0.6
+  #Used for smooth loading of attraction images
+  transparent_image: 0.1.0
+
+  # Used for photo view of stored images
+  photo_view: 0.1.3
+
+  flutter_cupertino_date_picker: 0.3.0
 
 dev_dependencies:
   flutter_test:

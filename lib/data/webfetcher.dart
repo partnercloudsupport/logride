@@ -36,7 +36,7 @@ class WebFetcher {
     return data;
   }
 
-  Future<List<BluehostAttraction>> getAllAttractionData({num parkID, Map<int, String> rideTypes}) async{
+  Future<List<BluehostAttraction>> getAllAttractionData({num parkID, Map<int, String> rideTypes, List<BluehostPark> allParks}) async{
     List<BluehostAttraction> data = List<BluehostAttraction>();
 
     final response = await http.get(_serverURLS[WebLocation.PARK_ATTRACTIONS] + parkID.toString());
@@ -49,6 +49,9 @@ class WebFetcher {
 
         // Get our type label, or leave it blank if it doesn't exist
         newAttraction.typeLabel = rideTypes[newAttraction.rideType] ?? "";
+        if(newAttraction.previousParkID != 0){
+          newAttraction.previousParkLabel = getBluehostParkByID(allParks, newAttraction.previousParkID).parkName;
+        }
 
         data.add(newAttraction);
       }

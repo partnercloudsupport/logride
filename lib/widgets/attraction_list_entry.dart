@@ -2,18 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../animations/slide_up_transition.dart';
 import '../data/attraction_structures.dart';
 import '../data/park_structures.dart';
 import '../widgets/experience_button.dart';
+import '../ui/details_page.dart';
 
 class AttractionListEntry extends StatefulWidget {
   AttractionListEntry(
       {this.attractionData,
-        this.userData,
-        this.slidableController,
-        this.ignoreCallback,
+      this.userData,
+      this.slidableController,
+      this.ignoreCallback,
       this.experienceHandler,
-      this.parentPark});
+      this.parentPark,
+      this.timeChanged});
 
   final BluehostAttraction attractionData;
   final FirebaseAttraction userData;
@@ -21,14 +24,13 @@ class AttractionListEntry extends StatefulWidget {
   final SlidableController slidableController;
   final Function(BluehostAttraction, bool) ignoreCallback;
   final Function(ExperienceAction, FirebaseAttraction) experienceHandler;
+  final Function(DateTime, FirebaseAttraction, bool) timeChanged;
 
   @override
   State<StatefulWidget> createState() => AttractionListState();
 }
 
-
-class AttractionListState extends State<AttractionListEntry>{
-
+class AttractionListState extends State<AttractionListEntry> {
   @override
   Widget build(BuildContext context) {
     Widget built;
@@ -39,48 +41,57 @@ class AttractionListState extends State<AttractionListEntry>{
         ? Theme.of(context).disabledColor
         : Colors.white;
 
-
     // Core layout of the row / list item.
-    built = Container(
+    built = Material(
       color: tileColor,
-      constraints: BoxConstraints.expand(height: 58.0),
-      padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 12.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          // The text should take up as much space as possible, but not overflow under the button
-          Expanded(
-              child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      child: InkWell(
+        onTap: _onInfoTap,
+        child: Container(
+          constraints: BoxConstraints.expand(height: 58.0),
+          padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 12.0),
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              AutoSizeText(
-                widget.attractionData.attractionName,
-                maxLines: 1,
-                style: Theme.of(context).textTheme.subhead,
-              ),
-              AutoSizeText(widget.attractionData.typeLabel,
-                  maxLines: 1, style: Theme.of(context).textTheme.subtitle)
+              // The text should take up as much space as possible, but not overflow under the button
+              Expanded(
+                  child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  AutoSizeText(
+                    widget.attractionData.attractionName,
+                    maxLines: 1,
+                    style: Theme.of(context).textTheme.subhead,
+                  ),
+                  AutoSizeText(widget.attractionData.typeLabel,
+                      maxLines: 1, style: Theme.of(context).textTheme.subtitle)
+                ],
+              )),
+              // If the button's not there for any reason, just show an empty container instead. Prevents null errors.
+              ExperienceButton(
+                interactHandler: widget.experienceHandler,
+                parentPark: widget.parentPark,
+                ignored: ignored ?? false,
+                data: widget.userData ??
+                    FirebaseAttraction(
+                        rideID: widget.attractionData.attractionID),
+              )
             ],
-          )),
-          // If the button's not there for any reason, just show an empty container instead. Prevents null errors.
-          ExperienceButton(
-            interactHandler: widget.experienceHandler,
-            parentPark: widget.parentPark,
-            ignored: ignored ?? false,
-            data: widget.userData ?? FirebaseAttraction(rideID: widget.attractionData.attractionID),
-          )
-        ],
+          ),
+        ),
       ),
     );
 
     // Logic for selecting whether or not there are any slide interactions with
     // this list entry.
     Widget slideAction;
-    if (!widget.attractionData.active) slideAction = null; // Already ignored thanks to defunct, no point in ignoring it more
+    if (!widget.attractionData.active)
+      slideAction =
+          null; // Already ignored thanks to defunct, no point in ignoring it more
     if (widget.attractionData.active) {
       // If we're ignored, show the include slide. If we're included, show the ignore slide.
-      slideAction = ignored ? _buildIncludeSlideAction() : _buildIgnoreSlideAction();
+      slideAction =
+          ignored ? _buildIncludeSlideAction() : _buildIgnoreSlideAction();
     }
 
     // This is kinda ugly, but if there's no action that happens on slide,
@@ -101,7 +112,8 @@ class AttractionListState extends State<AttractionListEntry>{
       icon: FontAwesomeIcons.ban,
       color: Color.fromARGB(255, 221, 222, 224),
       caption: "Ignore",
-      onTap: () => widget.ignoreCallback(widget.attractionData, widget.userData.ignored),
+      onTap: () =>
+          widget.ignoreCallback(widget.attractionData, widget.userData.ignored),
     );
   }
 
@@ -110,13 +122,20 @@ class AttractionListState extends State<AttractionListEntry>{
       icon: FontAwesomeIcons.check,
       color: Color.fromARGB(255, 135, 207, 129),
       caption: "Include",
-      onTap: () => widget.ignoreCallback(widget.attractionData, widget.userData.ignored),
+      onTap: () =>
+          widget.ignoreCallback(widget.attractionData, widget.userData.ignored),
     );
   }
 
   void _onInfoTap() {
-    //TODO: Open attraction info panel
-    print(
-        "NOT YET IMPLEMENTED: Thomas, open an attraction panel for ${widget.attractionData.attractionName}");
+    Navigator.push(
+        context,
+        SlideUpRoute(
+            widget: DetailsPage(
+          data: widget.attractionData,
+          userData: widget.userData,
+          dateChangeHandler: (first, newTime) =>
+              widget.timeChanged(newTime, widget.userData, first),
+        )));
   }
 }
