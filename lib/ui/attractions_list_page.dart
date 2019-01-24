@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -6,6 +7,7 @@ import 'package:firebase_database/firebase_database.dart';
 import '../animations/slide_up_transition.dart';
 import '../ui/details_page.dart';
 import '../ui/standard_page_structure.dart';
+import '../ui/park_settings_page.dart';
 import '../data/parks_manager.dart';
 import '../data/park_structures.dart';
 import '../data/fbdb_manager.dart';
@@ -13,7 +15,6 @@ import '../widgets/content_frame.dart';
 import '../widgets/park_progress.dart';
 import '../widgets/attraction_list_widget.dart';
 import '../widgets/title_bar_icon.dart';
-import 'dart:convert';
 
 class AttractionsPage extends StatefulWidget {
   AttractionsPage({this.pm, this.db, this.serverParkData});
@@ -144,35 +145,13 @@ class _AttractionsPageState extends State<AttractionsPage>
             ),
           ),
           // Right icon
-          /// TODO: REPLACE WITH PROPER SETTINGS PAGE
           TitleBarIcon(
               icon: FontAwesomeIcons.cog,
               onTap: () {
-                parkData.incrementorEnabled = !parkData.incrementorEnabled;
-                widget.db.setEntryAtPath(
-                    path: DatabasePath.PARKS,
-                    key: parkData.parkID.toString(),
-                    payload: parkData.toMap());
+                _openSettingsPage(parkData);
               })
         ],
       )),
-    );
-  }
-
-  /// Returns the properly stylized buttons used in the titlebar of an attractions
-  /// list page.
-  Widget _buildTitleBarIcon(BuildContext context,
-      {IconData icon, Function onTap}) {
-    num iconSize = 26.0;
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Icon(
-            icon,
-            color: Theme.of(context).buttonColor,
-            size: iconSize,
-          )),
     );
   }
 
@@ -189,5 +168,27 @@ class _AttractionsPageState extends State<AttractionsPage>
           data: widget.serverParkData,
           db: widget.db,
         )));
+  }
+
+  void _openSettingsPage(FirebasePark userData) {
+    Future<dynamic> result = Navigator.push(
+        context,
+        SlideUpRoute(
+          widget: ParkSettingsPage(
+            userData: userData,
+            parkData: widget.serverParkData,
+          )
+        ));
+
+    result.then((value) {
+      if(value != Null){
+        ParkSettingsData settingsData = value as ParkSettingsData;
+        print("User has submitted settings");
+        userData.incrementorEnabled = settingsData.tally;
+        userData.showSeasonal = settingsData.showSeasonal;
+        userData.showDefunct = settingsData.showDefunct;
+        widget.db.setEntryAtPath(payload: userData.toMap(), key: userData.parkID.toString(), path: DatabasePath.PARKS);
+      }
+    });
   }
 }
