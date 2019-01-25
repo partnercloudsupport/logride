@@ -7,6 +7,10 @@ import '../data/park_structures.dart';
 import '../widgets/attraction_list_entry.dart';
 import '../widgets/experience_button.dart';
 
+class AttractionFilter extends ValueNotifier<String> {
+  AttractionFilter(String value) : super(value);
+}
+
 class FirebaseAttractionListView extends StatefulWidget {
   FirebaseAttractionListView(
       {this.attractionQuery,
@@ -26,7 +30,8 @@ class FirebaseAttractionListView extends StatefulWidget {
 
   final Function(BluehostAttraction target, bool currentState) ignoreCallback;
   final Function(ExperienceAction, FirebaseAttraction) experienceHandler;
-  final Function(List<FirebaseAttraction> userData, List<int> ignoreData) countHandler;
+  final Function(List<FirebaseAttraction> userData, List<int> ignoreData)
+      countHandler;
   final Function(DateTime, FirebaseAttraction, bool) dateHandler;
 
   @override
@@ -36,6 +41,11 @@ class FirebaseAttractionListView extends StatefulWidget {
 
 class _FirebaseAttractionListViewState
     extends State<FirebaseAttractionListView> {
+  AttractionFilter filter = AttractionFilter("");
+
+  // This allows us to hide the search entry until the user pulls down to access it.
+  ScrollController controller = ScrollController(initialScrollOffset: 66.0);
+
   FirebaseList _attractionList;
   FirebaseList _ignoreList;
 
@@ -112,6 +122,11 @@ class _FirebaseAttractionListViewState
         onChildChanged: _onIgnoreChanged,
         onChildRemoved: _onIgnoreRemoved,
         onValue: _onIgnoreValue);
+    filter.addListener(_filterUpdated);
+  }
+
+  void _filterUpdated() {
+    setState(() {});
   }
 
   void _buildLists() {
@@ -119,7 +134,6 @@ class _FirebaseAttractionListViewState
     _attractionList.forEach((snap) {
       FirebaseAttraction parsed =
           FirebaseAttraction.fromMap(Map.from(snap.value));
-
       _builtAttractionList.add(parsed);
     });
 
@@ -143,6 +157,27 @@ class _FirebaseAttractionListViewState
   }
 
   Widget _entryBuilder(BuildContext context, int index) {
+    if (index == 0) {
+      // We need to return our text field
+      return TextField(
+        onChanged: (value) {
+          if (mounted) {
+            setState(() {
+              if (filter.value != value) {
+                filter.value = value;
+              }
+            });
+          }
+        },
+        decoration: InputDecoration(
+          labelText: "Search",
+          hintText: "Search",
+          prefixIcon: Icon(Icons.search),
+        ),
+      );
+    } else {
+      index--;
+    }
     if (widget.headedList[index] is String) {
       return Container(
         height: 20.0,
@@ -160,15 +195,22 @@ class _FirebaseAttractionListViewState
             _builtAttractionList, target.attractionID) ??
         FirebaseAttraction(rideID: target.attractionID);
 
-    return AttractionListEntry(
-      attractionData: target,
-      parentPark: widget.parentPark,
-      experienceHandler: widget.experienceHandler,
-      ignoreCallback: widget.ignoreCallback,
-      slidableController: _slidableController,
-      userData: attraction,
-      timeChanged: widget.dateHandler,
-    );
+    if (target.attractionName
+            .toLowerCase()
+            .contains(filter.value.toLowerCase()) ||
+        target.typeLabel.toLowerCase().contains(filter.value.toLowerCase())) {
+      return AttractionListEntry(
+        attractionData: target,
+        parentPark: widget.parentPark,
+        experienceHandler: widget.experienceHandler,
+        ignoreCallback: widget.ignoreCallback,
+        slidableController: _slidableController,
+        userData: attraction,
+        timeChanged: widget.dateHandler,
+      );
+    } else {
+      return Container();
+    }
   }
 
   @override
@@ -176,10 +218,11 @@ class _FirebaseAttractionListViewState
     if (_ignoreLoaded && _attractionLoaded) {
       _buildLists();
       widget.countHandler(_builtAttractionList, _builtIgnoreList);
-      print("Rebuilding");
       return ListView.builder(
-        itemCount: widget.headedList.length,
+        // +1 is for the search entry
+        itemCount: widget.headedList.length + 1,
         itemBuilder: _entryBuilder,
+        controller: controller,
       );
     } else {
       return Center(child: CircularProgressIndicator());
