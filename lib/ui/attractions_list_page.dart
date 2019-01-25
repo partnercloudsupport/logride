@@ -44,6 +44,7 @@ class _AttractionsPageState extends State<AttractionsPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomPadding: false,
         backgroundColor: Colors.transparent,
         body: StandardPageStructure(
           // IconFunction and IconDecoration relate to the homeIcon

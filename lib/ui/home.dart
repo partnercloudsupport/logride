@@ -12,7 +12,7 @@ import '../data/auth_manager.dart';
 import '../data/fbdb_manager.dart';
 import '../animations/slide_up_transition.dart';
 import '../ui/standard_page_structure.dart';
-import '../ui/all_park_search.dart';
+import '../ui/park_search.dart';
 import '../ui/attractions_list_page.dart';
 
 enum SectionFocus { favorites, all, balanced }
@@ -239,46 +239,55 @@ class _HomePageState extends State<HomePage> {
                 curve: Curves.linear,
                 duration: animationDuration,
                 height: _favesHeight,
-                child: ParkListView(
-                  parksData: widget.db.getFilteredQuery(
-                      path: DatabasePath.PARKS, key: "favorite", value: true),
-                  favorites: true,
-                  slidableController: _slidableController,
-                  sliderActionCallback: _handleSlidableCallback,
-                  headerCallback: _handleHeaderCallback,
-                  onTap: _handleEntryCallback,
-                  arrowWidget: Transform(
-                    transform: Matrix4.translationValues(10, 10, 0.0),
-                    child: AnimatedContainer(
-                        curve: Curves.linear,
-                        duration: animationDuration,
-                        transform: _favesArrowRotation,
-                        alignment: Alignment(0.0, 30.0),
-                        child: arrowIcon),
-                  ),
-                ),
-              ),
-              AnimatedContainer(
-                curve: Curves.linear,
-                duration: animationDuration,
-                height: _allHeight,
-                child: ParkListView(
-                    parksData: widget.db
-                        .getQueryForUser(path: DatabasePath.PARKS, key: ""),
-                    favorites: false,
+                child: Card(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+                  child: ParkListView(
+                    parksData: widget.db.getFilteredQuery(
+                        path: DatabasePath.PARKS, key: "favorite", value: true),
+                    favorites: true,
                     slidableController: _slidableController,
+                    sliderActionCallback: _handleSlidableCallback,
                     headerCallback: _handleHeaderCallback,
                     onTap: _handleEntryCallback,
-                    sliderActionCallback: _handleSlidableCallback,
                     arrowWidget: Transform(
                       transform: Matrix4.translationValues(10, 10, 0.0),
                       child: AnimatedContainer(
                           curve: Curves.linear,
                           duration: animationDuration,
-                          transform: _allArrowRotation,
+                          transform: _favesArrowRotation,
                           alignment: Alignment(0.0, 30.0),
                           child: arrowIcon),
-                    )),
+                    ),
+                  ),
+                ),
+              ),
+              AnimatedContainer(
+                  curve: Curves.linear,
+                  duration: animationDuration,
+                  height: _allHeight,
+                  child: Card(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+                      child: ParkListView(
+                          parksData: widget.db
+                              .getQueryForUser(path: DatabasePath.PARKS, key: ""),
+                          favorites: false,
+                          showSearch: true,
+                          slidableController: _slidableController,
+                          headerCallback: _handleHeaderCallback,
+                          onTap: _handleEntryCallback,
+                          sliderActionCallback: _handleSlidableCallback,
+                          arrowWidget: Transform(
+                            transform: Matrix4.translationValues(10, 10, 0.0),
+                            child: AnimatedContainer(
+                                curve: Curves.linear,
+                                duration: animationDuration,
+                                transform: _allArrowRotation,
+                                alignment: Alignment(0.0, 30.0),
+                                child: arrowIcon),
+                          ),
+
+                    ),
+                  ),
               )
             ],
           )));
