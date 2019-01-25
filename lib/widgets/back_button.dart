@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../animations/fade_in_widget.dart';
+import '../animations/fade_widget.dart';
 
 class RoundBackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return FadeInWidget(
+    return FadeWidget(
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(12.0),

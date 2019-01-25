@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 
-class FadeInWidget extends StatefulWidget {
+class FadeWidget extends StatefulWidget {
 
-  FadeInWidget({this.child, this.duration = const Duration(milliseconds: 500)});
+  FadeWidget({this.child, this.duration = const Duration(milliseconds: 500), this.forward = true});
 
   final Widget child;
   final Duration duration;
+  final bool forward;
 
   @override
-  _FadeInWidgetState createState() => _FadeInWidgetState();
+  _FadeWidgetState createState() => _FadeWidgetState();
 }
 
-class _FadeInWidgetState extends State<FadeInWidget> with SingleTickerProviderStateMixin{
+class _FadeWidgetState extends State<FadeWidget> with SingleTickerProviderStateMixin{
   AnimationController _controller;
   Animation<double> _animation;
 
@@ -24,7 +25,11 @@ class _FadeInWidgetState extends State<FadeInWidget> with SingleTickerProviderSt
     );
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
 
-    _controller.forward();
+    if(widget.forward){
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
   }
 
   @override
