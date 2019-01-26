@@ -7,6 +7,7 @@ abstract class BaseAuth {
   Future<String> signUp(String username, String email, String password);
   Future<FirebaseUser> getCurrentUser();
   Future<String> getCurrentUserID();
+  Future<String> getCurrentUserName();
   Future<void> signOut();
   Future<void> resetPassword(String email);
 }
@@ -26,7 +27,7 @@ class Auth implements BaseAuth {
         email: email, password: password);
     DatabaseReference reference =
         _firebaseDatabase.reference().child("users/details");
-    reference.child(user.uid).set({"userID": user.uid, "username": username});
+    reference.child(user.uid).set({"userID": user.uid, "userName": username});
     return user.uid;
   }
 
@@ -46,5 +47,11 @@ class Auth implements BaseAuth {
   Future<String> getCurrentUserID() async {
     FirebaseUser user = await _firebaseAuth.currentUser();
     return user.uid;
+  }
+
+  Future<String> getCurrentUserName() async {
+    FirebaseUser user = await _firebaseAuth.currentUser();
+    DatabaseReference location = _firebaseDatabase.reference().child("users/details/${user.uid}/userName/");
+    return await location.once().then((snap) => snap.value);
   }
 }

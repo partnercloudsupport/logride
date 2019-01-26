@@ -10,10 +10,12 @@ import '../data/parks_manager.dart';
 import '../data/webfetcher.dart';
 import '../data/auth_manager.dart';
 import '../data/fbdb_manager.dart';
+import '../animations/slide_in_transition.dart';
 import '../animations/slide_up_transition.dart';
 import '../ui/standard_page_structure.dart';
 import '../ui/park_search.dart';
 import '../ui/attractions_list_page.dart';
+import '../ui/app_info_page.dart';
 
 enum SectionFocus { favorites, all, balanced }
 
@@ -38,6 +40,8 @@ class _HomePageState extends State<HomePage> {
   Matrix4 _allArrowRotation;
 
   SectionFocus focus = SectionFocus.balanced;
+
+  String userName = "";
 
   final SlidableController _slidableController = SlidableController();
   ParksManager _parksManager = ParksManager();
@@ -137,13 +141,17 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _handleEntryCallback(FirebasePark park) {
-    BluehostPark serverPark = getBluehostParkByID(_parksManager.allParksInfo, park.parkID);
+    BluehostPark serverPark =
+        getBluehostParkByID(_parksManager.allParksInfo, park.parkID);
 
     // This should only happen on the rare occasion that the user opens the app
     // then immidiately taps on a park tile. Making it so that nothing happens
     // means the user will think they missed, hopefully giving us enough time to
     // actually load park data.
-    if(serverPark.attractions == null) {print("User is attempting to open a page that doesn't have data yet."); return;}
+    if (serverPark.attractions == null) {
+      print("User is attempting to open a page that doesn't have data yet.");
+      return;
+    }
 
     print("Opening up attraction page for park ${park.name}");
     Navigator.push(
@@ -182,6 +190,10 @@ class _HomePageState extends State<HomePage> {
     _parksManager = ParksManager(db: widget.db, wf: _webFetcher);
     initialized = _parksManager.init();
 
+    widget.auth.getCurrentUserName().then((name) {
+      userName = name;
+    });
+
     super.initState();
   }
 
@@ -207,28 +219,31 @@ class _HomePageState extends State<HomePage> {
         if (!snapshot.hasData) {
           return Center(
               child: Container(
-                width: MediaQuery.of(context).size.width * 2 / 5,
-                child: Card(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15)),
-                      child: AspectRatio(
-                          aspectRatio: 1,
-                          child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            CircularProgressIndicator(),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8.0),
-                              child: Text("Loading Park Information...", textAlign: TextAlign.center,),
-                            )
-                          ],
-                        ),
-                      )),
-                ),
-              ));
+            width: MediaQuery.of(context).size.width * 2 / 5,
+            child: Card(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
+              child: AspectRatio(
+                  aspectRatio: 1,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        CircularProgressIndicator(),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            "Loading Park Information...",
+                            textAlign: TextAlign.center,
+                          ),
+                        )
+                      ],
+                    ),
+                  )),
+            ),
+          ));
         } else if (snapshot.data) {
           // Since data is a bool, if it's true, we'll do this thing
           return ContentFrame(
@@ -305,8 +320,10 @@ class _HomePageState extends State<HomePage> {
           size: 38,
         ),
         onPressed: () {
-
-          if(!_parksManager.searchInitialized) {print("Search hasn't been initialized yet."); return;}
+          if (!_parksManager.searchInitialized) {
+            print("Search hasn't been initialized yet.");
+            return;
+          }
 
           Navigator.push(
               context,
@@ -334,16 +351,29 @@ class _HomePageState extends State<HomePage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            GestureDetector(
-                onTap: _signOut,
-                child: _buildMenuIcon(FontAwesomeIcons.userAlt)),
+            InkWell(
+              onTap: () => Navigator.push(
+                context,
+                SlideInRoute(
+                  direction: SlideInDirection.LEFT,
+                  widget: AppInfoPage(
+                    signOut: _signOut, username: userName,
+                  )
+                )
+              ),
+              child: _buildMenuIcon(FontAwesomeIcons.info),
+            ),
             Row(
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.only(right: 28.0),
-                  child: _buildMenuIcon(FontAwesomeIcons.trophy),
+                  child: InkWell(
+                      onTap: () => print("Stats"),
+                      child: _buildMenuIcon(FontAwesomeIcons.trophy)),
                 ),
-                _buildMenuIcon(FontAwesomeIcons.cog)
+                InkWell(
+                    onTap: () => print("Lists"),
+                    child: _buildMenuIcon(FontAwesomeIcons.listAlt))
               ],
             )
           ],
