@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../animations/fade_in_widget.dart';
+import '../animations/fade_widget.dart';
 
 enum BackButtonDirection {
   LEFT,
@@ -17,7 +17,7 @@ class RoundBackButton extends StatelessWidget {
     bool left = (direction == BackButtonDirection.LEFT);
     return Align(
       alignment: left ? Alignment.topLeft : Alignment.topRight,
-      child: FadeInWidget(
+      child: FadeWidget(
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(12.0),

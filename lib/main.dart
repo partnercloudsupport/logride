@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'data/auth_manager.dart';
 import 'data/fbdb_manager.dart';
-import 'ui/all_park_search.dart';
+import 'ui/park_search.dart';
 import 'ui/landing_page.dart';
 
 class MyApp extends StatelessWidget {

@@ -14,12 +14,17 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_list.dart';
 import 'package:firebase_database/ui/firebase_sorted_list.dart';
 
+class ListFilter extends ValueNotifier<String>{
+  ListFilter(String value) : super(value);
+}
+
 typedef Widget FirebaseAnimatedListItemBuilder(
     BuildContext context,
     DataSnapshot snapshot,
     Animation<double> animation,
     int index,
     int length,
+    String filter,
     );
 
 /// An AnimatedList widget that is bound to a query
@@ -29,6 +34,7 @@ class FirebaseAnimatedList extends StatefulWidget {
     Key key,
     @required this.query,
     @required this.itemBuilder,
+    this.filter,
     this.sort,
     this.defaultChild,
     this.emptyChild,
@@ -46,6 +52,8 @@ class FirebaseAnimatedList extends StatefulWidget {
 
   /// A Firebase query to use to populate the animated list
   final Query query;
+
+  final ListFilter filter;
 
   /// Optional function used to compare snapshots when sorting the list
   ///
@@ -148,8 +156,16 @@ class FirebaseAnimatedListState extends State<FirebaseAnimatedList> {
   List<DataSnapshot> _model;
   bool _loaded = false;
 
+  String _filter = "";
+
   @override
   void didChangeDependencies() {
+    if(widget.filter != null){
+      widget.filter.addListener(_filterUpdated);
+    } else {
+      _filter = "";
+    }
+
     if (widget.sort != null) {
       _model = FirebaseSortedList(
         query: widget.query,
@@ -176,8 +192,15 @@ class FirebaseAnimatedListState extends State<FirebaseAnimatedList> {
   void dispose() {
     // Cancel the Firebase stream subscriptions
     _model.clear();
-
     super.dispose();
+  }
+
+  void _filterUpdated(){
+    if(mounted){
+      setState((){
+        _filter = widget.filter.value;
+      });
+    }
   }
 
   void _onChildAdded(int index, DataSnapshot snapshot) {
@@ -195,7 +218,7 @@ class FirebaseAnimatedListState extends State<FirebaseAnimatedList> {
     _animatedListKey.currentState.removeItem(
       index,
           (BuildContext context, Animation<double> animation) {
-        return widget.itemBuilder(context, snapshot, animation, index, _model.length);
+        return widget.itemBuilder(context, snapshot, animation, index, _model.length, _filter);
       },
       duration: widget.duration,
     );
@@ -219,7 +242,7 @@ class FirebaseAnimatedListState extends State<FirebaseAnimatedList> {
 
   Widget _buildItem(
       BuildContext context, int index, Animation<double> animation) {
-    return widget.itemBuilder(context, _model[index], animation, index, _model.length);
+    return widget.itemBuilder(context, _model[index], animation, index, _model.length, _filter);
   }
 
   @override

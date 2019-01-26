@@ -109,7 +109,7 @@ class AllParkSearchPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        resizeToAvoidBottomPadding: true,
+        resizeToAvoidBottomPadding: false,
         backgroundColor: Colors.transparent,
         body: StandardPageStructure(
           iconFunction: () => Navigator.of(context).pop(),
