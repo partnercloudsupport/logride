@@ -5,6 +5,7 @@ import '../widgets/submit_button.dart';
 import '../widgets/home_icon.dart';
 import '../widgets/page_controller_slider_bar.dart';
 import '../data/auth_manager.dart';
+import '../data/contact_url_constants.dart';
 
 class AuthPage extends StatefulWidget {
   AuthPage({this.auth, this.onSignedIn});
@@ -18,8 +19,6 @@ class AuthPage extends StatefulWidget {
 
 class _AuthPageState extends State<AuthPage>
     with SingleTickerProviderStateMixin {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
   final TextEditingController loginEmailController = TextEditingController();
   final TextEditingController loginPasswordController = TextEditingController();
 
@@ -295,7 +294,6 @@ class _AuthPageState extends State<AuthPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        key: _scaffoldKey,
         backgroundColor: Theme.of(context).primaryColor,
         body: NotificationListener<OverscrollIndicatorNotification>(
           onNotification: (overScroll) {
@@ -307,53 +305,52 @@ class _AuthPageState extends State<AuthPage>
                     ? MediaQuery.of(context).size.height
                     : 500.0,
                 width: MediaQuery.of(context).size.width,
-                child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: SafeArea(
-                      child: Container(
-                        child: Center(
-                          child: Card(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15.0)),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: HomeIconButton(),
+                child: SafeArea(
+                  minimum: EdgeInsets.all(8.0),
+                  child: Container(
+                    child: Center(
+                      child: Card(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15.0)),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: HomeIconButton(),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Text(
+                                  "Welcome to LogRide",
+                                  textScaleFactor: 2,
+                                ),
+                              ),
+                              _buildMenuBar(context),
+                              Container(
+                                height: 200,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 24.0, horizontal: 24.0),
+                                  child: PageView(
+                                    controller: _pageController,
+                                    onPageChanged: _pageChanged,
+                                    children: <Widget>[
+                                      _buildSignUpPage(context),
+                                      _buildLoginPage(context),
+                                    ],
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: Text(
-                                      "Welcome to LogRide",
-                                      textScaleFactor: 2,
-                                    ),
-                                  ),
-                                  _buildMenuBar(context),
-                                  Container(
-                                    height: 200,
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 24.0, horizontal: 24.0),
-                                      child: PageView(
-                                        controller: _pageController,
-                                        onPageChanged: _pageChanged,
-                                        children: <Widget>[
-                                          _buildSignUpPage(context),
-                                          _buildLoginPage(context),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                      padding: EdgeInsets.only(bottom: 25.0),
-                                      child: _buildSubmitButton(currentPage)),
-                                  _buildInfoRow(context)
-                                ],
-                              )),
-                        ),
-                      ),
-                    ))),
+                                ),
+                              ),
+                              Padding(
+                                  padding: EdgeInsets.only(bottom: 25.0),
+                                  child: _buildSubmitButton(currentPage)),
+                              _buildInfoRow(context)
+                            ],
+                          )),
+                    ),
+                  ),
+                )),
           ),
         ));
   }
@@ -528,8 +525,8 @@ class _AuthPageState extends State<AuthPage>
     );
   }
 
-  void _launchURL(String url) async{
-    if(await canLaunch(url)){
+  void _launchURL(String url) async {
+    if (await canLaunch(url)) {
       launch(url);
     } else {
       print("Couldn't launch $url");
@@ -541,12 +538,18 @@ class _AuthPageState extends State<AuthPage>
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
         FlatButton(
-          child: Text("Privacy Policy", textScaleFactor: 1.1,),
-          onPressed: () => _launchURL("https://www.theparksman.com/logride-privacy-policy/"),
+          child: Text(
+            "Privacy Policy",
+            textScaleFactor: 1.1,
+          ),
+          onPressed: () => _launchURL(URL_PRIVACY),
         ),
         FlatButton(
-          child: Text("Terms of Service", textScaleFactor: 1.2,),
-          onPressed: () => _launchURL("https://www.theparksman.com/logride-terms-and-conditions/"),
+          child: Text(
+            "Terms of Service",
+            textScaleFactor: 1.2,
+          ),
+          onPressed: () => _launchURL(URL_TOS),
         )
       ],
     );
