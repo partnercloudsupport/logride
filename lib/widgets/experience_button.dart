@@ -48,7 +48,9 @@ class ExperienceButton extends StatelessWidget {
       if (data.numberOfTimesRidden > 0) {
         // Plus button is displayed when there's at least one count and incrementor isn't on
         iconWidget = Icon(
-          parentPark.incrementorEnabled ? FontAwesomeIcons.plusCircle : FontAwesomeIcons.solidCheckCircle,
+          parentPark.incrementorEnabled
+              ? FontAwesomeIcons.plusCircle
+              : FontAwesomeIcons.solidCheckCircle,
           color: buttonColor,
           size: 32.0,
         );
@@ -80,9 +82,9 @@ class ExperienceButton extends StatelessWidget {
     }
 
     buttonWidget = AspectRatio(
-        aspectRatio: 1.0,
-        child: iconWidget,
-      );
+      aspectRatio: 1.0,
+      child: iconWidget,
+    );
 
     children.add(buttonWidget);
 
@@ -103,7 +105,8 @@ class ExperienceButton extends StatelessWidget {
           ),
           onTap: () => interactHandler(ExperienceAction.ADD, data),
           //onDoubleTap: () => interactHandler(ExperienceAction.SET, data),
-          onLongPress: () => interactHandler(ExperienceAction.SET, data), // If a user wants to remove a value, they have to set it. I doubt they use the single remove often.
+          onLongPress: () => interactHandler(ExperienceAction.SET,
+              data), // If a user wants to remove a value, they have to set it. I doubt they use the single remove often.
         ),
       ),
     );

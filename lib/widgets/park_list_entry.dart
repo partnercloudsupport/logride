@@ -92,15 +92,16 @@ class ParkListEntry extends StatelessWidget {
                         children: <Widget>[
                           // AutoSizeText is used to avoid overflow, since park names
                           // and locations may have unknown lengths.
-                          AutoSizeText(
+                          Text(
                             parkData.name,
                             style: Theme.of(context).textTheme.subhead,
                             maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          AutoSizeText(
+                          Text(
                             parkData.location,
                             style: Theme.of(context).textTheme.subtitle,
-                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           )
                         ],
                       ),

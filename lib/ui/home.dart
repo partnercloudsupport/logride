@@ -11,7 +11,6 @@ import '../data/webfetcher.dart';
 import '../data/auth_manager.dart';
 import '../data/fbdb_manager.dart';
 import '../animations/slide_in_transition.dart';
-import '../animations/slide_up_transition.dart';
 import '../ui/standard_page_structure.dart';
 import '../ui/park_search.dart';
 import '../ui/attractions_list_page.dart';
@@ -156,7 +155,9 @@ class _HomePageState extends State<HomePage> {
     print("Opening up attraction page for park ${park.name}");
     Navigator.push(
         context,
-        SlideUpRoute(
+        SlideInRoute(
+          direction: SlideInDirection.UP,
+            dialogStyle: true,
             widget: AttractionsPage(
           pm: _parksManager,
           db: widget.db,
@@ -327,7 +328,9 @@ class _HomePageState extends State<HomePage> {
 
           Navigator.push(
               context,
-              SlideUpRoute(
+              SlideInRoute(
+                dialogStyle: true,
+                  direction: SlideInDirection.UP,
                   widget: AllParkSearchPage(
                 allParks: _parksManager.allParksInfo,
                 tapBack: _handleAddCallback,

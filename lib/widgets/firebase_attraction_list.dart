@@ -6,6 +6,7 @@ import '../data/attraction_structures.dart';
 import '../data/park_structures.dart';
 import '../widgets/attraction_list_entry.dart';
 import '../widgets/experience_button.dart';
+import '../data/fbdb_manager.dart';
 
 class AttractionFilter extends ValueNotifier<String> {
   AttractionFilter(String value) : super(value);
@@ -20,7 +21,8 @@ class FirebaseAttractionListView extends StatefulWidget {
       this.ignoreCallback,
       this.experienceHandler,
       this.countHandler,
-      this.dateHandler});
+      this.dateHandler,
+      this.db});
 
   final Query attractionQuery;
   final Query ignoreQuery;
@@ -34,6 +36,8 @@ class FirebaseAttractionListView extends StatefulWidget {
       countHandler;
   final Function(DateTime, FirebaseAttraction, bool) dateHandler;
 
+  final BaseDB db;
+
   @override
   _FirebaseAttractionListViewState createState() =>
       _FirebaseAttractionListViewState();
@@ -42,6 +46,8 @@ class FirebaseAttractionListView extends StatefulWidget {
 class _FirebaseAttractionListViewState
     extends State<FirebaseAttractionListView> {
   AttractionFilter filter = AttractionFilter("");
+
+  bool _delayOver = false;
 
   // This allows us to hide the search entry until the user pulls down to access it.
   ScrollController controller = ScrollController(initialScrollOffset: 66.0);
@@ -123,6 +129,13 @@ class _FirebaseAttractionListViewState
         onChildRemoved: _onIgnoreRemoved,
         onValue: _onIgnoreValue);
     filter.addListener(_filterUpdated);
+
+    // We delay the building of the UI until any possible transition has completed. This way any animation part of the transition isn't slowed.
+    Future.delayed(
+        Duration(milliseconds: 450),
+        () => setState(() {
+              _delayOver = true;
+            }));
   }
 
   void _filterUpdated() {
@@ -207,6 +220,7 @@ class _FirebaseAttractionListViewState
         slidableController: _slidableController,
         userData: attraction,
         timeChanged: widget.dateHandler,
+        db: widget.db,
       );
     } else {
       return Container();
@@ -215,7 +229,7 @@ class _FirebaseAttractionListViewState
 
   @override
   Widget build(BuildContext context) {
-    if (_ignoreLoaded && _attractionLoaded) {
+    if (_ignoreLoaded && _attractionLoaded && _delayOver) {
       _buildLists();
       widget.countHandler(_builtAttractionList, _builtIgnoreList);
       return ListView.builder(

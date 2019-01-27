@@ -258,6 +258,7 @@ class _AttractionsListViewState extends State<AttractionsListView> {
           ignoreCallback: _ignoreCallbackHandler,
           countHandler: _updateCountHandler,
           dateHandler: _dateUpdateHandler,
+          db: widget.db,
         ));
   }
 

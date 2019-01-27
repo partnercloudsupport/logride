@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'dart:convert';
-import '../animations/slide_up_transition.dart';
+import '../animations/slide_in_transition.dart';
 import '../data/park_structures.dart';
 import '../widgets/park_list_entry.dart';
 import '../widgets/custom_animated_firebase_list.dart';
@@ -102,7 +102,9 @@ class ParkListView extends StatelessWidget {
       searchWidget = IconButton(
           icon: Icon(Icons.search),
           onPressed: () {
-            Navigator.push(context, SlideUpRoute(
+            Navigator.push(context, SlideInRoute(
+              dialogStyle: true,
+              direction: SlideInDirection.UP,
               widget: UserParksSearchPage(
                 entryCallback: onTap,
                 slidableController: slidableController,

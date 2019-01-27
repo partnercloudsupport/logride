@@ -6,6 +6,7 @@ import 'package:latlong/latlong.dart' as oldLatLng;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
+import '../animations/slide_in_transition.dart';
 import '../data/attraction_structures.dart';
 import '../data/fbdb_manager.dart';
 import '../data/park_structures.dart';
@@ -15,6 +16,7 @@ import '../widgets/side_strike_text.dart';
 import '../widgets/stored_image_widget.dart';
 import '../widgets/photo_credit_text.dart';
 import '../widgets/title_bar_icon.dart';
+import '../ui/attraction_scorecard_page.dart';
 import '../ui/standard_page_structure.dart';
 
 enum _DetailsType { PARK_DETAILS, ATTRACTION_DETAILS }
@@ -145,7 +147,15 @@ class _DetailsPageState extends State<DetailsPage> {
       if (attractionData.scoreCard) {
         _leftIcon = TitleBarIcon(
           icon: FontAwesomeIcons.trophy,
-          onTap: () => print("Scoreboard"), // TODO: Call up scoreboard page
+          onTap: () {
+            Navigator.push(
+                context,
+                SlideInRoute(
+                    dialogStyle: true,
+                    direction: SlideInDirection.UP,
+                    widget: AttractionScorecardPage(
+                        attraction: attractionData, db: widget.db)));
+          }, // TODO: Call up scoreboard page
         );
       }
 
@@ -166,7 +176,7 @@ class _DetailsPageState extends State<DetailsPage> {
             Expanded(
               child: AutoSizeText(
                 titleText,
-                maxLines: 1,
+                maxLines: 2,
                 style: Theme.of(context).textTheme.headline,
                 textAlign: TextAlign.center,
               ),
