@@ -48,7 +48,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<bool> initialized;
 
-  double _calculateSectionHeight(bool isFavorites, SectionFocus focus) {
+  double _calculateFavoritesSectionHeight(SectionFocus focus) {
     // Get our total possible height
     double screenHeight = MediaQuery.of(context).size.height;
     // Remove the menu-bar padding
@@ -57,21 +57,19 @@ class _HomePageState extends State<HomePage> {
     screenHeight -= 50.0; // Remove the floating icon's padding
     // We now have our total height to play with
     double titleBarHeight = 61.0;
-    double allParksTtileBarHeight =
+    double allParksTitleBarHeight =
         82.0; // AllParks is slightly bigger thanks to the icon for the search
     // If we're not in focus, fall back to the titlebarheight
     switch (focus) {
       case SectionFocus.balanced:
         // We split the screen 2:3 if both are in focus
-        return isFavorites ? screenHeight * (2 / 5) : screenHeight * (3 / 5);
+        return screenHeight * (2 / 5);
       case SectionFocus.all:
         // The favorites section is only the header, the other is the rest
-        return isFavorites ? titleBarHeight : screenHeight - titleBarHeight;
+        return titleBarHeight;
       case SectionFocus.favorites:
         // Opposite of favorites
-        return isFavorites
-            ? screenHeight - allParksTtileBarHeight
-            : allParksTtileBarHeight;
+        return screenHeight - allParksTitleBarHeight;
     }
     print("Error - calculateSectionHeight was given an improper focus");
     return 0.0;
@@ -156,13 +154,13 @@ class _HomePageState extends State<HomePage> {
     Navigator.push(
         context,
         SlideInRoute(
-          direction: SlideInDirection.UP,
+            direction: SlideInDirection.UP,
             dialogStyle: true,
             widget: AttractionsPage(
-          pm: _parksManager,
-          db: widget.db,
-          serverParkData: serverPark,
-        )));
+              pm: _parksManager,
+              db: widget.db,
+              serverParkData: serverPark,
+            )));
   }
 
   void _handleAddCallback(BluehostPark park) async {
@@ -202,8 +200,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     widget.db.storeUserID(widget.uid);
 
-    _favesHeight = _calculateSectionHeight(true, focus);
-    _allHeight = _calculateSectionHeight(false, focus);
+    _favesHeight = _calculateFavoritesSectionHeight(focus);
 
     Widget arrowIcon = Transform(
         transform: Matrix4.translationValues(-10, -10, 0.0),
@@ -256,7 +253,8 @@ class _HomePageState extends State<HomePage> {
                 duration: animationDuration,
                 height: _favesHeight,
                 child: Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15.0)),
                   child: ParkListView(
                     parksData: widget.db.getFilteredQuery(
                         path: DatabasePath.PARKS, key: "favorite", value: true),
@@ -277,33 +275,30 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ),
-              AnimatedContainer(
-                  curve: Curves.linear,
-                  duration: animationDuration,
-                  height: _allHeight,
-                  child: Card(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-                      child: ParkListView(
-                          parksData: widget.db
-                              .getQueryForUser(path: DatabasePath.PARKS, key: ""),
-                          favorites: false,
-                          showSearch: true,
-                          slidableController: _slidableController,
-                          headerCallback: _handleHeaderCallback,
-                          onTap: _handleEntryCallback,
-                          sliderActionCallback: _handleSlidableCallback,
-                          arrowWidget: Transform(
-                            transform: Matrix4.translationValues(10, 10, 0.0),
-                            child: AnimatedContainer(
-                                curve: Curves.linear,
-                                duration: animationDuration,
-                                transform: _allArrowRotation,
-                                alignment: Alignment(0.0, 30.0),
-                                child: arrowIcon),
-                          ),
-
+              Expanded(
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15.0)),
+                  child: ParkListView(
+                    parksData: widget.db
+                        .getQueryForUser(path: DatabasePath.PARKS, key: ""),
+                    favorites: false,
+                    showSearch: true,
+                    slidableController: _slidableController,
+                    headerCallback: _handleHeaderCallback,
+                    onTap: _handleEntryCallback,
+                    sliderActionCallback: _handleSlidableCallback,
+                    arrowWidget: Transform(
+                      transform: Matrix4.translationValues(10, 10, 0.0),
+                      child: AnimatedContainer(
+                          curve: Curves.linear,
+                          duration: animationDuration,
+                          transform: _allArrowRotation,
+                          alignment: Alignment(0.0, 30.0),
+                          child: arrowIcon),
                     ),
                   ),
+                ),
               )
             ],
           )));
@@ -329,12 +324,12 @@ class _HomePageState extends State<HomePage> {
           Navigator.push(
               context,
               SlideInRoute(
-                dialogStyle: true,
+                  dialogStyle: true,
                   direction: SlideInDirection.UP,
                   widget: AllParkSearchPage(
-                allParks: _parksManager.allParksInfo,
-                tapBack: _handleAddCallback,
-              )));
+                    allParks: _parksManager.allParksInfo,
+                    tapBack: _handleAddCallback,
+                  )));
         },
         backgroundColor: Theme.of(context).primaryColor,
       ),
@@ -356,14 +351,13 @@ class _HomePageState extends State<HomePage> {
           children: <Widget>[
             InkWell(
               onTap: () => Navigator.push(
-                context,
-                SlideInRoute(
-                  direction: SlideInDirection.LEFT,
-                  widget: AppInfoPage(
-                    signOut: _signOut, username: userName,
-                  )
-                )
-              ),
+                  context,
+                  SlideInRoute(
+                      direction: SlideInDirection.LEFT,
+                      widget: AppInfoPage(
+                        signOut: _signOut,
+                        username: userName,
+                      ))),
               child: _buildMenuIcon(FontAwesomeIcons.info),
             ),
             Row(
