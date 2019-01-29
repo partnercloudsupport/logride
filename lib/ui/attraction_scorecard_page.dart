@@ -154,7 +154,7 @@ class _AttractionScorecardPageState extends State<AttractionScorecardPage> {
                   slidableCallback: _deleteCallback,
                   isHighScore: (index == 0),
                   decorator: Icon(
-                    FontAwesomeIcons.trophy,
+                    FontAwesomeIcons.medal,
                     color: decoratorColor,
                     size: _ENTRY_ICON_SIZE,
                   ),

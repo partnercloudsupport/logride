@@ -147,7 +147,7 @@ class _DetailsPageState extends State<DetailsPage> {
 
       if (attractionData.scoreCard) {
         _leftIcon = TitleBarIcon(
-          icon: FontAwesomeIcons.trophy,
+          icon: FontAwesomeIcons.medal,
           onTap: () {
             Navigator.push(
                 context,
