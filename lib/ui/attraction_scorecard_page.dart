@@ -69,32 +69,36 @@ class _AttractionScorecardPageState extends State<AttractionScorecardPage> {
 
   void _deleteCallback(ScorecardEntry entry) async {
     // Run Confirmation
-    dynamic confirmed = await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15.0)),
-            title: Text("Delete Score?"),
-            content: Text(
-                "This will permanately delete your score of ${NumberFormat.decimalPattern().format(entry.score)} from ${DateFormat.yMMMMd().format(entry.time)}"),
-            actions: <Widget>[
-              FlatButton(
-                child: Text("Cancel"),
-                onPressed: () {
-                  Navigator.of(context).pop(false);
-                },
-              ),
-              FlatButton(
-                child: Text("Delete"),
-                onPressed: () {
-                  Navigator.of(context).pop(true);
-                },
-              )
-            ],
-          );
-        });
-    if (!confirmed) print("User cancelled deletion of score");
+    bool confirmed = await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.0)),
+                title: Text("Delete Score?"),
+                content: Text(
+                    "This will permanately delete your score of ${NumberFormat.decimalPattern().format(entry.score)} from ${DateFormat.yMMMMd().format(entry.time)}"),
+                actions: <Widget>[
+                  FlatButton(
+                    child: Text("Cancel"),
+                    onPressed: () {
+                      Navigator.of(context).pop(false);
+                    },
+                  ),
+                  FlatButton(
+                    child: Text("Delete"),
+                    onPressed: () {
+                      Navigator.of(context).pop(true);
+                    },
+                  )
+                ],
+              );
+            }) ??
+        false;
+    if (!confirmed) {
+      print("User cancelled deletion of score");
+      return;
+    }
     // Convert time to the time that firebase checks for
     int simpleTime = entry.time.millisecondsSinceEpoch ~/ 1000;
     print(
@@ -164,10 +168,7 @@ class _AttractionScorecardPageState extends State<AttractionScorecardPage> {
         child: Text(
           "Tap the Experience button for this attraction or press the \"SUBMIT NEW SCORE\" button below to add a score to your score card!",
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18.0
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
         ),
       );
     }
