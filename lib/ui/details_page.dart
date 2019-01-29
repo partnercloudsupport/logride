@@ -59,6 +59,7 @@ class _DetailsPageState extends State<DetailsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.transparent,
+        resizeToAvoidBottomPadding: false,
         body: StandardPageStructure(
           iconFunction: () => Navigator.of(context).pop(),
           iconDecoration: Container(

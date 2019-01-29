@@ -1,13 +1,23 @@
 import 'package:firebase_database/ui/firebase_list.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-import '../data/attraction_structures.dart';
-import '../data/color_constants.dart';
-import '../data/fbdb_manager.dart';
-import '../data/scorecard_structures.dart';
-import '../widgets/interface_button.dart';
+import 'package:log_ride/data/attraction_structures.dart';
+import 'package:log_ride/data/color_constants.dart';
+import 'package:log_ride/data/fbdb_manager.dart';
+import 'package:log_ride/data/scorecard_structures.dart';
+import 'package:log_ride/ui/single_value_dialog.dart';
+import 'package:log_ride/widgets/interface_button.dart';
+
+Map<int, Color> positionalColors = {
+  0: POSITION_FIRST,
+  1: POSITION_SECOND,
+  2: POSITION_THIRD
+};
+
+const double _ENTRY_ICON_SIZE = 20;
 
 class AttractionScorecardPage extends StatefulWidget {
   AttractionScorecardPage({@required this.attraction, @required this.db});
@@ -23,6 +33,7 @@ class AttractionScorecardPage extends StatefulWidget {
 class _AttractionScorecardPageState extends State<AttractionScorecardPage> {
   List<ScorecardEntry> _entries;
   FirebaseList _firebaseList;
+  SlidableController _slidableController = SlidableController();
 
   bool _loaded = false;
 
@@ -56,15 +67,55 @@ class _AttractionScorecardPageState extends State<AttractionScorecardPage> {
     _entries.sort((a, b) => b.score.compareTo(a.score));
   }
 
+  void _deleteCallback(ScorecardEntry entry) async {
+    // Run Confirmation
+    dynamic confirmed = await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15.0)),
+            title: Text("Delete Score?"),
+            content: Text(
+                "This will permanately delete your score of ${NumberFormat.decimalPattern().format(entry.score)} from ${DateFormat.yMMMMd().format(entry.time)}"),
+            actions: <Widget>[
+              FlatButton(
+                child: Text("Cancel"),
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
+              ),
+              FlatButton(
+                child: Text("Delete"),
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                },
+              )
+            ],
+          );
+        });
+    if (!confirmed) print("User cancelled deletion of score");
+    // Convert time to the time that firebase checks for
+    int simpleTime = entry.time.millisecondsSinceEpoch ~/ 1000;
+    print(
+        "Attempting to delete [user]/${widget.attraction.parkID}/${widget.attraction.attractionID}/$simpleTime");
+    // Delete from firebase
+    widget.db.removeEntryFromPath(
+        path: DatabasePath.SCORECARD,
+        key:
+            "${widget.attraction.parkID}/${widget.attraction.attractionID}/$simpleTime");
+    print("Entry deleted");
+  }
+
   @override
   void initState() {
     super.initState();
-    print(widget.db == null);
-    print(widget.db.runtimeType);
+
     Query query = widget.db.getQueryForUser(
       path: DatabasePath.SCORECARD,
       key: "${widget.attraction.parkID}/${widget.attraction.attractionID}",
     );
+
     _firebaseList = FirebaseList(
         query: query,
         onChildAdded: _onScoreAdded,
@@ -77,13 +128,53 @@ class _AttractionScorecardPageState extends State<AttractionScorecardPage> {
   Widget build(BuildContext context) {
     _buildEntriesList();
 
-    int topScore = 0;
-    if (_entries.isNotEmpty) {
-      topScore = _entries.first.score;
+    num cardHeight = MediaQuery.of(context).size.height / 2;
+    if (cardHeight < 200.0) cardHeight = 200.0;
+
+    Widget content;
+    if (_entries.length > 0) {
+      content = ListView.builder(
+          itemCount: _entries.length,
+          itemBuilder: (BuildContext context, int index) {
+            // Making the icons transparent mean they take up the exact same space it would if there was a decoration, but they're just not there
+            Color decoratorColor = Colors.transparent;
+            if (positionalColors.containsKey(index)) {
+              decoratorColor = positionalColors[index];
+            }
+
+            return Column(
+              children: <Widget>[
+                _ScorecardEntry(
+                  data: _entries[index],
+                  slidableController: _slidableController,
+                  slidableCallback: _deleteCallback,
+                  isHighScore: (index == 0),
+                  decorator: Icon(
+                    FontAwesomeIcons.trophy,
+                    color: decoratorColor,
+                    size: _ENTRY_ICON_SIZE,
+                  ),
+                ),
+              ],
+            );
+          });
+    } else {
+      content = Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        child: Text(
+          "Tap the Experience button for this attraction or press the \"SUBMIT NEW SCORE\" button below to add a score to your score card!",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 18.0
+          ),
+        ),
+      );
     }
 
     return Scaffold(
         backgroundColor: Colors.transparent,
+        resizeToAvoidBottomPadding: false,
         body: Stack(
           children: <Widget>[
             GestureDetector(
@@ -105,19 +196,37 @@ class _AttractionScorecardPageState extends State<AttractionScorecardPage> {
                       _ScorecardTitleBar(
                         title: widget.attraction.attractionName,
                       ),
-                      //Top Score
-                      _ScorecardTopScore(
-                        topScore: topScore,
-                      ),
-                      //Following Scores
                       Container(
-                        width: double.infinity,
-                        height: 200.0,
-                        child: ListView.builder(
-                            itemCount: _entries.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return Text(_entries[index].score.toString());
-                            }),
+                          width: double.infinity,
+                          height: cardHeight,
+                          child: content),
+                      InterfaceButton(
+                        text: "SUBMIT NEW SCORE",
+                        color: Theme.of(context).primaryColor,
+                        textColor: Colors.white,
+                        onPressed: () async {
+                          dynamic result = await showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return SingleValueDialog(
+                                  title: "Enter Today's New Score",
+                                  submitText: "SUBMIT",
+                                  type: SingleValueDialogType.NUMBER,
+                                );
+                              });
+                          if (result == null) return;
+
+                          ScorecardEntry entry = ScorecardEntry(
+                              rideID: widget.attraction.attractionID,
+                              score: result,
+                              time: DateTime.now());
+
+                          widget.db.setEntryAtPath(
+                              path: DatabasePath.SCORECARD,
+                              key:
+                                  "${widget.attraction.parkID}/${widget.attraction.attractionID}/${entry.time.millisecondsSinceEpoch ~/ 1000}",
+                              payload: entry.toMap());
+                        },
                       )
                     ],
                   ),
@@ -145,14 +254,17 @@ class _ScorecardTitleBar extends StatelessWidget {
             Expanded(
               child: Text(
                 "Score Card",
-                style: Theme.of(context).textTheme.subhead.apply(fontWeightDelta: 1, color: Colors.white),
+                style: Theme.of(context)
+                    .textTheme
+                    .subhead
+                    .apply(fontWeightDelta: 1, color: Colors.white),
               ),
             ),
             Padding(
               padding: const EdgeInsets.only(left: 8.0),
               child: InterfaceButton(
                 text: "Close",
-                onPressed: () {},
+                onPressed: () => Navigator.of(context).pop(),
               ),
             ),
           ],
@@ -161,6 +273,7 @@ class _ScorecardTitleBar extends StatelessWidget {
     );
   }
 }
+/*
 
 class _ScorecardTopScore extends StatelessWidget {
   _ScorecardTopScore({this.topScore});
@@ -175,7 +288,7 @@ class _ScorecardTopScore extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Icon(
             FontAwesomeIcons.trophy,
-            color: PROGRESS_BAR_GOLD,
+            color: POSITION_FIRST,
           ),
         ),
         Expanded(
@@ -186,6 +299,72 @@ class _ScorecardTopScore extends StatelessWidget {
           ),
         )
       ],
+    );
+  }
+}
+*/
+
+class _ScorecardEntry extends StatelessWidget {
+  _ScorecardEntry(
+      {this.data,
+      this.decorator,
+      this.isHighScore = false,
+      this.slidableController,
+      this.slidableCallback});
+
+  final Widget decorator;
+  final ScorecardEntry data;
+  final SlidableController slidableController;
+  final bool isHighScore;
+  final Function(ScorecardEntry entry) slidableCallback;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget rowIcon = decorator ?? Container();
+
+    return Slidable(
+      controller: slidableController,
+      delegate: SlidableDrawerDelegate(),
+      actionExtentRatio: 0.25,
+      secondaryActions: [
+        IconSlideAction(
+          icon: FontAwesomeIcons.trash,
+          color: Colors.red,
+          caption: "Delete",
+          onTap: () => slidableCallback(this.data),
+        )
+      ],
+      child: Column(
+        children: <Widget>[
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Row(children: <Widget>[
+                  rowIcon,
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Text(
+                      NumberFormat.decimalPattern().format(data.score ?? 0),
+                      style: Theme.of(context).textTheme.body1.apply(
+                          fontSizeDelta: isHighScore ? 8 : 6,
+                          fontWeightDelta: isHighScore ? 6 : 0),
+                    ),
+                  ),
+                ]),
+                Text(DateFormat.yMMMMd().format(
+                    data.time ?? DateTime.fromMillisecondsSinceEpoch(0)))
+              ],
+            ),
+          ),
+          Divider(
+            height: 0,
+          )
+        ],
+      ),
     );
   }
 }
