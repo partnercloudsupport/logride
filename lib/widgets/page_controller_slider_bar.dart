@@ -4,7 +4,7 @@ import '../animations/auth_bubble_painter.dart';
 class PageControllerSliderBar extends StatelessWidget {
   PageControllerSliderBar({
     this.pageController,
-    this.height, this.width,
+    this.height = 50, this.width = 300,
     this.leftText, this.rightText,
     this.leftTextColor, this.rightTextColor
   });
@@ -28,8 +28,10 @@ class PageControllerSliderBar extends StatelessWidget {
       ),
       child: CustomPaint(
         painter: TabIndicationPainter(pageController: pageController,
-            dxTarget: width / 2 - 25,
-            dy: height / 2),
+            dxEntry: (height / 2),
+            dxTarget: width / 2 - (height / 2),
+            dy: height / 2,
+            radius: height / 2),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[

@@ -12,6 +12,7 @@ import '../data/auth_manager.dart';
 import '../data/fbdb_manager.dart';
 import '../animations/slide_in_transition.dart';
 import '../ui/standard_page_structure.dart';
+import 'package:log_ride/ui/stats_page.dart';
 import '../ui/park_search.dart';
 import '../ui/attractions_list_page.dart';
 import '../ui/app_info_page.dart';
@@ -33,7 +34,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   double _favesHeight;
-  double _allHeight;
 
   Matrix4 _favesArrowRotation;
   Matrix4 _allArrowRotation;
@@ -365,8 +365,18 @@ class _HomePageState extends State<HomePage> {
                 Padding(
                   padding: const EdgeInsets.only(right: 28.0),
                   child: InkWell(
-                      onTap: () => print("Stats"),
-                      child: _buildMenuIcon(FontAwesomeIcons.trophy)),
+                      onTap: () => Navigator.push(
+                        context,
+                        SlideInRoute(
+                          direction: SlideInDirection.UP,
+                          dialogStyle: true,
+                          widget: StatsPage(
+                            db: widget.db,
+                            serverParks: _parksManager.allParksInfo,
+                          )
+                        )
+                      ),
+                      child: _buildMenuIcon(FontAwesomeIcons.chartPie)),
                 ),
                 InkWell(
                     onTap: () => print("Lists"),

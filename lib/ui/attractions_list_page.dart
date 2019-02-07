@@ -12,7 +12,7 @@ import '../data/parks_manager.dart';
 import '../data/park_structures.dart';
 import '../data/fbdb_manager.dart';
 import '../widgets/content_frame.dart';
-import '../widgets/park_progress.dart';
+import '../widgets/progress_bars.dart';
 import '../widgets/attraction_list_widget.dart';
 import '../widgets/title_bar_icon.dart';
 

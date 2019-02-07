@@ -156,7 +156,7 @@ class _DetailsPageState extends State<DetailsPage> {
                     direction: SlideInDirection.UP,
                     widget: AttractionScorecardPage(
                         attraction: attractionData, db: widget.db)));
-          }, // TODO: Call up scoreboard page
+          },
         );
       }
 
