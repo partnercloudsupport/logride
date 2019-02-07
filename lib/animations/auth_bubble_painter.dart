@@ -44,7 +44,7 @@ class TabIndicationPainter extends CustomPainter {
         new Rect.fromCircle(center: target, radius: radius), 1.5 * pi, 1 * pi);
 
     canvas.translate(size.width * pageOffset, 0.0);
-    canvas.drawShadow(path, Colors.grey, 3.0, true);
+    //canvas.drawShadow(path, Colors.grey, 3.0, true);
     canvas.drawPath(path, painter);
   }
 

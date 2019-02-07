@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
@@ -98,7 +99,7 @@ class _StatsPageState extends State<StatsPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
                           Padding(
-                            padding: EdgeInsets.only(top: 40.0),
+                            padding: EdgeInsets.only(top: 44.0),
                             child: Container(),
                           ),
                           // Title
@@ -119,7 +120,8 @@ class _StatsPageState extends State<StatsPage> {
                             child: PageView(
                               controller: _pageController,
                               onPageChanged: _pageChanged,
-                              physics: NeverScrollableScrollPhysics(),
+                              physics: PageScrollPhysics(),
+                              //physics: NeverScrollableScrollPhysics(),
                               children: <Widget>[
                                 _buildParksPage(context, stats),
                                 _buildAttractionsPage(context, stats)
@@ -411,7 +413,7 @@ class _TopAttractionScores extends StatelessWidget {
 
     return _TopScores(
       title: "TOP ATTRACTIONS",
-      unit: "experiences",
+      unit: "Exps.",
       scores: displayScores,
     );
   }
