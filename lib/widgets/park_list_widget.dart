@@ -1,18 +1,19 @@
+import 'dart:convert';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'dart:convert';
-import '../animations/slide_up_transition.dart';
-import '../data/park_structures.dart';
-import '../widgets/park_list_entry.dart';
-import '../widgets/custom_animated_firebase_list.dart';
-import '../ui/user_parks_search.dart';
+import 'package:log_ride/animations/slide_in_transition.dart';
+import 'package:log_ride/data/park_structures.dart';
+import 'package:log_ride/widgets/park_list_entry.dart';
+import 'package:log_ride/widgets/custom_animated_firebase_list.dart';
+import 'package:log_ride/ui/user_parks_search.dart';
 
 class ParkListView extends StatelessWidget {
   ParkListView(
       {this.parksData,
       this.favorites,
-        this.showSearch = false,
+      this.showSearch = false,
       this.slidableController,
       this.sliderActionCallback,
       this.headerCallback,
@@ -102,14 +103,17 @@ class ParkListView extends StatelessWidget {
       searchWidget = IconButton(
           icon: Icon(Icons.search),
           onPressed: () {
-            Navigator.push(context, SlideUpRoute(
-              widget: UserParksSearchPage(
-                entryCallback: onTap,
-                slidableController: slidableController,
-                parksQuery: parksData,
-                sliderActionCallback: sliderActionCallback,
-              )
-            ));
+            Navigator.push(
+                context,
+                SlideInRoute(
+                    dialogStyle: true,
+                    direction: SlideInDirection.UP,
+                    widget: UserParksSearchPage(
+                      entryCallback: onTap,
+                      slidableController: slidableController,
+                      parksQuery: parksData,
+                      sliderActionCallback: sliderActionCallback,
+                    )));
           });
     } else {
       searchWidget = Container();
@@ -118,37 +122,40 @@ class ParkListView extends StatelessWidget {
     String headerText = favorites ? "Favorites " : "All Parks ";
 
     return ClipRect(
-        child: Column(
-          children: <Widget>[
-            GestureDetector(
-              onTap: () {
-                // Update the data model with the new focus state (note - not final implementation)
-                headerCallback(favorites);
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Row(
-                        children: <Widget>[
-                          Text(
-                            headerText,
-                            style: Theme.of(context).textTheme.headline,
-                            textAlign: TextAlign.left,
-                          ),
-                          arrowWidget
-                        ],
-                      ),
+      child: Column(
+        children: <Widget>[
+          GestureDetector(
+            onTap: () {
+              // Update the data model with the new focus state (note - not final implementation)
+              headerCallback(favorites);
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Container(
+                    width: MediaQuery.of(context).size.width*4/6,
+                    child: Row(
+                      children: <Widget>[
+                        AutoSizeText(
+                          headerText,
+                          maxLines: 1,
+                          style: Theme.of(context).textTheme.headline,
+                          textAlign: TextAlign.left,
+                        ),
+                        arrowWidget
+                      ],
                     ),
-                    searchWidget
-                  ],
-                ),
+                  ),
+                  searchWidget
+                ],
               ),
             ),
-            Expanded(child: content)
-          ],
-        ),
+          ),
+          Expanded(child: content)
+        ],
+      ),
     );
   }
 }

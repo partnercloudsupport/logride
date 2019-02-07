@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../animations/slide_up_transition.dart';
+import '../animations/slide_in_transition.dart';
 import '../data/attraction_structures.dart';
 import '../data/park_structures.dart';
+import '../data/fbdb_manager.dart';
 import '../widgets/experience_button.dart';
 import '../ui/details_page.dart';
 
@@ -16,7 +17,8 @@ class AttractionListEntry extends StatefulWidget {
       this.ignoreCallback,
       this.experienceHandler,
       this.parentPark,
-      this.timeChanged});
+      this.timeChanged,
+      this.db});
 
   final BluehostAttraction attractionData;
   final FirebaseAttraction userData;
@@ -25,6 +27,7 @@ class AttractionListEntry extends StatefulWidget {
   final Function(BluehostAttraction, bool) ignoreCallback;
   final Function(ExperienceAction, FirebaseAttraction) experienceHandler;
   final Function(DateTime, FirebaseAttraction, bool) timeChanged;
+  final BaseDB db;
 
   @override
   State<StatefulWidget> createState() => AttractionListState();
@@ -58,13 +61,14 @@ class AttractionListState extends State<AttractionListEntry> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  AutoSizeText(
+                  Text(
                     widget.attractionData.attractionName,
-                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.subhead,
                   ),
-                  AutoSizeText(widget.attractionData.typeLabel,
-                      maxLines: 1, style: Theme.of(context).textTheme.subtitle)
+                  Text(widget.attractionData.typeLabel,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.subtitle)
                 ],
               )),
               // If the button's not there for any reason, just show an empty container instead. Prevents null errors.
@@ -130,12 +134,15 @@ class AttractionListState extends State<AttractionListEntry> {
   void _onInfoTap() {
     Navigator.push(
         context,
-        SlideUpRoute(
+        SlideInRoute(
+            direction: SlideInDirection.UP,
+            dialogStyle: true,
             widget: DetailsPage(
-          data: widget.attractionData,
-          userData: widget.userData,
-          dateChangeHandler: (first, newTime) =>
-              widget.timeChanged(newTime, widget.userData, first),
-        )));
+              data: widget.attractionData,
+              db: widget.db,
+              userData: widget.userData,
+              dateChangeHandler: (first, newTime) =>
+                  widget.timeChanged(newTime, widget.userData, first),
+            )));
   }
 }

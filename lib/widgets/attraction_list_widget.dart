@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import '../data/attraction_structures.dart';
-import '../data/park_structures.dart';
-import '../data/parks_manager.dart';
-import '../data/fbdb_manager.dart';
-import '../widgets/experience_button.dart';
-import '../widgets/firebase_attraction_list.dart';
-import '../widgets/set_experience_box.dart';
+import 'package:log_ride/data/attraction_structures.dart';
+import 'package:log_ride/data/park_structures.dart';
+import 'package:log_ride/data/parks_manager.dart';
+import 'package:log_ride/data/fbdb_manager.dart';
+import 'package:log_ride/data/scorecard_structures.dart';
+import 'package:log_ride/ui/single_value_dialog.dart';
+import 'package:log_ride/widgets/experience_button.dart';
+import 'package:log_ride/widgets/firebase_attraction_list.dart';
+import 'package:log_ride/widgets/set_experience_box.dart';
 
 class AttractionsListView extends StatefulWidget {
   AttractionsListView(
@@ -73,8 +75,10 @@ class _AttractionsListViewState extends State<AttractionsListView> {
     Map<String, List<BluehostAttraction>> returnMap = Map();
 
     if (_hasActive) returnMap["Active"] = activeList;
-    if (_hasSeasonal && widget.parentPark.showSeasonal) returnMap["Seasonal"] = seasonalList;
-    if (_hasDefunct && widget.parentPark.showDefunct) returnMap["Defunct"] = defunctList;
+    if (_hasSeasonal && widget.parentPark.showSeasonal)
+      returnMap["Seasonal"] = seasonalList;
+    if (_hasDefunct && widget.parentPark.showDefunct)
+      returnMap["Defunct"] = defunctList;
 
     // Strings are used as headers for the list. These are checked for in the
     // Build functions for the listview.
@@ -128,10 +132,10 @@ class _AttractionsListViewState extends State<AttractionsListView> {
       ExperienceAction action, FirebaseAttraction data) async {
     switch (action) {
       case ExperienceAction.SET:
-
-      // You can't set the value if it's just toggleable.
+        // You can't set the value if it's just toggleable.
         if (!widget.parentPark.incrementorEnabled) return;
 
+        // Storing this for comparison later
         int oldValue = data.numberOfTimesRidden ?? 0;
 
         int result = await showDialog(
@@ -139,18 +143,20 @@ class _AttractionsListViewState extends State<AttractionsListView> {
             builder: (BuildContext context) =>
                 SetExperienceDialogBox(data.numberOfTimesRidden ?? 0));
 
+        // Don't do anything if there's no change or repsonse
         if (result == null) return;
         if (result == data.numberOfTimesRidden) return;
 
         data.numberOfTimesRidden = result;
 
-        // If our new result isn't zero and we used to be zero, we need to set our first ride date.
-        if(oldValue == 0 && result != 0){
+        // If our new result isn't zero and we used to be zero, we're first-timers and need to set our first ride date.
+        if (oldValue == 0 && result != 0) {
           data.firstRideDate = DateTime.now();
+          // Now, we could go through and ask for scoreboard scores, but the likelihood is that a user setting a score will go back and add their own scores manually
         }
 
         // If we're resetting our progress for this attraction, we're resetting our first ride date and last ride date
-        if(result == 0){
+        if (result == 0) {
           data.firstRideDate = DateTime.fromMillisecondsSinceEpoch(0);
           data.lastRideDate = DateTime.fromMillisecondsSinceEpoch(0);
         }
@@ -164,8 +170,10 @@ class _AttractionsListViewState extends State<AttractionsListView> {
         break;
 
       case ExperienceAction.ADD:
+        BluehostAttraction attr = getBluehostAttractionFromList(
+            widget.sourceAttractions, data.rideID);
 
-      // Use of a transaction here prevents any possible race conditions from occurring
+        // Use of a transaction here prevents any possible race conditions from occurring
         widget.db.performTransaction(
             path: DatabasePath.ATTRACTIONS,
             key: widget.parentPark.parkID.toString() +
@@ -185,15 +193,20 @@ class _AttractionsListViewState extends State<AttractionsListView> {
 
               // If we're not using the incrementor, we'll be toggling the number of times ridden.
               if (!widget.parentPark.incrementorEnabled) {
-                attraction.numberOfTimesRidden =
-                (attraction.numberOfTimesRidden == 0) ? 1 : 0;
+                bool notRiddenYet = (attraction.numberOfTimesRidden == 0);
+                attraction.numberOfTimesRidden = notRiddenYet ? 1 : 0;
+
+                if (notRiddenYet && attr.scoreCard) _collectScore(attraction);
               } else {
                 attraction.numberOfTimesRidden =
                     attraction.numberOfTimesRidden + 1;
+
+                if (attr.scoreCard) _collectScore(attraction);
               }
 
               attraction.lastRideDate = DateTime.now();
-              if(attraction.firstRideDate == DateTime.fromMillisecondsSinceEpoch(0))
+              if (attraction.firstRideDate ==
+                  DateTime.fromMillisecondsSinceEpoch(0))
                 attraction.firstRideDate = DateTime.now();
 
               // Return it back to the map/json form before giving it back to the transaction
@@ -204,7 +217,7 @@ class _AttractionsListViewState extends State<AttractionsListView> {
 
       /// Technically deprecated, isn't used anywhere in the code
       case ExperienceAction.REMOVE:
-      // We don't want this going negative.
+        // We don't want this going negative.
         if (data.numberOfTimesRidden > 0) {
           data.numberOfTimesRidden--;
           widget.db.setEntryAtPath(
@@ -218,18 +231,39 @@ class _AttractionsListViewState extends State<AttractionsListView> {
     }
   }
 
-  void _dateUpdateHandler(DateTime newDate, FirebaseAttraction data, bool first) async{
-    if(first) {
+  void _collectScore(FirebaseAttraction data) async {
+    dynamic result = await showDialog(
+        context: context,
+        builder: (BuildContext context) => SingleValueDialog(
+              type: SingleValueDialogType.NUMBER,
+              submitText: "SUBMIT",
+              title: "Submit Today's New Score",
+            ));
+
+    if (result == null) return;
+
+    ScorecardEntry newScore = ScorecardEntry(
+        time: DateTime.now(), score: result as num, rideID: data.rideID);
+
+    widget.db.setEntryAtPath(
+        path: DatabasePath.SCORECARD,
+        key:
+            "${widget.parentPark.parkID}/${data.rideID}/${newScore.time.millisecondsSinceEpoch ~/ 1000}",
+        payload: newScore.toMap());
+  }
+
+  void _dateUpdateHandler(
+      DateTime newDate, FirebaseAttraction data, bool first) async {
+    if (first) {
       data.firstRideDate = newDate;
     } else {
       data.lastRideDate = newDate;
     }
 
     widget.db.setEntryAtPath(
-      path: DatabasePath.ATTRACTIONS,
-      key: widget.parentPark.parkID.toString()+ "/" + data.rideID.toString(),
-      payload: data.toMap()
-    );
+        path: DatabasePath.ATTRACTIONS,
+        key: widget.parentPark.parkID.toString() + "/" + data.rideID.toString(),
+        payload: data.toMap());
   }
 
   // Load all
@@ -258,7 +292,7 @@ class _AttractionsListViewState extends State<AttractionsListView> {
           ignoreCallback: _ignoreCallbackHandler,
           countHandler: _updateCountHandler,
           dateHandler: _dateUpdateHandler,
+          db: widget.db,
         ));
   }
-
 }

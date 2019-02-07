@@ -13,9 +13,9 @@ enum WebLocation {
 
 class WebFetcher {
   final Map _serverURLS = {
-    WebLocation.ALL_PARKS: "http://www.beingpositioned.com/theparksman/parksdbservice.php",
-    WebLocation.PARK_ATTRACTIONS: "http://www.beingpositioned.com/theparksman/attractiondbservice.php?parkid=",
-    WebLocation.SPECIFIC_ATTRACTION: "http://www.beingpositioned.com/theparksman/getAttractionDetails.php?rideID=",
+    WebLocation.ALL_PARKS: "http://www.beingpositioned.com/theparksman/LogRide/Version1.0.5/parksdbservice.php",
+    WebLocation.PARK_ATTRACTIONS: "http://www.beingpositioned.com/theparksman/LogRide/Version1.0.5/attractiondbservice.php?parkid=",
+    WebLocation.SPECIFIC_ATTRACTION: "http://www.beingpositioned.com/theparksman/LogRide/Version1.0.5/getAttractionDetails.php?rideID=",
     WebLocation.ATTRACTION_TYPES: "http://www.beingpositioned.com/theparksman/attractionTypes.php"
   };
 

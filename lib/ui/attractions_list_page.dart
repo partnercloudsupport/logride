@@ -4,7 +4,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:firebase_database/firebase_database.dart';
-import '../animations/slide_up_transition.dart';
+import '../animations/slide_in_transition.dart';
 import '../ui/details_page.dart';
 import '../ui/standard_page_structure.dart';
 import '../ui/park_settings_page.dart';
@@ -12,7 +12,7 @@ import '../data/parks_manager.dart';
 import '../data/park_structures.dart';
 import '../data/fbdb_manager.dart';
 import '../widgets/content_frame.dart';
-import '../widgets/park_progress.dart';
+import '../widgets/progress_bars.dart';
 import '../widgets/attraction_list_widget.dart';
 import '../widgets/title_bar_icon.dart';
 
@@ -142,7 +142,7 @@ class _AttractionsPageState extends State<AttractionsPage>
               widget.serverParkData.parkName,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.headline,
-              maxLines: 1,
+              maxLines: 2,
             ),
           ),
           // Right icon
@@ -164,7 +164,9 @@ class _AttractionsPageState extends State<AttractionsPage>
 
     Navigator.push(
         context,
-        SlideUpRoute(
+        SlideInRoute(
+          direction: SlideInDirection.UP,
+            dialogStyle: true,
             widget: DetailsPage(
           data: widget.serverParkData,
           db: widget.db,
@@ -174,7 +176,9 @@ class _AttractionsPageState extends State<AttractionsPage>
   void _openSettingsPage(FirebasePark userData) {
     Future<dynamic> result = Navigator.push(
         context,
-        SlideUpRoute(
+        SlideInRoute(
+          direction: SlideInDirection.UP,
+          dialogStyle: true,
           widget: ParkSettingsPage(
             userData: userData,
             parkData: widget.serverParkData,

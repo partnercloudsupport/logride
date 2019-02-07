@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/home_icon.dart';
 
+/// Centers content and applies a homeIcon in the appropriate position on the stack.
 class StandardPageStructure extends StatelessWidget {
   StandardPageStructure({this.content, this.iconDecoration, this.iconFunction});
 

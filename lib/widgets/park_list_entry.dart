@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'park_progress.dart';
+import 'progress_bars.dart';
 import '../data/park_structures.dart';
 
 enum ParkSlideActionType { faveAdd, faveRemove, delete }
@@ -92,15 +92,16 @@ class ParkListEntry extends StatelessWidget {
                         children: <Widget>[
                           // AutoSizeText is used to avoid overflow, since park names
                           // and locations may have unknown lengths.
-                          AutoSizeText(
+                          Text(
                             parkData.name,
                             style: Theme.of(context).textTheme.subhead,
                             maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          AutoSizeText(
+                          Text(
                             parkData.location,
                             style: Theme.of(context).textTheme.subtitle,
-                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           )
                         ],
                       ),

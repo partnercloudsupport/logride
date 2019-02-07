@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:shimmer/shimmer.dart';
+import '../data/color_constants.dart';
 
 /// [ParkProgessListItem] is a small progressbar overlaid with text, documenting how many
 /// [numRides] a park has and comparing that to the user's [numRidden]
@@ -30,7 +31,7 @@ class ParkProgressListItem extends StatelessWidget {
                 child: Stack(
                   children: <Widget>[
                     Container(
-                      color: new Color.fromARGB(255, 221, 222, 224),
+                      color: PROGRESS_BAR_BACKING,
                       constraints: BoxConstraints.expand(),
                     ),
                     FractionBar(
@@ -78,7 +79,7 @@ class FullParkProgressBar extends StatelessWidget {
       children: <Widget>[
         // Background - full bar with blank decor
         Container(
-          color: Color.fromARGB(255, 221, 222, 224),
+          color: PROGRESS_BAR_BACKING,
           constraints: BoxConstraints.expand(),
         ),
         // Foreground - percentage bar with progress color
@@ -144,10 +145,12 @@ class AnimatedProgressBarManager extends StatefulWidget {
   AnimatedProgressBarManager({
     this.totalCount,
     this.riddenCount,
-    this.oldRatio});
+    this.oldRatio,
+    this.shimmer = true});
 
   final int totalCount, riddenCount;
   final double oldRatio;
+  final bool shimmer;
 
   @override
   State<StatefulWidget> createState() => _AnimatedProgressBarManagerState();
@@ -156,6 +159,12 @@ class AnimatedProgressBarManager extends StatefulWidget {
 class _AnimatedProgressBarManagerState extends State<AnimatedProgressBarManager> with TickerProviderStateMixin{
   AnimationController controller;
   Animation<double> animation;
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -191,12 +200,13 @@ class _AnimatedProgressBarManagerState extends State<AnimatedProgressBarManager>
       children: <Widget>[
         // Background - full bar with blank decor
         Container(
-          color: Color.fromARGB(255, 221, 222, 224),
+          color: PROGRESS_BAR_BACKING,
           constraints: BoxConstraints.expand(),
         ),
         // Foreground - percentage bar with progress color
         AnimatedFractionBar(
           animation: animation,
+          shimmer: widget.shimmer
         )
       ],
     );
@@ -204,16 +214,18 @@ class _AnimatedProgressBarManagerState extends State<AnimatedProgressBarManager>
 }
 
 class AnimatedFractionBar extends AnimatedWidget {
-  AnimatedFractionBar({Key key, Animation<double> animation}) : super(key: key, listenable: animation);
+  AnimatedFractionBar({Key key, Animation<double> animation, this.shimmer = true}) : super(key: key, listenable: animation);
+
+  final bool shimmer;
 
   @override
   Widget build(BuildContext context) {
     final Animation<double> animation = listenable;
-    if(animation.value == 1.0){
+    if(animation.value == 1.0 && shimmer){
       return Shimmer.fromColors(
-        child: Container(constraints: BoxConstraints.expand(), color: Color.fromARGB(255, 250, 204, 73)),
-        baseColor: Color.fromARGB(255, 250, 204, 73),
-        highlightColor: Color.fromARGB(255, 252, 227, 154),
+        child: Container(constraints: BoxConstraints.expand(), color: PROGRESS_BAR_GOLD),
+        baseColor: PROGRESS_BAR_GOLD,
+        highlightColor: PROGRESS_BAR_GOLD_SHIMMER,
         period: const Duration(milliseconds: 2500),
       );
     } else {
@@ -237,9 +249,9 @@ class FractionBar extends StatelessWidget {
   Widget build(BuildContext context) {
     if(ratio == 1.0){
       return Shimmer.fromColors(
-        child: Container(constraints: BoxConstraints.expand(), color: Color.fromARGB(255, 250, 204, 73)),
-        baseColor: Color.fromARGB(255, 250, 204, 73),
-        highlightColor: Color.fromARGB(255, 252, 227, 154),
+        child: Container(constraints: BoxConstraints.expand(), color: PROGRESS_BAR_GOLD),
+        baseColor: PROGRESS_BAR_GOLD,
+        highlightColor: PROGRESS_BAR_GOLD_SHIMMER,
         period: const Duration(milliseconds: 2500),
       );
     } else {

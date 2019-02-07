@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../data/park_structures.dart';
+import '../widgets/interface_button.dart';
 
 class ParkSettingsPage extends StatefulWidget {
   ParkSettingsPage({this.userData, this.parkData});
@@ -142,7 +143,7 @@ class _ParkSettingsPageState extends State<ParkSettingsPage> {
           _data.showDefunct = value;
         },
       ),
-      SettingsButton(
+      InterfaceButton(
         text: "Submit New Attraction".toUpperCase(),
         onPressed: () => print("Submit new attraction called"),
         color: Theme.of(context).primaryColor,
@@ -156,11 +157,11 @@ class _ParkSettingsPageState extends State<ParkSettingsPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
-        SettingsButton(
+        InterfaceButton(
           icon: Icon(FontAwesomeIcons.times, color: Colors.grey[600]),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        SettingsButton(
+        InterfaceButton(
           icon: Icon(FontAwesomeIcons.check,
               color: Theme.of(context).primaryColor),
           onPressed: submit,
@@ -172,30 +173,5 @@ class _ParkSettingsPageState extends State<ParkSettingsPage> {
   void submit() {
     _formKey.currentState.save();
     Navigator.of(context).pop(_data);
-  }
-}
-
-class SettingsButton extends StatelessWidget {
-  SettingsButton(
-      {this.text, this.icon, this.onPressed, this.color, this.textColor});
-
-  final String text;
-  final Icon icon;
-  final VoidCallback onPressed;
-  final Color color;
-  final Color textColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return RaisedButton(
-      color: color ?? Colors.grey[200],
-      onPressed: onPressed ?? () => print("No function assigned for button"),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-      child: (icon != null)
-          ? Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.0), child: icon)
-          : Text(text),
-      textColor: textColor ?? Colors.black,
-    );
   }
 }
