@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:collection';
 import 'package:latlong/latlong.dart';
+import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
-import 'package:log_ride/data/attraction_structures.dart';
 
 const int _MAX_LIST_SIZE = 5;
 

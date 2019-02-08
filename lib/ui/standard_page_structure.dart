@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../widgets/home_icon.dart';
+import 'package:log_ride/widgets/home_icon.dart';
 
 /// Centers content and applies a homeIcon in the appropriate position on the stack.
 class StandardPageStructure extends StatelessWidget {

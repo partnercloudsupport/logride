@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
-import '../data/park_structures.dart';
+import 'package:log_ride/data/park_structures.dart';
 
 class GenericListEntry extends StatefulWidget{
   GenericListEntry({this.park, this.onTap});

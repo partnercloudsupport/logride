@@ -1,21 +1,22 @@
+import 'dart:math' as math;
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'dart:math' as math;
-import '../widgets/park_list_widget.dart';
-import '../widgets/park_list_entry.dart';
-import '../widgets/content_frame.dart';
-import '../data/park_structures.dart';
-import '../data/parks_manager.dart';
-import '../data/webfetcher.dart';
-import '../data/auth_manager.dart';
-import '../data/fbdb_manager.dart';
-import '../animations/slide_in_transition.dart';
-import '../ui/standard_page_structure.dart';
+import 'package:log_ride/animations/slide_in_transition.dart';
+import 'package:log_ride/data/park_structures.dart';
+import 'package:log_ride/data/parks_manager.dart';
+import 'package:log_ride/data/webfetcher.dart';
+import 'package:log_ride/data/auth_manager.dart';
+import 'package:log_ride/data/fbdb_manager.dart';
+import 'package:log_ride/ui/standard_page_structure.dart';
 import 'package:log_ride/ui/stats_page.dart';
-import '../ui/park_search.dart';
-import '../ui/attractions_list_page.dart';
-import '../ui/app_info_page.dart';
+import 'package:log_ride/ui/park_search.dart';
+import 'package:log_ride/ui/attractions_list_page.dart';
+import 'package:log_ride/ui/app_info_page.dart';
+import 'package:log_ride/widgets/park_list_widget.dart';
+import 'package:log_ride/widgets/park_list_entry.dart';
+import 'package:log_ride/widgets/content_frame.dart';
 
 enum SectionFocus { favorites, all, balanced }
 

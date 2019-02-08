@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../widgets/hyperlink_text.dart';
+import 'package:log_ride/widgets/hyperlink_text.dart';
 
 class PhotoCreditText extends StatelessWidget {
   PhotoCreditText({this.photoUrl, this.username, this.ccType, this.style});

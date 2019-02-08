@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:shimmer/shimmer.dart';
-import '../data/color_constants.dart';
+import 'package:log_ride/data/color_constants.dart';
 
 /// [ParkProgessListItem] is a small progressbar overlaid with text, documenting how many
 /// [numRides] a park has and comparing that to the user's [numRidden]

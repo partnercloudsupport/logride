@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../animations/slide_in_transition.dart';
-import '../data/attraction_structures.dart';
-import '../data/park_structures.dart';
-import '../data/fbdb_manager.dart';
-import '../widgets/experience_button.dart';
-import '../ui/details_page.dart';
+import 'package:log_ride/animations/slide_in_transition.dart';
+import 'package:log_ride/data/attraction_structures.dart';
+import 'package:log_ride/data/park_structures.dart';
+import 'package:log_ride/data/fbdb_manager.dart';
+import 'package:log_ride/widgets/experience_button.dart';
+import 'package:log_ride/ui/details_page.dart';
 
 class AttractionListEntry extends StatefulWidget {
   AttractionListEntry(

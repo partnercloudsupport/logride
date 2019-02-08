@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'data/auth_manager.dart';
-import 'data/fbdb_manager.dart';
-import 'ui/park_search.dart';
-import 'ui/landing_page.dart';
+import 'package:log_ride/data/auth_manager.dart';
+import 'package:log_ride/data/fbdb_manager.dart';
+import 'package:log_ride/ui/park_search.dart';
+import 'package:log_ride/ui/landing_page.dart';
 
 class MyApp extends StatelessWidget {
 

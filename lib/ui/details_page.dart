@@ -1,23 +1,24 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:latlong/latlong.dart' as oldLatLng;
 import 'package:url_launcher/url_launcher.dart';
-import 'package:intl/intl.dart';
-import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
-import '../animations/slide_in_transition.dart';
-import '../data/attraction_structures.dart';
-import '../data/fbdb_manager.dart';
-import '../data/park_structures.dart';
-import '../widgets/content_frame.dart';
-import '../widgets/embedded_map_entry.dart';
-import '../widgets/side_strike_text.dart';
-import '../widgets/stored_image_widget.dart';
-import '../widgets/photo_credit_text.dart';
-import '../widgets/title_bar_icon.dart';
-import '../ui/attraction_scorecard_page.dart';
-import '../ui/standard_page_structure.dart';
+
+import 'package:log_ride/animations/slide_in_transition.dart';
+import 'package:log_ride/data/attraction_structures.dart';
+import 'package:log_ride/data/fbdb_manager.dart';
+import 'package:log_ride/data/park_structures.dart';
+import 'package:log_ride/widgets/content_frame.dart';
+import 'package:log_ride/widgets/embedded_map_entry.dart';
+import 'package:log_ride/widgets/side_strike_text.dart';
+import 'package:log_ride/widgets/stored_image_widget.dart';
+import 'package:log_ride/widgets/photo_credit_text.dart';
+import 'package:log_ride/widgets/title_bar_icon.dart';
+import 'package:log_ride/ui/attraction_scorecard_page.dart';
+import 'package:log_ride/ui/standard_page_structure.dart';
 
 enum _DetailsType { PARK_DETAILS, ATTRACTION_DETAILS }
 

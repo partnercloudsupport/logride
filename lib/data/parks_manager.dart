@@ -1,8 +1,9 @@
-import '../data/fbdb_manager.dart';
-import '../data/park_structures.dart';
-import '../data/attraction_structures.dart';
-import '../data/webfetcher.dart';
+import 'dart:async';
 import 'dart:convert';
+import 'package:log_ride/data/attraction_structures.dart';
+import 'package:log_ride/data/fbdb_manager.dart';
+import 'package:log_ride/data/park_structures.dart';
+import 'package:log_ride/data/webfetcher.dart';
 
 class ParksManager {
   ParksManager({this.db, this.wf});

@@ -1,5 +1,5 @@
-import 'attraction_structures.dart';
 import 'package:latlong/latlong.dart';
+import 'package:log_ride/data/attraction_structures.dart';
 
 class FirebasePark {
   bool checkedInToday = false;

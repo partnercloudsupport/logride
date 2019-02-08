@@ -1,11 +1,13 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../widgets/submit_button.dart';
-import '../widgets/home_icon.dart';
-import '../widgets/page_controller_slider_bar.dart';
-import '../data/auth_manager.dart';
-import '../data/contact_url_constants.dart';
+
+import 'package:log_ride/widgets/submit_button.dart';
+import 'package:log_ride/widgets/home_icon.dart';
+import 'package:log_ride/widgets/page_controller_slider_bar.dart';
+import 'package:log_ride/data/auth_manager.dart';
+import 'package:log_ride/data/contact_url_constants.dart';
 
 class AuthPage extends StatefulWidget {
   AuthPage({this.auth, this.onSignedIn});

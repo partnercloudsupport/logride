@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import '../ui/standard_page_structure.dart';
-import '../widgets/content_frame.dart';
-import '../widgets/park_list_widget.dart';
-import '../widgets/custom_animated_firebase_list.dart';
+import 'package:log_ride/ui/standard_page_structure.dart';
+import 'package:log_ride/widgets/content_frame.dart';
+import 'package:log_ride/widgets/park_list_widget.dart';
+import 'package:log_ride/widgets/custom_animated_firebase_list.dart';
 
 class UserParksSearchPage extends StatefulWidget {
   UserParksSearchPage(

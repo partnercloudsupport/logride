@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../animations/auth_bubble_painter.dart';
+import 'package:log_ride/animations/auth_bubble_painter.dart';
 
 class PageControllerSliderBar extends StatelessWidget {
   PageControllerSliderBar({

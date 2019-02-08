@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'park_structures.dart';
-import 'attraction_structures.dart';
+import 'package:log_ride/data/park_structures.dart';
+import 'package:log_ride/data/attraction_structures.dart';
 
 enum WebLocation {
   ALL_PARKS,

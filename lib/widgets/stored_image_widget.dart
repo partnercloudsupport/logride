@@ -1,9 +1,10 @@
+import 'dart:async';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:photo_view/photo_view.dart';
-import '../widgets/hero_network_image.dart';
-import '../widgets/back_button.dart';
+import 'package:log_ride/widgets/hero_network_image.dart';
+import 'package:log_ride/widgets/back_button.dart';
 
 class FirebaseAttractionImage extends StatefulWidget {
   FirebaseAttractionImage({this.parkID, this.attractionID, this.overlay});

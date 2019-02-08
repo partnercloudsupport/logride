@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../data/color_constants.dart';
+import 'package:log_ride/data/color_constants.dart';
 
 class InterfaceButton extends StatelessWidget {
   InterfaceButton(

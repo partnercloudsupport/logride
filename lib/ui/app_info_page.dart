@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:package_info/package_info.dart';
-import '../widgets/home_icon.dart';
-import '../widgets/back_button.dart';
-import '../widgets/hyperlink_text.dart';
-import '../data/contact_url_constants.dart';
+import 'package:log_ride/data/contact_url_constants.dart';
+import 'package:log_ride/widgets/home_icon.dart';
+import 'package:log_ride/widgets/hyperlink_text.dart';
+import 'package:log_ride/widgets/back_button.dart';
 
 class AppInfoPage extends StatefulWidget {
   AppInfoPage(

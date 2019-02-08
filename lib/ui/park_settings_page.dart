@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../data/park_structures.dart';
-import '../widgets/interface_button.dart';
+import 'package:log_ride/data/park_structures.dart';
+import 'package:log_ride/widgets/interface_button.dart';
 
 class ParkSettingsPage extends StatefulWidget {
   ParkSettingsPage({this.userData, this.parkData});
