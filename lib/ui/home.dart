@@ -415,23 +415,25 @@ class _HomePageState extends State<HomePage> {
             ),
             Row(
               children: <Widget>[
+                /*
                 Padding(
                   padding: const EdgeInsets.only(right: 28.0),
-                  child: InkWell(
-                      onTap: () => Navigator.push(
-                          context,
-                          SlideInRoute(
-                              direction: SlideInDirection.UP,
-                              dialogStyle: true,
-                              widget: StatsPage(
-                                db: widget.db,
-                                serverParks: _parksManager.allParksInfo,
-                              ))),
-                      child: _buildMenuIcon(FontAwesomeIcons.chartPie)),
+                  child: ,
                 ),
                 InkWell(
                     onTap: () => print("Lists"),
-                    child: _buildMenuIcon(FontAwesomeIcons.listAlt))
+                    child: _buildMenuIcon(FontAwesomeIcons.listAlt))*/
+                InkWell(
+                    onTap: () => Navigator.push(
+                        context,
+                        SlideInRoute(
+                            direction: SlideInDirection.UP,
+                            dialogStyle: true,
+                            widget: StatsPage(
+                              db: widget.db,
+                              serverParks: _parksManager.allParksInfo,
+                            ))),
+                    child: _buildMenuIcon(FontAwesomeIcons.chartPie))
               ],
             )
           ],
