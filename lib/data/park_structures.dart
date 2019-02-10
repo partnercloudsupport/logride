@@ -14,7 +14,7 @@ class FirebasePark {
   final int parkID;
   int ridesRidden = 0;
   bool showDefunct = false;
-  bool showSeasonal = false;
+  bool showSeasonal = true;
   int totalRides = 0;
 
   FirebasePark({this.parkID, this.name, this.location});
@@ -87,6 +87,11 @@ class FirebasePark {
 
       // If it's defunct, it only adds to the defunct count if it's been ridden
       if (!serverAttraction.active) {
+        // If the park is defunct, add the defunct attraction to the total number of attractions
+        if (!targetPark.active) {
+          numAttractions++;
+        }
+
         if ((userAttraction?.numberOfTimesRidden ?? -1) > 0) {
           numDefunctRidden++;
         }
@@ -109,6 +114,10 @@ class FirebasePark {
     this.numSeasonalRidden = numSeasonalRidden;
     this.ridesRidden = numRidden;
     this.totalRides = numAttractions;
+
+    if (!targetPark.active) {
+      this.ridesRidden = numDefunctRidden;
+    }
   }
 }
 

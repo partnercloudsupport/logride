@@ -74,6 +74,11 @@ class ParksManager {
 
     FirebasePark translated = targetPark.toNewFirebaseEntry();
 
+    if(!targetPark.active) {
+      // If a park is defunct, show defunct attractions since all attractions will be defunct
+      translated.showDefunct = true;
+    }
+
     translated.updateAttractionCount(targetPark: targetPark);
 
     // Push the translated park into the database
