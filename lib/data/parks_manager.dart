@@ -58,16 +58,19 @@ class ParksManager {
     return true;
   }
 
-  void addParkToUser(num targetParkID) async {
+  Future<bool> addParkToUser(num targetParkID) async {
     // Find if we already have the park
     bool exists = await db.doesEntryExistAtPath(
         path: DatabasePath.PARKS, key: targetParkID.toString());
-    if (exists) return; // If the park is already there, ignore it
+    if (exists) return false; // If the park is already there, ignore it
 
     // Get our targeted park, calculate ride
     BluehostPark targetPark = getBluehostParkByID(allParksInfo, targetParkID);
     targetPark.attractions = await wf.getAllAttractionData(
         parkID: targetParkID, rideTypes: attractionTypes, allParks: allParksInfo);
+
+    print(targetPark.attractions);
+    print(targetPark.attractions.length);
 
     FirebasePark translated = targetPark.toNewFirebaseEntry();
 
@@ -78,6 +81,8 @@ class ParksManager {
         path: DatabasePath.PARKS,
         key: targetParkID.toString(),
         payload: translated.toMap());
+
+    return true;
   }
 
   void removeParkFromUserData(num targetID) async {

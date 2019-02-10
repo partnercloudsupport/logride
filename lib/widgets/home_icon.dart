@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class HomeIconButton extends StatelessWidget{
+class HomeIconButton extends StatelessWidget {
   HomeIconButton({this.onTap, this.decoration});
 
   final Function onTap;
@@ -11,7 +11,7 @@ class HomeIconButton extends StatelessWidget{
     Widget decor;
     Color colorOverlay;
 
-    if(decoration != null){
+    if (decoration != null) {
       decor = decoration;
       colorOverlay = Colors.black54;
     } else {
@@ -25,7 +25,9 @@ class HomeIconButton extends StatelessWidget{
           child: Padding(
             padding: const EdgeInsets.only(top: 4.0),
             child: GestureDetector(
-              onTap: onTap != null ? onTap : (){}, // Pass an empty function if we don't have a tap function
+              onTap: onTap != null
+                  ? onTap
+                  : () {}, // Pass an empty function if we don't have a tap function
               child: Container(
                 height: 85.4,
                 width: 85.4,
@@ -37,7 +39,8 @@ class HomeIconButton extends StatelessWidget{
                         decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             image: DecorationImage(
-                                colorFilter: ColorFilter.mode(colorOverlay, BlendMode.multiply),
+                                colorFilter: ColorFilter.mode(
+                                    colorOverlay, BlendMode.multiply),
                                 image: AssetImage('assets/appicon.png')),
                             border: Border.all(
                               color: Colors.white,

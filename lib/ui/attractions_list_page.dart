@@ -68,14 +68,21 @@ class _AttractionsPageState extends State<AttractionsPage>
         child: StreamBuilder<Event>(
             stream: _parkStream,
             builder: (BuildContext context, AsyncSnapshot<Event> stream) {
-              if (!stream.hasData) {
+              if (!stream.hasData || stream.data == null || stream.data.snapshot.value == null) {
                 return Container(
                     constraints: BoxConstraints.expand(),
-                    child: CircularProgressIndicator());
+                    child: Center(child: CircularProgressIndicator()));
               } else {
-                Map parkDataMap =
-                    jsonDecode(jsonEncode(stream.data.snapshot.value));
-                FirebasePark parkData = FirebasePark.fromMap(parkDataMap);
+                FirebasePark parkData = FirebasePark.fromMap(Map.from(stream.data.snapshot.value));
+
+                // Sometimes we do get data but it's not quite proper. This means something is happening elsewhere
+                // Just show the circle thing.
+                if(parkData == null || parkData.totalRides == null) {
+                  return Container(
+                      constraints: BoxConstraints.expand(),
+                      child: Center(child: CircularProgressIndicator()));
+                }
+
                 print(
                     "Successfully recived parkData for attractions list page");
 
@@ -187,7 +194,7 @@ class _AttractionsPageState extends State<AttractionsPage>
         ));
 
     result.then((value) {
-      if(value != Null){
+      if(value != null){
         ParkSettingsData settingsData = value as ParkSettingsData;
         print("User has submitted settings");
         userData.incrementorEnabled = settingsData.tally;
