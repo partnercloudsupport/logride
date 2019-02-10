@@ -4,16 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/animations/slide_in_transition.dart';
+import 'package:log_ride/data/check_in_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/parks_manager.dart';
 import 'package:log_ride/data/webfetcher.dart';
 import 'package:log_ride/data/auth_manager.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
-import 'package:log_ride/ui/standard_page_structure.dart';
 import 'package:log_ride/ui/stats_page.dart';
 import 'package:log_ride/ui/park_search.dart';
 import 'package:log_ride/ui/attractions_list_page.dart';
 import 'package:log_ride/ui/app_info_page.dart';
+import 'package:log_ride/widgets/home_icon.dart';
+import 'package:log_ride/widgets/check_in_widget.dart';
 import 'package:log_ride/widgets/park_list_widget.dart';
 import 'package:log_ride/widgets/park_list_entry.dart';
 import 'package:log_ride/widgets/content_frame.dart';
@@ -34,20 +36,26 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  double _favesHeight;
+  final SlidableController _slidableController = SlidableController();
 
+  // Variables relating to the focus effect
+  SectionFocus focus = SectionFocus.balanced;
+  double _favesHeight;
   Matrix4 _favesArrowRotation;
   Matrix4 _allArrowRotation;
 
-  SectionFocus focus = SectionFocus.balanced;
-
+  // Used for debugging and future features
   String userName = "";
 
-  final SlidableController _slidableController = SlidableController();
+  // Data management
   ParksManager _parksManager = ParksManager();
   WebFetcher _webFetcher = WebFetcher();
-
   Future<bool> initialized;
+
+  // Check-in Variables
+  CheckInManager _checkInManager;
+  bool isInPark = false;
+  int inParkID = -1;
 
   double _calculateFavoritesSectionHeight(SectionFocus focus) {
     // Get our total possible height
@@ -143,7 +151,7 @@ class _HomePageState extends State<HomePage> {
         getBluehostParkByID(_parksManager.allParksInfo, park.parkID);
 
     // This should only happen on the rare occasion that the user opens the app
-    // then immidiately taps on a park tile. Making it so that nothing happens
+    // then immediately taps on a park tile. Making it so that nothing happens
     // means the user will think they missed, hopefully giving us enough time to
     // actually load park data.
     if (serverPark.attractions == null) {
@@ -164,8 +172,27 @@ class _HomePageState extends State<HomePage> {
             )));
   }
 
-  void _handleAddCallback(BluehostPark park) async {
+  void _handleAddCallback(BluehostPark park) {
     _parksManager.addParkToUser(park.id);
+  }
+
+  Future<bool> _handleAddIDCallback(int id) async {
+    await _parksManager.addParkToUser(id);
+    return true;
+  }
+
+  // This function adds the park to the current user's parks (if it isn't already) and opens it
+  void _handleCheckInCallback(int parkID) async {
+    BluehostPark serverPark =
+        getBluehostParkByID(_parksManager.allParksInfo, parkID);
+
+    Navigator.push(
+        context,
+        SlideInRoute(
+            direction: SlideInDirection.UP,
+            dialogStyle: true,
+            widget: AttractionsPage(
+                pm: _parksManager, db: widget.db, serverParkData: serverPark)));
   }
 
   void _signOut() async {
@@ -189,6 +216,13 @@ class _HomePageState extends State<HomePage> {
     _webFetcher = WebFetcher();
     _parksManager = ParksManager(db: widget.db, wf: _webFetcher);
     initialized = _parksManager.init();
+
+    initialized.then((_) {
+      _checkInManager = CheckInManager(
+          db: widget.db,
+          serverParks: _parksManager.allParksInfo,
+          addPark: _handleAddIDCallback);
+    });
 
     widget.auth.getCurrentUserName().then((name) {
       userName = name;
@@ -334,12 +368,30 @@ class _HomePageState extends State<HomePage> {
         },
         backgroundColor: Theme.of(context).primaryColor,
       ),
-      body: StandardPageStructure(
-        content: <Widget>[
-          _buildMenuBar(context),
-          content,
-        ],
-      ),
+      body: Container(
+          child: Center(
+        child: SafeArea(
+          child: Stack(
+            children: <Widget>[
+              _buildMenuBar(context),
+              content,
+              FutureBuilder<bool>(
+                future: initialized,
+                builder: (BuildContext context, AsyncSnapshot<bool> snap) {
+                  if (!snap.hasData) {
+                    return HomeIconButton();
+                  } else {
+                    return CheckInWidget(
+                      manager: _checkInManager,
+                      onTap: _handleCheckInCallback,
+                    );
+                  }
+                },
+              )
+            ],
+          ),
+        ),
+      )),
     );
   }
 
@@ -367,16 +419,14 @@ class _HomePageState extends State<HomePage> {
                   padding: const EdgeInsets.only(right: 28.0),
                   child: InkWell(
                       onTap: () => Navigator.push(
-                        context,
-                        SlideInRoute(
-                          direction: SlideInDirection.UP,
-                          dialogStyle: true,
-                          widget: StatsPage(
-                            db: widget.db,
-                            serverParks: _parksManager.allParksInfo,
-                          )
-                        )
-                      ),
+                          context,
+                          SlideInRoute(
+                              direction: SlideInDirection.UP,
+                              dialogStyle: true,
+                              widget: StatsPage(
+                                db: widget.db,
+                                serverParks: _parksManager.allParksInfo,
+                              ))),
                       child: _buildMenuIcon(FontAwesomeIcons.chartPie)),
                 ),
                 InkWell(
