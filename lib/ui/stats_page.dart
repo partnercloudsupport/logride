@@ -93,18 +93,16 @@ class _StatsPageState extends State<StatsPage> {
                     );
                   } else {
                     UserStats stats = snap.data;
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                      child: Column(
+                    return Column(
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
                           Padding(
-                            padding: EdgeInsets.only(top: 44.0),
+                            padding: EdgeInsets.only(top: 32.0),
                             child: Container(),
                           ),
                           // Title
                           Padding(
-                            padding: const EdgeInsets.only(bottom: 12.0),
+                            padding: const EdgeInsets.all(12.0),
                             child: PageControllerSliderBar(
                               pageController: _pageController,
                               leftText: "Parks",
@@ -129,7 +127,6 @@ class _StatsPageState extends State<StatsPage> {
                             ),
                           )
                         ],
-                      ),
                     );
                   }
                 },
@@ -143,97 +140,103 @@ class _StatsPageState extends State<StatsPage> {
 
   Widget _buildParksPage(BuildContext context, UserStats stats) {
     return SingleChildScrollView(
-      child: Column(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          _PageHeader(text: "PARKS STATS"),
-          _SidedProgressBar(
-            left: stats.parksCompleted,
-            right: stats.totalParks,
-            leftText: "Completed",
-            rightText: "Experienced",
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Divider(
-              height: 8.0,
-              color: Theme.of(context).primaryColor,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            _PageHeader(text: "PARKS STATS"),
+            _SidedProgressBar(
+              left: stats.parksCompleted,
+              right: stats.totalParks,
+              leftText: "Completed",
+              rightText: "Experienced",
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: _TopParkScores(
-              scores: stats.topParks,
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Divider(
+                height: 8.0,
+                color: Theme.of(context).primaryColor,
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Divider(
-              height: 8.0,
-              color: Theme.of(context).primaryColor,
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: _TopParkScores(
+                scores: stats.topParks,
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12.0),
-            child: _CountriesBox(
-              countries: stats.countries,
-              mapData: stats.parkLocations,
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Divider(
+                height: 8.0,
+                color: Theme.of(context).primaryColor,
+              ),
             ),
-          )
-        ],
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12.0),
+              child: _CountriesBox(
+                countries: stats.countries,
+                mapData: stats.parkLocations,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildAttractionsPage(BuildContext context, UserStats stats) {
     return SingleChildScrollView(
-      child: Column(
-        children: <Widget>[
-          _PageHeader(text: "ATTRACTION STATS"),
-          _HeaderStat(
-            stat: stats.totalAttractionsChecked,
-            text: "CHECKED ATTRACTIONS"
-          ),
-          _SummedProgressBar(
-            left: stats.activeAttractionsChecked,
-            right: stats.extinctAttractionsChecked,
-            leftText: "Active",
-            rightText: "Defunct",
-            shimmer: false,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Divider(
-              height: 8.0,
-              color: Theme.of(context).primaryColor,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0),
+        child: Column(
+          children: <Widget>[
+            _PageHeader(text: "ATTRACTION STATS"),
+            _HeaderStat(
+              stat: stats.totalAttractionsChecked,
+              text: "CHECKED ATTRACTIONS"
             ),
-          ),
-          _HeaderStat(
-              stat: stats.totalExperiences,
-              text: "TOTAL EXPERIENCES"
-          ),
-          _TopAttractionScores(
-            scores: stats.topAttractions,
-          ),
-          // Bottom padding is used so the user doesn't see it butting up right against the bottom
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Divider(
-              height: 8.0,
-              color: Theme.of(context).primaryColor,
+            _SummedProgressBar(
+              left: stats.activeAttractionsChecked,
+              right: stats.extinctAttractionsChecked,
+              leftText: "Active",
+              rightText: "Defunct",
+              shimmer: false,
             ),
-          ),
-          _StatlessHeader(
-            text: "ATTRACTIONS OVERVIEW",
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: AttractionStats(
-              stats: stats
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Divider(
+                height: 8.0,
+                color: Theme.of(context).primaryColor,
+              ),
             ),
-          )
-        ],
+            _HeaderStat(
+                stat: stats.totalExperiences,
+                text: "TOTAL EXPERIENCES"
+            ),
+            _TopAttractionScores(
+              scores: stats.topAttractions,
+            ),
+            // Bottom padding is used so the user doesn't see it butting up right against the bottom
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Divider(
+                height: 8.0,
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+            _StatlessHeader(
+              text: "ATTRACTIONS OVERVIEW",
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: AttractionStats(
+                stats: stats
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
