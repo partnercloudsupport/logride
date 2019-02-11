@@ -120,6 +120,7 @@ class _HomePageState extends State<HomePage> {
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
                 title: Text("Delete Park Data?"),
                 content: Text(
                     "This will permanately delete your progress for ${park.name}"),
