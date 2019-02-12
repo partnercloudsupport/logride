@@ -77,6 +77,9 @@ class _AuthPageState extends State<AuthPage>
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15.0)
+            ),
             title: Text("Invalid Authentication"),
             content: Text(body),
             actions: <Widget>[
