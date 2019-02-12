@@ -41,8 +41,6 @@ class WebFetcher {
 
     final response = await http.get(_serverURLS[WebLocation.PARK_ATTRACTIONS] + parkID.toString());
 
-    print(response);
-
     if(response.statusCode == 200){
       List<dynamic> decoded = jsonDecode(response.body);
       for(int i =0; i < decoded.length; i++){

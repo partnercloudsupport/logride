@@ -26,12 +26,11 @@ class _CheckInWidgetState extends State<CheckInWidget> {
       });
 
       if(checkInData.park == null){
-        print("Park Data is null");
+        print("User is not currently located in/near a park.");
         return;
       }
 
-      print(checkInData.park.parkName);
-      print(checkInData.checkedInToday ? "Checked In" : "Not checked in");
+      print(checkInData.checkedInToday ? "User has previously checked in today" : "User has not previously checked in today");
 
       if (!checkInData.checkedInToday) {
         await _openCheckInDialog();
@@ -47,9 +46,9 @@ class _CheckInWidgetState extends State<CheckInWidget> {
       );
     });
     if(shouldCheckIn){
-      print("We should check in");
+      print("User wants to check in to park ${checkInData.park.parkName}");
       widget.manager.checkIn(checkInData.park.id);
-      print("Manager has checked in, now to have the thing open");
+      print("Manager has checked in to the park, opening the park page.");
       widget.onTap(checkInData.park.id);
     }
     return true;

@@ -353,7 +353,7 @@ class _HomePageState extends State<HomePage> {
         ),
         onPressed: () {
           if (!_parksManager.searchInitialized) {
-            print("Search hasn't been initialized yet.");
+            print("Search hasn't been initialized yet. Preventing user from viewing search page.");
             return;
           }
 
@@ -416,14 +416,6 @@ class _HomePageState extends State<HomePage> {
             ),
             Row(
               children: <Widget>[
-                /*
-                Padding(
-                  padding: const EdgeInsets.only(right: 28.0),
-                  child: ,
-                ),
-                InkWell(
-                    onTap: () => print("Lists"),
-                    child: _buildMenuIcon(FontAwesomeIcons.listAlt))*/
                 InkWell(
                     onTap: () => Navigator.push(
                         context,

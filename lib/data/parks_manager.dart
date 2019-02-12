@@ -64,19 +64,21 @@ class ParksManager {
         path: DatabasePath.PARKS, key: targetParkID.toString());
     if (exists) return false; // If the park is already there, ignore it
 
+    print("Adding a new park to our user.");
+
     // Get our targeted park, calculate ride
     BluehostPark targetPark = getBluehostParkByID(allParksInfo, targetParkID);
     targetPark.attractions = await wf.getAllAttractionData(
         parkID: targetParkID, rideTypes: attractionTypes, allParks: allParksInfo);
 
-    print(targetPark.attractions);
-    print(targetPark.attractions.length);
+    print("We are adding ${targetPark.parkName} to our user");
 
     FirebasePark translated = targetPark.toNewFirebaseEntry();
 
     if(!targetPark.active) {
       // If a park is defunct, show defunct attractions since all attractions will be defunct
       translated.showDefunct = true;
+      print("This park is defunct, so we've enabled showDefunct by default.");
     }
 
     translated.updateAttractionCount(targetPark: targetPark);
@@ -86,6 +88,8 @@ class ParksManager {
         path: DatabasePath.PARKS,
         key: targetParkID.toString(),
         payload: translated.toMap());
+
+    print("Park added successfully");
 
     return true;
   }

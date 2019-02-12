@@ -145,7 +145,7 @@ class _ParkSettingsPageState extends State<ParkSettingsPage> {
       ),
       InterfaceButton(
         text: "Submit New Attraction".toUpperCase(),
-        onPressed: () => print("Submit new attraction called"),
+        onPressed: () => print("Submit new attraction called"), // TODO: Submit new attraction page
         color: Theme.of(context).primaryColor,
         textColor: Colors.white,
       ),

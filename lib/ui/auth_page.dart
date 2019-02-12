@@ -257,9 +257,9 @@ class _AuthPageState extends State<AuthPage>
         }
 
         _handleSignUp(username, email, password).then((user) {
-          print("Checking for user stuff");
+          print("Checking to see if the user is valid.");
           if (user == null) return;
-          print("User data is good");
+          print("User data is valid");
           // No errors in the process, we have a valid signed-in user
           widget.onSignedIn();
         });

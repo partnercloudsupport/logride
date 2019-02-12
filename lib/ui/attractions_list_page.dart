@@ -83,7 +83,7 @@ class _AttractionsPageState extends State<AttractionsPage>
                 }
 
                 print(
-                    "Successfully recived parkData for attractions list page");
+                    "Successfully recived parkData for attractions list page for park ${parkData.name}");
 
                 double tempOldRatio = lastRatio;
                 lastRatio = 0.0;
@@ -164,11 +164,6 @@ class _AttractionsPageState extends State<AttractionsPage>
   }
 
   void _openDetailsPane() {
-    int condensedStatus = widget.serverParkData.active ? 1 : 0;
-    condensedStatus += widget.serverParkData.seasonal ? 10 : 0;
-
-    print(condensedStatus.toString());
-
     Navigator.push(
         context,
         SlideInRoute(
@@ -195,7 +190,7 @@ class _AttractionsPageState extends State<AttractionsPage>
     result.then((value) {
       if(value != null){
         ParkSettingsData settingsData = value as ParkSettingsData;
-        print("User has submitted settings");
+        print("User has submitted new settings");
         userData.incrementorEnabled = settingsData.tally;
         userData.showSeasonal = settingsData.showSeasonal;
         userData.showDefunct = settingsData.showDefunct;

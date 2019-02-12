@@ -66,22 +66,18 @@ class _FirebaseAttractionListViewState
 
   void _onAttractionAdded(int index, DataSnapshot snap) {
     if (!_attractionLoaded) return;
-    print("AttractionAdded Callback index: $index");
     if (mounted) setState(() {});
   }
 
   void _onAttractionRemoved(int index, DataSnapshot snap) {
-    print("AttractionRemoved Callback index: $index");
     if (mounted) setState(() {});
   }
 
   void _onAttractionChanged(int index, DataSnapshot snap) {
-    print("AttractionChanged Callback index: $index");
     if (mounted) setState(() {});
   }
 
   void _onAttractionValue(DataSnapshot snap) {
-    print("AttractionValue");
     if (mounted)
       setState(() {
         _attractionLoaded = true;
@@ -90,23 +86,18 @@ class _FirebaseAttractionListViewState
 
   void _onIgnoreAdded(int index, DataSnapshot snap) {
     if (!_ignoreLoaded) return;
-    print("IgnoreAdded index: $index");
-    print("IgnoreAdded data: ${snap.value["rideID"]}");
     if (mounted) setState(() {});
   }
 
   void _onIgnoreRemoved(int index, DataSnapshot snap) {
-    print("Ignore removed index: $index");
     if (mounted) setState(() {});
   }
 
   void _onIgnoreChanged(int index, DataSnapshot snap) {
-    print("Ignore changed index: $index");
     if (mounted) setState(() {});
   }
 
   void _onIgnoreValue(DataSnapshot snap) {
-    print("Ignore value");
     if (mounted)
       setState(() {
         _ignoreLoaded = true;
@@ -115,7 +106,6 @@ class _FirebaseAttractionListViewState
 
   @override
   void initState() {
-    print("List initialized");
     super.initState();
     _attractionList = FirebaseList(
         query: widget.attractionQuery,

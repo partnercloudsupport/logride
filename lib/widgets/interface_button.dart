@@ -15,7 +15,7 @@ class InterfaceButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return RaisedButton(
       color: color ?? UI_BUTTON_BACKGROUND,
-      onPressed: onPressed ?? () => print("No function assigned for button"),
+      onPressed: onPressed ?? () => print("No function assigned for interace button"),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
       child: (icon != null)
           ? Padding(

@@ -181,7 +181,7 @@ class StatsCalculator {
   }
 
   Future<UserStats> countStats() async {
-    print("Beginning CountStats");
+    print("Calculating user stats...");
     // Since we're calculating user stats fresh each time, we don't have to wait for the old values to load
     UserStats stats = UserStats();
 
@@ -191,6 +191,8 @@ class StatsCalculator {
         await db.getEntryAtPath(path: DatabasePath.PARKS, key: "");
 
     List entries = Map.from(rawResponse).values.toList();
+
+    print("Got ${userParks.length} parks");
 
     entries.forEach((e) {
       FirebasePark park = FirebasePark.fromMap(Map.from(e));
@@ -283,8 +285,6 @@ class StatsCalculator {
       });
       stats.topAttractions = sortedAttractions;
     }
-
-    print(stats.topAttractions.length);
 
     _setServerStats(stats);
 

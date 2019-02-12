@@ -185,7 +185,6 @@ class _AppInfoPageState extends State<AppInfoPage> {
                             ),
                             color: Theme.of(context).primaryColor,
                             onPressed: () {
-                              print("Sign out");
                               widget.signOut();
                               Navigator.of(context).pop();
                             },
