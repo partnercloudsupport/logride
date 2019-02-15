@@ -119,7 +119,7 @@ class ParkListView extends StatelessWidget {
       searchWidget = Container();
     }
 
-    String headerText = favorites ? "Favorites " : "All Parks ";
+    String headerText = favorites ? "Favorites " : "My Parks ";
 
     return ClipRect(
       child: Column(

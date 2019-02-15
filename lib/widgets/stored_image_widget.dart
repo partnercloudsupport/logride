@@ -64,7 +64,7 @@ class _FirebaseAttractionImageState extends State<FirebaseAttractionImage> {
                     ),
                   ),
                   Text(
-                    "NO IMAGE FOUND",
+                    "SUBMIT YOUR OWN IMAGE",
                     style: TextStyle(color: _foregroundColor),
                   )
                 ],

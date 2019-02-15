@@ -3,6 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:log_ride/data/color_constants.dart';
 import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/widgets/attraction_list_entry.dart';
@@ -51,7 +52,7 @@ class _FirebaseAttractionListViewState
   bool _delayOver = false;
 
   // This allows us to hide the search entry until the user pulls down to access it.
-  ScrollController controller = ScrollController(initialScrollOffset: 66.0);
+  ScrollController controller = ScrollController(initialScrollOffset: 71.0);
 
   FirebaseList _attractionList;
   FirebaseList _ignoreList;
@@ -184,9 +185,10 @@ class _FirebaseAttractionListViewState
     }
     if (widget.headedList[index] is String) {
       return Container(
-        height: 20.0,
+        height: 22.0,
         width: double.infinity,
-        color: Colors.grey[200],
+        alignment: Alignment.centerLeft,
+        color: SECTION_HEADER_BACKGROUND,
         child: Padding(
           padding: EdgeInsets.only(left: 8.0),
           child: Text(widget.headedList[index]),

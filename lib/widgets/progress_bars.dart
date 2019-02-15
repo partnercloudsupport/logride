@@ -9,16 +9,16 @@ import 'package:log_ride/data/color_constants.dart';
 /// [numRidden] - a number representing how many rides the user has ridden at
 ///   least once in the park
 class ParkProgressListItem extends StatelessWidget {
-  ParkProgressListItem({this.numRides, this.numRidden});
+  ParkProgressListItem({this.numRides, this.numRidden, this.barColor});
 
   final num numRides;
   final num numRidden;
+  final Color barColor;
 
   @override
   Widget build(BuildContext context) {
-
     double ratio = 0.0;
-    if(numRides != 0.0) ratio = numRidden / numRides;
+    if (numRides != 0.0) ratio = numRidden / numRides;
 
     return Container(
         // Hard-coding the size of the box in dp. This may change later.
@@ -35,8 +35,8 @@ class ParkProgressListItem extends StatelessWidget {
                       constraints: BoxConstraints.expand(),
                     ),
                     FractionBar(
-                      ratio: ratio,
-                    )
+                        ratio: ratio,
+                        barColor: barColor ?? Colors.green)
                   ],
                 )),
             Center(
@@ -51,10 +51,19 @@ class ParkProgressListItem extends StatelessWidget {
 }
 
 class FullParkProgressBar extends StatelessWidget {
-  FullParkProgressBar({this.showDefunct, this.showSeasonal, this.totalCount, this.riddenCount, this.defunctCount, this.seasonalCount, this.oldRatio});
+  FullParkProgressBar(
+      {this.showDefunct,
+      this.showSeasonal,
+      this.totalCount,
+      this.riddenCount,
+      this.defunctCount,
+      this.seasonalCount,
+      this.oldRatio,
+      this.barColor});
   final bool showDefunct, showSeasonal;
   final int totalCount, riddenCount, defunctCount, seasonalCount;
   final double oldRatio;
+  final Color barColor;
 
   @override
   Widget build(BuildContext context) {
@@ -66,13 +75,16 @@ class FullParkProgressBar extends StatelessWidget {
           // Background bar, full width
           // Text overlay - Progress
           _buildProgressLabel(context),
-          showDefunct && (defunctCount != 0) ? _buildDefunctLabel(context) : Container(),
-          showSeasonal && (seasonalCount != 0) ? _buildSeasonalLabel(context) : Container()
+          showDefunct && (defunctCount != 0)
+              ? _buildDefunctLabel(context)
+              : Container(),
+          showSeasonal && (seasonalCount != 0)
+              ? _buildSeasonalLabel(context)
+              : Container()
         ],
       ),
     );
   }
-
 
   Widget _buildProgressBar(BuildContext context) {
     return Stack(
@@ -84,10 +96,10 @@ class FullParkProgressBar extends StatelessWidget {
         ),
         // Foreground - percentage bar with progress color
         AnimatedProgressBarManager(
-          totalCount: totalCount,
-          riddenCount: riddenCount,
-          oldRatio: oldRatio,
-        )
+            totalCount: totalCount,
+            riddenCount: riddenCount,
+            oldRatio: oldRatio,
+            barColor: barColor ?? Colors.green)
       ],
     );
   }
@@ -142,21 +154,24 @@ class FullParkProgressBar extends StatelessWidget {
 }
 
 class AnimatedProgressBarManager extends StatefulWidget {
-  AnimatedProgressBarManager({
-    this.totalCount,
-    this.riddenCount,
-    this.oldRatio,
-    this.shimmer = true});
+  AnimatedProgressBarManager(
+      {this.totalCount,
+      this.riddenCount,
+      this.oldRatio,
+      this.shimmer = true,
+      this.barColor});
 
   final int totalCount, riddenCount;
   final double oldRatio;
   final bool shimmer;
+  final Color barColor;
 
   @override
   State<StatefulWidget> createState() => _AnimatedProgressBarManagerState();
 }
 
-class _AnimatedProgressBarManagerState extends State<AnimatedProgressBarManager> with TickerProviderStateMixin{
+class _AnimatedProgressBarManagerState extends State<AnimatedProgressBarManager>
+    with TickerProviderStateMixin {
   AnimationController controller;
   Animation<double> animation;
 
@@ -170,12 +185,14 @@ class _AnimatedProgressBarManagerState extends State<AnimatedProgressBarManager>
   void initState() {
     super.initState();
     controller = AnimationController(
-      duration: const Duration(milliseconds: 500), vsync: this);
+        duration: const Duration(milliseconds: 500), vsync: this);
 
     double targetRatio = 0.0;
-    if(widget.totalCount != 0.0) targetRatio = widget.riddenCount / widget.totalCount;
+    if (widget.totalCount != 0.0)
+      targetRatio = widget.riddenCount / widget.totalCount;
 
-    animation = Tween(begin: widget.oldRatio, end: targetRatio).animate(controller);
+    animation =
+        Tween(begin: widget.oldRatio, end: targetRatio).animate(controller);
     controller.forward();
   }
 
@@ -188,9 +205,11 @@ class _AnimatedProgressBarManagerState extends State<AnimatedProgressBarManager>
         duration: const Duration(milliseconds: 300), vsync: this);
 
     double targetRatio = 0.0;
-    if(widget.totalCount != 0.0) targetRatio = widget.riddenCount / widget.totalCount;
+    if (widget.totalCount != 0.0)
+      targetRatio = widget.riddenCount / widget.totalCount;
 
-    animation = Tween(begin: widget.oldRatio, end: targetRatio).animate(controller);
+    animation =
+        Tween(begin: widget.oldRatio, end: targetRatio).animate(controller);
     controller.forward();
   }
 
@@ -204,52 +223,54 @@ class _AnimatedProgressBarManagerState extends State<AnimatedProgressBarManager>
           constraints: BoxConstraints.expand(),
         ),
         // Foreground - percentage bar with progress color
-        AnimatedFractionBar(
-          animation: animation,
-          shimmer: widget.shimmer
-        )
+        AnimatedFractionBar(animation: animation, shimmer: widget.shimmer, barColor: widget.barColor ?? Colors.green)
       ],
     );
   }
 }
 
 class AnimatedFractionBar extends AnimatedWidget {
-  AnimatedFractionBar({Key key, Animation<double> animation, this.shimmer = true}) : super(key: key, listenable: animation);
+  AnimatedFractionBar(
+      {Key key, Animation<double> animation, this.shimmer = true, this.barColor})
+      : super(key: key, listenable: animation);
 
   final bool shimmer;
+  final Color barColor;
 
   @override
   Widget build(BuildContext context) {
     final Animation<double> animation = listenable;
-    if(animation.value == 1.0 && shimmer){
+    if (animation.value == 1.0 && shimmer) {
       return Shimmer.fromColors(
-        child: Container(constraints: BoxConstraints.expand(), color: PROGRESS_BAR_GOLD),
+        child: Container(
+            constraints: BoxConstraints.expand(), color: PROGRESS_BAR_GOLD),
         baseColor: PROGRESS_BAR_GOLD,
         highlightColor: PROGRESS_BAR_GOLD_SHIMMER,
         period: const Duration(milliseconds: 2500),
       );
     } else {
-    return FractionallySizedBox(
-      widthFactor: animation.value,
-      heightFactor: 1.0,
-      child: Container(
-        color: Colors.green,
-        constraints: BoxConstraints.expand(),
-      )
-    );
+      return FractionallySizedBox(
+          widthFactor: animation.value,
+          heightFactor: 1.0,
+          child: Container(
+            color: barColor ?? Colors.green,
+            constraints: BoxConstraints.expand(),
+          ));
     }
   }
 }
 
 class FractionBar extends StatelessWidget {
-  FractionBar({this.ratio});
+  FractionBar({this.ratio, this.barColor});
   final double ratio;
+  final Color barColor;
 
   @override
   Widget build(BuildContext context) {
-    if(ratio == 1.0){
+    if (ratio == 1.0) {
       return Shimmer.fromColors(
-        child: Container(constraints: BoxConstraints.expand(), color: PROGRESS_BAR_GOLD),
+        child: Container(
+            constraints: BoxConstraints.expand(), color: PROGRESS_BAR_GOLD),
         baseColor: PROGRESS_BAR_GOLD,
         highlightColor: PROGRESS_BAR_GOLD_SHIMMER,
         period: const Duration(milliseconds: 2500),
@@ -259,7 +280,7 @@ class FractionBar extends StatelessWidget {
         widthFactor: ratio,
         heightFactor: 1.0,
         child: Container(
-          color: Colors.green,
+          color: barColor ?? Colors.green,
           constraints: BoxConstraints.expand(),
         ),
       );

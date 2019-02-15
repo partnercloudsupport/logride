@@ -118,6 +118,11 @@ class FirebasePark {
     if (!targetPark.active) {
       this.ridesRidden = numDefunctRidden;
     }
+
+    // Parks names can update in the bluehost - we need to make sure we update the
+    // firebase ones to match
+    this.name = targetPark.parkName;
+    this.location = targetPark.parkCity;
   }
 }
 

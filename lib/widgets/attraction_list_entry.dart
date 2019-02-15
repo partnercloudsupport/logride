@@ -43,6 +43,7 @@ class AttractionListState extends State<AttractionListEntry> {
         ? Theme.of(context).disabledColor
         : Colors.white;
 
+
     // Core layout of the row / list item.
     built = Material(
       color: tileColor,
@@ -67,14 +68,17 @@ class AttractionListState extends State<AttractionListEntry> {
                   ),
                   Text(widget.attractionData.typeLabel,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.subtitle)
+                      style: Theme.of(context)
+                          .textTheme
+                          .subtitle
+                          .apply(color: Colors.grey[700]))
                 ],
               )),
               // If the button's not there for any reason, just show an empty container instead. Prevents null errors.
               ExperienceButton(
                 interactHandler: widget.experienceHandler,
                 parentPark: widget.parentPark,
-                ignored: ignored ?? false,
+                ignored: (widget.attractionData.seasonal || !widget.attractionData.active) ? false : (ignored ?? false),
                 data: widget.userData ??
                     FirebaseAttraction(
                         rideID: widget.attractionData.attractionID),
@@ -88,10 +92,10 @@ class AttractionListState extends State<AttractionListEntry> {
     // Logic for selecting whether or not there are any slide interactions with
     // this list entry.
     Widget slideAction;
-    if (!widget.attractionData.active)
+    if (!widget.attractionData.active || widget.attractionData.seasonal)
       slideAction =
           null; // Already ignored thanks to defunct, no point in ignoring it more
-    if (widget.attractionData.active) {
+    if (widget.attractionData.active && !widget.attractionData.seasonal) {
       // If we're ignored, show the include slide. If we're included, show the ignore slide.
       slideAction =
           ignored ? _buildIncludeSlideAction() : _buildIgnoreSlideAction();

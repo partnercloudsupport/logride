@@ -8,6 +8,7 @@ import 'package:log_ride/animations/slide_in_transition.dart';
 import 'package:log_ride/ui/details_page.dart';
 import 'package:log_ride/ui/standard_page_structure.dart';
 import 'package:log_ride/ui/park_settings_page.dart';
+import 'package:log_ride/data/color_constants.dart';
 import 'package:log_ride/data/parks_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
@@ -110,6 +111,7 @@ class _AttractionsPageState extends State<AttractionsPage>
                     riddenCount: parkData.ridesRidden,
                     seasonalCount: parkData.numSeasonalRidden,
                     defunctCount: parkData.numDefunctRidden,
+                    barColor: widget.serverParkData.active ? Colors.green : PROGRESS_BAR_DEFUNCT,
                   ),
 
                   // Listview (Expanded)

@@ -412,7 +412,7 @@ class _HomePageState extends State<HomePage> {
                         signOut: _signOut,
                         username: userName,
                       ))),
-              child: _buildMenuIcon(FontAwesomeIcons.info),
+              child: _buildMenuIcon(FontAwesomeIcons.cog),
             ),
             Row(
               children: <Widget>[
