@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:log_ride/ui/standard_page_structure.dart';
 import 'package:log_ride/widgets/content_frame.dart';
@@ -32,10 +33,7 @@ class _UserParksSearchPageState extends State<UserParksSearchPage> {
       backgroundColor: Colors.transparent,
       body: StandardPageStructure(
         iconFunction: () => Navigator.of(context).pop(),
-        iconDecoration: Container(
-          child: Icon(Icons.home, size: 60, color: Colors.white),
-          constraints: BoxConstraints.expand(),
-        ),
+        iconDecoration: FontAwesomeIcons.home,
         content: <Widget>[
           ContentFrame(
               child: Card(

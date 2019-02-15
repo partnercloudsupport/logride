@@ -64,14 +64,7 @@ class _CheckInWidgetState extends State<CheckInWidget> {
   Widget build(BuildContext context) {
     return (checkInData.park != null)
         ? HomeIconButton(
-            decoration: Container(
-              constraints: BoxConstraints.expand(),
-              child: Icon(
-                FontAwesomeIcons.mapMarkerAlt,
-                color: Colors.white,
-                size: 60.0,
-              ),
-            ),
+            decoration: FontAwesomeIcons.mapMarkerAlt,
             onTap: () async {
               if(widget.onTap != null){
                 if(!checkInData.checkedInToday) {

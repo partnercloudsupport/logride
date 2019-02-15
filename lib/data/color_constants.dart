@@ -12,3 +12,6 @@ const Color POSITION_SECOND = Color.fromARGB(255, 215, 215, 215);
 const Color POSITION_THIRD = Color.fromARGB(255, 165, 108, 73);
 
 const Color SECTION_HEADER_BACKGROUND = Color.fromARGB(255, 135, 207, 129);
+
+const Color APP_ICON_FOREGROUND = Color.fromARGB(255, 36, 65, 41);
+const Color APP_ICON_BACKGROUND = Color.fromARGB(255, 102, 180, 72);

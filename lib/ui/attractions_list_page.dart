@@ -51,10 +51,7 @@ class _AttractionsPageState extends State<AttractionsPage>
         body: StandardPageStructure(
           // IconFunction and IconDecoration relate to the homeIcon
           iconFunction: () => Navigator.of(context).pop(),
-          iconDecoration: Container(
-            child: Icon(Icons.home, size: 60, color: Colors.white),
-            constraints: BoxConstraints.expand(),
-          ),
+          iconDecoration: FontAwesomeIcons.home,
           content: <Widget>[_buildAttractionsCard(context)],
         ));
   }

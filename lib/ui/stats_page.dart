@@ -64,14 +64,7 @@ class _StatsPageState extends State<StatsPage> {
       backgroundColor: Colors.transparent,
       body: StandardPageStructure(
         iconFunction: () => Navigator.of(context).pop(),
-        iconDecoration: Container(
-          child: Icon(
-            FontAwesomeIcons.chartPie,
-            size: 60,
-            color: Colors.white,
-          ),
-          constraints: BoxConstraints.expand(),
-        ),
+        iconDecoration: FontAwesomeIcons.chartPie,
         content: <Widget>[
           ContentFrame(
             child: Card(

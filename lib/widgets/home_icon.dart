@@ -1,22 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:log_ride/data/color_constants.dart';
 
 class HomeIconButton extends StatelessWidget {
   HomeIconButton({this.onTap, this.decoration});
 
   final Function onTap;
-  final Widget decoration;
+  final IconData decoration;
 
   @override
   Widget build(BuildContext context) {
-    Widget decor;
-    Color colorOverlay;
-
-    if (decoration != null) {
-      decor = decoration;
-      colorOverlay = Colors.black54;
+    Widget content;
+    if (decoration == null) {
+      content = Container(
+          constraints: BoxConstraints.expand(),
+          color: APP_ICON_BACKGROUND,
+          padding: EdgeInsets.only(top: 6.0, bottom: 6.0, right: 3.0),
+          child: Image.asset(
+            'assets/plain.png'
+          ));
     } else {
-      decor = Container();
-      colorOverlay = Colors.transparent;
+      content = Container(
+        constraints: BoxConstraints.expand(),
+        color: APP_ICON_BACKGROUND,
+        child: Icon(
+          decoration,
+          size: 56.0,
+          color: APP_ICON_FOREGROUND,
+        ),
+      );
     }
 
     return Column(
@@ -29,36 +40,15 @@ class HomeIconButton extends StatelessWidget {
                   ? onTap
                   : () {}, // Pass an empty function if we don't have a tap function
               child: Container(
-                height: 85.4,
-                width: 85.4,
-                child: Stack(
-                  children: <Widget>[
-                    Container(
-                      constraints: BoxConstraints.expand(),
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            image: DecorationImage(
-                                colorFilter: ColorFilter.mode(
-                                    colorOverlay, BlendMode.multiply),
-                                image: AssetImage('assets/appicon.png')),
-                            border: Border.all(
-                              color: Colors.white,
-                              width: 4.0,
-                            ),
-                            boxShadow: const [
-                              BoxShadow(
-                                  color: Colors.grey,
-                                  spreadRadius: 0.1,
-                                  blurRadius: 4,
-                                  offset: Offset(0, 2))
-                            ]),
-                      ),
-                    ),
-                    decor,
-                  ],
-                ),
-              ),
+                  height: 85.4,
+                  width: 85.4,
+                  foregroundDecoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 4.0)),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(60.0),
+                    child: content,
+                  )),
             ),
           ),
         )

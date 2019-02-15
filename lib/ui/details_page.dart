@@ -63,14 +63,7 @@ class _DetailsPageState extends State<DetailsPage> {
         resizeToAvoidBottomPadding: false,
         body: StandardPageStructure(
           iconFunction: () => Navigator.of(context).pop(),
-          iconDecoration: Container(
-            child: Icon(
-              FontAwesomeIcons.info,
-              size: 60,
-              color: Colors.white,
-            ),
-            constraints: BoxConstraints.expand(),
-          ),
+          iconDecoration: FontAwesomeIcons.info,
           content: <Widget>[_buildDetailsCard(context)],
         ));
   }

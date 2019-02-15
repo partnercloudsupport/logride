@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/ui/standard_page_structure.dart';
 import 'package:log_ride/widgets/generic_list_entry.dart';
@@ -113,7 +114,7 @@ class AllParkSearchPage extends StatelessWidget {
         backgroundColor: Colors.transparent,
         body: StandardPageStructure(
           iconFunction: () => Navigator.of(context).pop(),
-          iconDecoration: Container(child: Icon(Icons.home, size: 60, color: Colors.white), constraints: BoxConstraints.expand(),),
+          iconDecoration: FontAwesomeIcons.home,
           content: <Widget>[
             AllParkSearchCard(allParkData: allParks, tapBack: tapBack)
           ],

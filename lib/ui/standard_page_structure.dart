@@ -6,7 +6,7 @@ class StandardPageStructure extends StatelessWidget {
   StandardPageStructure({this.content, this.iconDecoration, this.iconFunction});
 
   final List<Widget> content;
-  final Widget iconDecoration;
+  final IconData iconDecoration;
   final Function iconFunction;
 
   @override
