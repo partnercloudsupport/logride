@@ -14,14 +14,23 @@ class SideStrikeText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        _buildSideStrike(context),
-        bodyText,
-        _buildSideStrike(context)
-      ],
-    );
+    if (bodyText != null) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          _buildSideStrike(context),
+          bodyText,
+          _buildSideStrike(context)
+        ],
+      );
+    } else {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          _buildSideStrike(context)
+        ],
+      );
+    }
   }
 
   Widget _buildSideStrike(BuildContext context) {

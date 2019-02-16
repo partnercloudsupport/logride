@@ -160,8 +160,17 @@ class _DetailsPageState extends State<DetailsPage> {
       );
     }
 
-    if (titleText == null) titleText = "No Title";
-    if (subtitleText == null) subtitleText = "No Type";
+    if (titleText == null || titleText == "") titleText = "Missing Title";
+    if (subtitleText == null) subtitleText = "Missing Subtitle";
+
+    Widget sText = AutoSizeText(
+      subtitleText,
+      style: TextStyle(fontSize: 20.0),
+    );
+
+    if (subtitleText == "") {
+      sText = null;
+    }
 
     return Column(
       children: <Widget>[
@@ -180,10 +189,7 @@ class _DetailsPageState extends State<DetailsPage> {
           ],
         ),
         SideStrikeText(
-          bodyText: AutoSizeText(
-            subtitleText,
-            style: TextStyle(fontSize: 20.0),
-          ),
+          bodyText: sText,
           strikeColor: Theme.of(context).primaryColor,
           strikeThickness: 4.0,
         )
