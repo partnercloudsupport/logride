@@ -17,6 +17,7 @@ class CheckInWidget extends StatefulWidget {
 
 class _CheckInWidgetState extends State<CheckInWidget> {
   CheckInData checkInData = CheckInData(null, false);
+  bool _showingDialog = false;
 
   void _checkInStatusChanged() async {
     if (!widget.manager.listenable.value.isEqualTo(checkInData)) {
@@ -39,12 +40,15 @@ class _CheckInWidgetState extends State<CheckInWidget> {
   }
 
   Future<bool> _openCheckInDialog() async {
+    if(_showingDialog) return false;
+    _showingDialog = true;
     // Display alert dialog
     bool shouldCheckIn = await showDialog<bool>(context: context, builder: (BuildContext context) {
       return CheckInDialog(
           park: checkInData.park
       );
     });
+    _showingDialog = false;
     if(shouldCheckIn){
       print("User wants to check in to park ${checkInData.park.parkName}");
       widget.manager.checkIn(checkInData.park.id);

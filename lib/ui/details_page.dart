@@ -143,13 +143,10 @@ class _DetailsPageState extends State<DetailsPage> {
         _leftIcon = TitleBarIcon(
           icon: FontAwesomeIcons.medal,
           onTap: () {
-            Navigator.push(
-                context,
-                SlideInRoute(
-                    dialogStyle: true,
-                    direction: SlideInDirection.UP,
-                    widget: AttractionScorecardPage(
-                        attraction: attractionData, db: widget.db)));
+            showDialog(context: context, builder: (BuildContext context) {
+              return AttractionScorecardPage(
+                  attraction: attractionData, db: widget.db);
+            });
           },
         );
       }
