@@ -46,7 +46,7 @@ class _AttractionsPageState extends State<AttractionsPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomPadding: false,
+        resizeToAvoidBottomPadding: false,
         backgroundColor: Colors.transparent,
         body: StandardPageStructure(
           // IconFunction and IconDecoration relate to the homeIcon
@@ -65,16 +65,19 @@ class _AttractionsPageState extends State<AttractionsPage>
         child: StreamBuilder<Event>(
             stream: _parkStream,
             builder: (BuildContext context, AsyncSnapshot<Event> stream) {
-              if (!stream.hasData || stream.data == null || stream.data.snapshot.value == null) {
+              if (!stream.hasData ||
+                  stream.data == null ||
+                  stream.data.snapshot.value == null) {
                 return Container(
                     constraints: BoxConstraints.expand(),
                     child: Center(child: CircularProgressIndicator()));
               } else {
-                FirebasePark parkData = FirebasePark.fromMap(Map.from(stream.data.snapshot.value));
+                FirebasePark parkData =
+                    FirebasePark.fromMap(Map.from(stream.data.snapshot.value));
 
                 // Sometimes we do get data but it's not quite proper. This means something is happening elsewhere
                 // Just show the circle thing.
-                if(parkData == null || parkData.totalRides == null) {
+                if (parkData == null || parkData.totalRides == null) {
                   return Container(
                       constraints: BoxConstraints.expand(),
                       child: Center(child: CircularProgressIndicator()));
@@ -108,7 +111,9 @@ class _AttractionsPageState extends State<AttractionsPage>
                     riddenCount: parkData.ridesRidden,
                     seasonalCount: parkData.numSeasonalRidden,
                     defunctCount: parkData.numDefunctRidden,
-                    barColor: widget.serverParkData.active ? Colors.green : PROGRESS_BAR_DEFUNCT,
+                    barColor: widget.serverParkData.active
+                        ? Colors.green
+                        : PROGRESS_BAR_DEFUNCT,
                   ),
 
                   // Listview (Expanded)
@@ -166,35 +171,42 @@ class _AttractionsPageState extends State<AttractionsPage>
     Navigator.push(
         context,
         SlideInRoute(
-          direction: SlideInDirection.UP,
+            direction: SlideInDirection.UP,
             dialogStyle: true,
             widget: DetailsPage(
-          data: widget.serverParkData,
-          db: widget.db,
-        )));
+              data: widget.serverParkData,
+              db: widget.db,
+            )));
+  }
+
+  void _settingsChangeCallback(
+      ParkSettingsCategory cat, dynamic data, FirebasePark userData) {
+    switch (cat) {
+      case ParkSettingsCategory.TALLY:
+        userData.incrementorEnabled = data as bool;
+        break;
+      case ParkSettingsCategory.SHOW_DEFUNCT:
+        userData.showDefunct = data as bool;
+        break;
+      case ParkSettingsCategory.SHOW_SEASONAL:
+        userData.showSeasonal = data as bool;
+        break;
+    }
+
+    widget.db.setEntryAtPath(
+        payload: userData.toMap(),
+        key: userData.parkID.toString(),
+        path: DatabasePath.PARKS);
   }
 
   void _openSettingsPage(FirebasePark userData) {
-    Future<dynamic> result = Navigator.push(
-        context,
-        SlideInRoute(
-          direction: SlideInDirection.UP,
-          dialogStyle: true,
-          widget: ParkSettingsPage(
-            userData: userData,
-            parkData: widget.serverParkData,
-          )
-        ));
-
-    result.then((value) {
-      if(value != null){
-        ParkSettingsData settingsData = value as ParkSettingsData;
-        print("User has submitted new settings");
-        userData.incrementorEnabled = settingsData.tally;
-        userData.showSeasonal = settingsData.showSeasonal;
-        userData.showDefunct = settingsData.showDefunct;
-        widget.db.setEntryAtPath(payload: userData.toMap(), key: userData.parkID.toString(), path: DatabasePath.PARKS);
-      }
+    showDialog(context: context, builder: (BuildContext context) {
+      return ParkSettingsPage(
+        userData: userData,
+        parkData: widget.serverParkData,
+        callback: (cat, dat) =>
+            _settingsChangeCallback(cat, dat, userData),
+      );
     });
   }
 }

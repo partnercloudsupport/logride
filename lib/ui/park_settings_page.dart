@@ -3,26 +3,20 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/widgets/interface_button.dart';
 
+enum ParkSettingsCategory { SHOW_SEASONAL, SHOW_DEFUNCT, TALLY }
+
 class ParkSettingsPage extends StatefulWidget {
-  ParkSettingsPage({this.userData, this.parkData});
+  ParkSettingsPage({this.userData, this.parkData, this.callback});
 
   final FirebasePark userData;
   final BluehostPark parkData;
+  final Function(ParkSettingsCategory key, dynamic data) callback;
 
   @override
   _ParkSettingsPageState createState() => _ParkSettingsPageState();
 }
 
-class ParkSettingsData {
-  bool showSeasonal = true;
-  bool showDefunct = false;
-  bool tally = false;
-}
-
 class _ParkSettingsPageState extends State<ParkSettingsPage> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  ParkSettingsData _data = ParkSettingsData();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,15 +35,13 @@ class _ParkSettingsPageState extends State<ParkSettingsPage> {
         ),
         Center(
           child: Form(
-            key: this._formKey,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Card(
+                clipBehavior: Clip.antiAlias,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15.0)),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Column(
+                child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       _buildTitleBar(context),
@@ -59,10 +51,8 @@ class _ParkSettingsPageState extends State<ParkSettingsPage> {
                           children: _buildEntries(context),
                         ),
                       ),
-                      _buildButtons(context)
                     ],
                   ),
-                ),
               ),
             ),
           ),
@@ -74,28 +64,17 @@ class _ParkSettingsPageState extends State<ParkSettingsPage> {
   Widget _buildTitleBar(BuildContext context) {
     return Column(
       children: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Expanded(
-              child: Text(
-                "Settings",
-                style: Theme.of(context).textTheme.headline,
-                textAlign: TextAlign.center,
-              ),
-            )
-          ],
-        ),
-        Padding(
-          padding: const EdgeInsets.only(left: 8.0, right: 8.0, top: 8.0),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
-              borderRadius: BorderRadius.circular(15.0),
+        Container(
+          color: Theme.of(context).primaryColor,
+          width: double.infinity,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              "Settings",
+              style: Theme.of(context).textTheme.headline.apply(color: Colors.white),
             ),
-            constraints: BoxConstraints.expand(height: 4.0),
           ),
-        )
+        ),
       ],
     );
   }
@@ -106,72 +85,59 @@ class _ParkSettingsPageState extends State<ParkSettingsPage> {
         builder: (FormFieldState<bool> state) {
           return SwitchListTile.adaptive(
             value: state.value,
-            onChanged: (value) => state.didChange(value),
+            onChanged: (value) {
+              state.didChange(value);
+              widget.callback(ParkSettingsCategory.TALLY, value);
+            },
             title: Text("Experience Tally"),
             activeColor: Theme.of(context).primaryColor,
           );
         },
         initialValue: widget.userData.incrementorEnabled,
-        onSaved: (value) {
-          _data.tally = value;
-        },
       ),
-      FormField(
-          builder: (FormFieldState<bool> state) {
-            return SwitchListTile.adaptive(
-              value: state.value,
-              onChanged: (value) => state.didChange(value),
-              title: Text("Show Seasonal Attractions"),
-              activeColor: Theme.of(context).primaryColor,
-            );
-          },
-          initialValue: widget.userData.showSeasonal,
-          onSaved: (value) {
-            _data.showSeasonal = value;
-          }),
       FormField(
         builder: (FormFieldState<bool> state) {
           return SwitchListTile.adaptive(
             value: state.value,
-            onChanged: (value) => state.didChange(value),
+            onChanged: (value) {
+              state.didChange(value);
+              widget.callback(ParkSettingsCategory.SHOW_SEASONAL, value);
+            },
+            title: Text("Show Seasonal Attractions"),
+            activeColor: Theme.of(context).primaryColor,
+          );
+        },
+        initialValue: widget.userData.showSeasonal,
+      ),
+      FormField(
+        builder: (FormFieldState<bool> state) {
+          return SwitchListTile.adaptive(
+            value: state.value,
+            onChanged: (value) {
+              state.didChange(value);
+              widget.callback(ParkSettingsCategory.SHOW_DEFUNCT, value);
+            },
             title: Text("Show Defunct Attractions"),
             activeColor: Theme.of(context).primaryColor,
           );
         },
         initialValue: widget.userData.showDefunct,
-        onSaved: (value) {
-          _data.showDefunct = value;
-        },
       ),
-      InterfaceButton(
-        text: "Submit New Attraction".toUpperCase(),
-        onPressed: () => print("Submit new attraction called"), // TODO: Submit new attraction page
-        color: Theme.of(context).primaryColor,
-        textColor: Colors.white,
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: InterfaceButton(
+          text: "Submit New Attraction".toUpperCase(),
+          onPressed: () => print(
+              "Submit new attraction called"), // TODO: Submit new attraction page
+          color: Theme.of(context).primaryColor,
+          textColor: Colors.white,
+        ),
       ),
     ];
     return entries;
   }
 
-  Widget _buildButtons(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: <Widget>[
-        InterfaceButton(
-          icon: Icon(FontAwesomeIcons.times, color: Colors.grey[600]),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        InterfaceButton(
-          icon: Icon(FontAwesomeIcons.check,
-              color: Theme.of(context).primaryColor),
-          onPressed: submit,
-        )
-      ],
-    );
-  }
-
   void submit() {
-    _formKey.currentState.save();
-    Navigator.of(context).pop(_data);
+    Navigator.of(context).pop();
   }
 }
