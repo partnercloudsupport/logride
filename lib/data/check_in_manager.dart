@@ -15,7 +15,7 @@ class CheckInManager {
 
   var geolocator = Geolocator();
   var locationOptions =
-      LocationOptions(accuracy: LocationAccuracy.high, distanceFilter: 15);
+      LocationOptions(accuracy: LocationAccuracy.high, distanceFilter: 15, timeInterval: 60000); // Wait one minute between check-in thing
 
   CheckInManager({this.db, this.serverParks, this.addPark}) {
     geolocator.getPositionStream(locationOptions).listen(_positionUpdate);
