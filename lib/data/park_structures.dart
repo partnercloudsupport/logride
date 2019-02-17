@@ -13,7 +13,7 @@ class FirebasePark {
   int numSeasonalRidden = 0;
   final int parkID;
   int ridesRidden = 0;
-  bool showDefunct = false;
+  bool showDefunct = true;
   bool showSeasonal = true;
   int totalRides = 0;
 
