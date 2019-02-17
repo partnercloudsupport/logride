@@ -523,6 +523,7 @@ class _SummedProgressBar extends StatelessWidget {
                             oldRatio: 0.0,
                             riddenCount: left,
                             totalCount: left + right,
+                            shimmer: shimmer,
                           ),
                         ],
                       ),
