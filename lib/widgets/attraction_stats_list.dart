@@ -153,26 +153,34 @@ class _AttractionStatsState extends State<AttractionStats> {
               color: UI_BUTTON_BACKGROUND)
           : null,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(left: 16.0),
-            child: Text(
-              data.checks.toString(),
-              style: entryStyle,
+          Expanded(
+            flex: 1,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 16.0),
+              child: Text(
+                data.checks.toString(),
+                style: entryStyle,
+              ),
             ),
           ),
-          Container(
+          Expanded(
+            flex: 1,
             child: Text(
               data.type,
               style: entryStyle,
+              textAlign: TextAlign.center,
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: Text(
-              data.experiences.toString(),
-              style: entryStyle,
+          Expanded(
+            flex: 1,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: Text(
+                data.experiences.toString(),
+                style: entryStyle,
+                textAlign: TextAlign.right,
+              ),
             ),
           )
         ],
@@ -221,11 +229,10 @@ class _AttractionStatColButton extends StatelessWidget {
                   width: 3.0, color: Theme.of(context).primaryColor))),
     );
 
-    if (align == _ColButtonAlign.CENTER) {
-      button = Expanded(child: button);
-    }
-
-    return button;
+    return Expanded(
+      child: button,
+      flex: (align == _ColButtonAlign.CENTER) ? 5 : 4,
+    );
   }
 }
 
