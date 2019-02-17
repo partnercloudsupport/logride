@@ -6,8 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong/latlong.dart' as oldLatLng;
 import 'package:url_launcher/url_launcher.dart';
-
-import 'package:log_ride/animations/slide_in_transition.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
@@ -45,12 +44,14 @@ class _DetailsPageState extends State<DetailsPage> {
     super.initState();
     if (widget.data is BluehostAttraction) {
       _type = _DetailsType.ATTRACTION_DETAILS;
+      FirebaseAnalytics().logEvent(name: "view_attraction", parameters: {"attractionName": (widget.data as BluehostAttraction).attractionName});
       if (widget.userData.firstRideDate.millisecondsSinceEpoch != 0)
         firstRide = widget.userData.firstRideDate;
       if (widget.userData.lastRideDate.millisecondsSinceEpoch != 0)
         lastRide = widget.userData.lastRideDate;
     } else if (widget.data is BluehostPark) {
       _type = _DetailsType.PARK_DETAILS;
+      FirebaseAnalytics().logEvent(name: "view_park_detail", parameters: {"parkName": (widget.data as BluehostPark).parkName});
     } else {
       throw FormatException("Improper data structure passed to details page.");
     }

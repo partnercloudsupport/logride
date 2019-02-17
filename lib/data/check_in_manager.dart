@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong/latlong.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 
@@ -114,6 +115,7 @@ class CheckInManager {
     });
 
     listenable.value.checkedInToday = true;
+    FirebaseAnalytics().logEvent(name: "check_into_park", parameters: {"parkName": listenable.value.park.parkName});
   }
 }
 

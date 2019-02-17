@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -40,6 +41,7 @@ class _AttractionsPageState extends State<AttractionsPage>
   void initState() {
     _parkStream = widget.db.getLiveEntryAtPath(
         path: DatabasePath.PARKS, key: widget.serverParkData.id.toString());
+    FirebaseAnalytics().logEvent(name: "view_park", parameters: {"parkName": widget.serverParkData.parkName});
     super.initState();
   }
 

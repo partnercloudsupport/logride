@@ -20,21 +20,26 @@ class FirebasePark {
   FirebasePark({this.parkID, this.name, this.location});
 
   factory FirebasePark.fromMap(Map<String, dynamic> data) {
+    // Bringing this math out here prevents issues when parks have nothing for their data
+    num lastDayVisitedTime = (data["lastDayVisited"] as num ?? 0);
+    lastDayVisitedTime *= 1000;
+    lastDayVisitedTime = lastDayVisitedTime.toInt();
+
+
     FirebasePark newPark = FirebasePark(parkID: data["parkID"]);
-    newPark.checkedInToday = data["checkedInToday"];
-    newPark.favorite = data["favorite"];
-    newPark.incrementorEnabled = data["incrementorEnabled"];
-    newPark.lastDayVisited = DateTime.fromMillisecondsSinceEpoch(
-        ((data["lastDayVisited"] as num).toDouble() * 1000).toInt());
-    newPark.location = data["location"];
-    newPark.name = data["name"];
-    newPark.numberOfCheckIns = data["numberOfCheckIns"];
-    newPark.ridesRidden = data["ridesRidden"];
+    newPark.checkedInToday = data["checkedInToday"] ?? false;
+    newPark.favorite = data["favorite"] ?? false;
+    newPark.incrementorEnabled = data["incrementorEnabled"] ?? false;
+    newPark.lastDayVisited = DateTime.fromMillisecondsSinceEpoch(lastDayVisitedTime);
+    newPark.location = data["location"] ?? "";
+    newPark.name = data["name"] ?? "";
+    newPark.numberOfCheckIns = data["numberOfCheckIns"] ?? 0;
+    newPark.ridesRidden = data["ridesRidden"] ?? 0;
     newPark.numDefunctRidden = data["defunctRidden"] ?? 0;
     newPark.numSeasonalRidden = data["seasonalRidden"] ?? 0;
-    newPark.showDefunct = data["showDefunct"];
-    newPark.showSeasonal = data["showSeasonal"] ?? false;
-    newPark.totalRides = data["totalRides"];
+    newPark.showDefunct = data["showDefunct"] ?? true;
+    newPark.showSeasonal = data["showSeasonal"] ?? true;
+    newPark.totalRides = data["totalRides"] ?? 0;
     return newPark;
   }
 

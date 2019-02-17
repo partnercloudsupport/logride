@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:latlong/latlong.dart';
@@ -53,6 +54,8 @@ class _StatsPageState extends State<StatsPage> {
         StatsCalculator(db: widget.db, serverParks: widget.serverParks);
 
     statsFuture = calculator.countStats();
+    
+    FirebaseAnalytics().logEvent(name: "view_stats", parameters: null);
 
     super.initState();
   }

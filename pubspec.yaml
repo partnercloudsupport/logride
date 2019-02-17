@@ -7,7 +7,7 @@ description: An app to help users track their progress through theme and amuseme
 # Both the version and the builder number may be overridden in flutter
 # build by specifying --build-name and --build-number, respectively.
 # Read more about versioning at semver.org.
-version: 0.1.0
+version: 0.2.0
 
 environment:
   sdk: ">=2.0.0-dev.68.0 <3.0.0"
@@ -32,7 +32,7 @@ dependencies:
   ## This version of firebase_auth has proper error handling - adopting this
   firebase_auth: 0.8.1+1
   firebase_database: 2.0.1+1
-  #firebase_analytics: ^1.0.6
+  firebase_analytics: 2.0.1
   firebase_storage: 2.0.1+1
   # Used for icons where material icons fail
   font_awesome_flutter: ^8.2.0

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
@@ -75,12 +76,6 @@ class ParksManager {
 
     FirebasePark translated = targetPark.toNewFirebaseEntry();
 
-    if(!targetPark.active) {
-      // If a park is defunct, show defunct attractions since all attractions will be defunct
-      translated.showDefunct = true;
-      print("This park is defunct, so we've enabled showDefunct by default.");
-    }
-
     translated.updateAttractionCount(targetPark: targetPark);
 
     // Push the translated park into the database
@@ -90,6 +85,8 @@ class ParksManager {
         payload: translated.toMap());
 
     print("Park added successfully");
+
+    FirebaseAnalytics().logEvent(name: "add_new_park", parameters: {"parkName": translated.name});
 
     return true;
   }
