@@ -63,8 +63,8 @@ class _SearchParksCardState extends State<SearchParksCard> {
                 filterListBySearch(value);
               },
               decoration: InputDecoration(
-                labelText: "Search",
-                hintText: "Search",
+                labelText: "Add Park",
+                hintText: "Search for new parks",
                 prefixIcon: Icon(Icons.search),
               ),
               controller: editingController,
