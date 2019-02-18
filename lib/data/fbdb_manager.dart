@@ -25,8 +25,9 @@ Map<DatabasePath, String> _databasePathStrings = {
 
 abstract class BaseDB {
   void init();
-  Query getSortedQueryForUser({DatabasePath path, String key});
+  Query getSortedQueryForUser({DatabasePath path, String key, String orderBy});
   Query getFilteredQuery({DatabasePath path, String key, dynamic value});
+  Query getSortedFilteredQuery({DatabasePath path, String key, dynamic value, String orderBy});
   Query getQueryForUser({DatabasePath path, String key});
   void setEntryAtPath({DatabasePath path, String key, dynamic payload});
   void updateEntryAtPath(
@@ -62,12 +63,16 @@ class DatabaseManager implements BaseDB {
     return _firebaseDatabase.reference().child(childPath);
   }
 
-  Query getSortedQueryForUser({DatabasePath path, String key}) {
-    return _getReference(path).child(_savedID).orderByChild(key);
+  Query getSortedQueryForUser({DatabasePath path, String key, String orderBy}) {
+    return _getReference(path).child(_savedID).child(key).orderByChild(orderBy);
   }
 
   Query getFilteredQuery({DatabasePath path, String key, dynamic value}) {
     return _getReference(path).child(_savedID).orderByChild(key).equalTo(value);
+  }
+
+  Query getSortedFilteredQuery({DatabasePath path, String key, dynamic value, String orderBy}) {
+    return _getReference(path).child(_savedID).orderByChild(key).equalTo(value).orderByChild(orderBy);
   }
 
   Query getQueryForUser({DatabasePath path, String key}) {

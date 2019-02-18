@@ -54,6 +54,11 @@ class ParkListView extends StatelessWidget {
       query: parksData,
       duration: const Duration(milliseconds: 600),
       filter: filter,
+      sort: (DataSnapshot a, DataSnapshot b) {
+        FirebasePark parkA = FirebasePark.fromMap(Map.from(a.value));
+        FirebasePark parkB = FirebasePark.fromMap(Map.from(b.value));
+        return parkA.name.compareTo(parkB.name);
+      },
       itemBuilder: (BuildContext context, DataSnapshot snapshot,
           Animation<double> anim, int index, int length, String filter) {
         // Snapshot.value is some weird hash map. We need to convert it for the fromJson factory to work
@@ -135,7 +140,7 @@ class ParkListView extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Container(
-                    width: MediaQuery.of(context).size.width*4/6,
+                    width: MediaQuery.of(context).size.width * 4 / 6,
                     child: Row(
                       children: <Widget>[
                         AutoSizeText(
