@@ -5,6 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:log_ride/widgets/hero_network_image.dart';
 import 'package:log_ride/widgets/back_button.dart';
+import 'package:log_ride/widgets/not_implemented_dialog.dart';
 
 class FirebaseAttractionImage extends StatefulWidget {
   FirebaseAttractionImage({this.parkID, this.attractionID, this.overlay});
@@ -48,26 +49,32 @@ class _FirebaseAttractionImageState extends State<FirebaseAttractionImage> {
           // If the page 404's, we don't have a URL, and we don't have an image on our firebase.
           // FirebaseStorage spews an error into the console, and I can't seem to prevent it. but it's ok.
           if (!url.hasData || url.hasError) {
-            return Container(
-              constraints: BoxConstraints.expand(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Icon(
-                      FontAwesomeIcons.image,
-                      color: _foregroundColor,
-                      size: 40.0,
+            return GestureDetector(
+              onTap: () => showDialog(
+                  context: context,
+                  builder: (ctx) =>
+                      NotImplementedDialog()), // TODO: Implement Image Submission
+              child: Container(
+                constraints: BoxConstraints.expand(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Icon(
+                        FontAwesomeIcons.image,
+                        color: _foregroundColor,
+                        size: 40.0,
+                      ),
                     ),
-                  ),
-                  Text(
-                    "SUBMIT YOUR OWN IMAGE",
-                    style: TextStyle(color: _foregroundColor),
-                  )
-                ],
+                    Text(
+                      "SUBMIT YOUR OWN IMAGE!",
+                      style: TextStyle(color: _foregroundColor),
+                    )
+                  ],
+                ),
               ),
             );
           } else {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:log_ride/widgets/not_implemented_dialog.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/widgets/interface_button.dart';
 
@@ -127,8 +127,11 @@ class _ParkSettingsPageState extends State<ParkSettingsPage> {
         padding: const EdgeInsets.all(8.0),
         child: InterfaceButton(
           text: "Submit New Attraction".toUpperCase(),
-          onPressed: () => print(
-              "Submit new attraction called"), // TODO: Submit new attraction page
+          onPressed: () {
+            print(
+                "Submit new attraction called");
+            showDialog(context: context, builder: (ctx) => NotImplementedDialog());
+          }, // TODO: Submit new attraction page
           color: Theme.of(context).primaryColor,
           textColor: Colors.white,
         ),

@@ -16,6 +16,7 @@ import 'package:log_ride/widgets/side_strike_text.dart';
 import 'package:log_ride/widgets/stored_image_widget.dart';
 import 'package:log_ride/widgets/photo_credit_text.dart';
 import 'package:log_ride/widgets/title_bar_icon.dart';
+import 'package:log_ride/widgets/not_implemented_dialog.dart';
 import 'package:log_ride/ui/attraction_scorecard_page.dart';
 import 'package:log_ride/ui/standard_page_structure.dart';
 
@@ -154,7 +155,10 @@ class _DetailsPageState extends State<DetailsPage> {
 
       _rightIcon = TitleBarIcon(
         icon: FontAwesomeIcons.pencilAlt,
-        onTap: () => print("Edit"), // TODO: Call up attraction edit page
+        onTap: () {
+          print("Edit");
+          showDialog(context: context, builder: (ctx) => NotImplementedDialog());
+        }, // TODO: Call up attraction edit page
       );
     }
 
