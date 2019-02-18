@@ -148,8 +148,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _handleEntryCallback(FirebasePark park) {
+    print("Opening id: ${park.parkID} park: ${park.name}");
     BluehostPark serverPark =
         getBluehostParkByID(_parksManager.allParksInfo, park.parkID);
+    print("Found bh id: ${serverPark.id} park: ${serverPark.parkName}");
 
     // This should only happen on the rare occasion that the user opens the app
     // then immediately taps on a park tile. Making it so that nothing happens
@@ -160,7 +162,6 @@ class _HomePageState extends State<HomePage> {
       return;
     }
 
-    print("Opening up attraction page for park ${park.name}");
     Navigator.push(
         context,
         SlideInRoute(

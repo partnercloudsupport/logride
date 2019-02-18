@@ -118,7 +118,6 @@ class ParkListEntry extends StatelessWidget {
           actions: <Widget>[leftAction],
           secondaryActions: <Widget>[rightAction],
           controller: slidableController,
-          key: Key(parkData.name + inFavorites.toString()), // TODO: Remove key if ultimately unnecessary
     );
   }
 }
