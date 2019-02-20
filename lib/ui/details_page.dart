@@ -45,14 +45,18 @@ class _DetailsPageState extends State<DetailsPage> {
     super.initState();
     if (widget.data is BluehostAttraction) {
       _type = _DetailsType.ATTRACTION_DETAILS;
-      FirebaseAnalytics().logEvent(name: "view_attraction", parameters: {"attractionName": (widget.data as BluehostAttraction).attractionName});
+      FirebaseAnalytics().logEvent(name: "view_attraction", parameters: {
+        "attractionName": (widget.data as BluehostAttraction).attractionName
+      });
       if (widget.userData.firstRideDate.millisecondsSinceEpoch != 0)
         firstRide = widget.userData.firstRideDate;
       if (widget.userData.lastRideDate.millisecondsSinceEpoch != 0)
         lastRide = widget.userData.lastRideDate;
     } else if (widget.data is BluehostPark) {
       _type = _DetailsType.PARK_DETAILS;
-      FirebaseAnalytics().logEvent(name: "view_park_detail", parameters: {"parkName": (widget.data as BluehostPark).parkName});
+      FirebaseAnalytics().logEvent(
+          name: "view_park_detail",
+          parameters: {"parkName": (widget.data as BluehostPark).parkName});
     } else {
       throw FormatException("Improper data structure passed to details page.");
     }
@@ -145,10 +149,12 @@ class _DetailsPageState extends State<DetailsPage> {
         _leftIcon = TitleBarIcon(
           icon: FontAwesomeIcons.medal,
           onTap: () {
-            showDialog(context: context, builder: (BuildContext context) {
-              return AttractionScorecardPage(
-                  attraction: attractionData, db: widget.db);
-            });
+            showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AttractionScorecardPage(
+                      attraction: attractionData, db: widget.db);
+                });
           },
         );
       }
@@ -157,7 +163,8 @@ class _DetailsPageState extends State<DetailsPage> {
         icon: FontAwesomeIcons.pencilAlt,
         onTap: () {
           print("Edit");
-          showDialog(context: context, builder: (ctx) => NotImplementedDialog());
+          showDialog(
+              context: context, builder: (ctx) => NotImplementedDialog());
         }, // TODO: Call up attraction edit page
       );
     }
@@ -350,6 +357,9 @@ class _DetailsPageState extends State<DetailsPage> {
 
     if (_type == _DetailsType.ATTRACTION_DETAILS) {
       BluehostAttraction attraction = widget.data as BluehostAttraction;
+      if (attraction.inactivePeriods != "")
+        details.add(_furtherDetailsTextEntry(
+            "Inactive Periods", attraction.inactivePeriods));
       if (attraction.manufacturer != "")
         details.add(
             _furtherDetailsTextEntry("Manufacturer", attraction.manufacturer));

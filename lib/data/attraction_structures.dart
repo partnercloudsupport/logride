@@ -36,11 +36,12 @@ class FirebaseAttraction {
 
 class BluehostAttraction {
   String attractionName;
-  final int attractionID;
+  int attractionID;
   int parkID;
   int rideType;
   int yearOpen;
   int yearClosed;
+  String inactivePeriods;
   bool active;
   bool seasonal;
   bool scoreCard;
@@ -87,6 +88,7 @@ class BluehostAttraction {
     newAttraction.rideType = num.parse(json["RideType"]);
     newAttraction.yearOpen = num.parse(json["YearOpen"]);
     newAttraction.yearClosed = num.parse(json["YearClosed"]);
+    newAttraction.inactivePeriods = json["inactivePeriods"];
 
     newAttraction.active = (json["Active"] == "1");
     newAttraction.seasonal = (json["Seasonal"] == "1");
