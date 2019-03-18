@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:log_ride/widgets/interface_button.dart';
+import 'package:log_ride/widgets/shared/interface_button.dart';
 
 enum SingleValueDialogType { NUMBER, TEXT }
 

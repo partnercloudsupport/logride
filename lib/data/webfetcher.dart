@@ -3,20 +3,38 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/attraction_structures.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 enum WebLocation {
   ALL_PARKS,
   PARK_ATTRACTIONS,
   SPECIFIC_ATTRACTION,
   ATTRACTION_TYPES,
+  SUBMISSION_LOG
 }
 
+enum SubmissionType {
+  ATTRACTION_NEW,
+  ATTRACTION_MODIFY,
+  PARK,
+  IMAGE
+}
+
+const _VERSION_URL = "Version1.0.5";
+
 class WebFetcher {
+
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+
   final Map _serverURLS = {
-    WebLocation.ALL_PARKS: "http://www.beingpositioned.com/theparksman/LogRide/Version1.0.5/parksdbservice.php",
-    WebLocation.PARK_ATTRACTIONS: "http://www.beingpositioned.com/theparksman/LogRide/Version1.0.5/attractiondbservice.php?parkid=",
-    WebLocation.SPECIFIC_ATTRACTION: "http://www.beingpositioned.com/theparksman/LogRide/Version1.0.5/getAttractionDetails.php?rideID=",
-    WebLocation.ATTRACTION_TYPES: "http://www.beingpositioned.com/theparksman/attractionTypes.php"
+    WebLocation.ALL_PARKS: "http://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/parksdbservice.php",
+    WebLocation.PARK_ATTRACTIONS: "http://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/attractiondbservice.php?parkid=",
+    WebLocation.SPECIFIC_ATTRACTION: "http://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/getAttractionDetails.php?rideID=",
+    WebLocation.ATTRACTION_TYPES: "http://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/attractionTypes.php",
+    SubmissionType.ATTRACTION_NEW: "https://www.beingpositioned.com/theparksman/LogRide/test/usersuggestservice.php",
+    SubmissionType.ATTRACTION_MODIFY: "https://www.beingpositioned.com/theparksman/LogRide/test/modifyAttracion.php",
+    SubmissionType.IMAGE: "http://www.beingpositioned.com/theparksman/LogRide/test/submitPhotoUpload.php",
+    SubmissionType.PARK: "http://www.beingpositioned.com/theparksman/LogRide/test/suggestParkUploadtoApprove",
   };
 
   Future<List<BluehostPark>> getAllParkData() async {
@@ -29,7 +47,11 @@ class WebFetcher {
       List<dynamic> decoded = json.decode(response.body);
 
       for(int i = 0; i < decoded.length; i++){
-        data.add(BluehostPark.fromJson(decoded[i]));
+        BluehostPark park = BluehostPark.fromJson(decoded[i]);
+        if(park == null) {
+          print("There was an error parsing the park with the following data: ${decoded[i]}");
+        }
+        data.add(park);
       }
     }
 
@@ -84,6 +106,42 @@ class WebFetcher {
     }
 
     return null;
+  }
+
+  void submitAttractionData(BluehostAttraction attr, BluehostPark park, {String username, String uid, bool isNewAttraction = false}) async {
+    // Check if the data is valid
+    // Prepare payload
+    var body = jsonEncode(({
+      "parknum": park.id,
+      "ride": attr.attractionName,
+      "open": attr.yearOpen ?? 0,
+      "close": attr.yearClosed ?? 0,
+      "yearsInactive": attr.inactivePeriods ?? "",
+      "type": attr.rideType ?? 0,
+      "park": park.parkName ?? "",
+      "rideID": isNewAttraction ? 0 : attr.attractionID,
+      "active": attr.active ? 1 : 0,
+      "seasonal": attr.seasonal ? 1 : 0,
+      "manufacturer": attr.manufacturer ?? "",
+      "notes": attr.notes ?? "",
+      "modify": isNewAttraction ? 0 : 1,
+      "scoreCard": attr.scoreCard ? 1 : 0,
+      "formerNames": attr.formerNames ?? "",
+      "model": attr.model ?? "",
+      "height": attr.height ?? 0,
+      "maxSpeed": attr.maxSpeed ?? 0,
+      "length": attr.length ?? 0,
+      "duration": attr.attractionDuration ?? 0,
+      "email": username,
+      "token": await _firebaseMessaging.getToken(),
+      "userID": uid
+    }));
+    // Issue request
+    http.post(_serverURLS[SubmissionType.ATTRACTION_NEW], body: body, headers: {"Content-Type": "application/json"}).then((response) {
+      print(response.statusCode);
+      print(response.body);
+    });
+    // State result
   }
 }
 

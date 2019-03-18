@@ -6,8 +6,8 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:log_ride/data/color_constants.dart';
 import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/park_structures.dart';
-import 'package:log_ride/widgets/attraction_list_entry.dart';
-import 'package:log_ride/widgets/experience_button.dart';
+import 'package:log_ride/widgets/attractions_page/attraction_list_entry.dart';
+import 'package:log_ride/widgets/attractions_page/experience_button.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 
 class AttractionFilter extends ValueNotifier<String> {
@@ -24,7 +24,8 @@ class FirebaseAttractionListView extends StatefulWidget {
       this.experienceHandler,
       this.countHandler,
       this.dateHandler,
-      this.db});
+      this.db,
+      this.submissionCallback});
 
   final Query attractionQuery;
   final Query ignoreQuery;
@@ -37,6 +38,7 @@ class FirebaseAttractionListView extends StatefulWidget {
   final Function(List<FirebaseAttraction> userData, List<int> ignoreData)
       countHandler;
   final Function(DateTime, FirebaseAttraction, bool) dateHandler;
+  final Function(dynamic, bool) submissionCallback;
 
   final BaseDB db;
 
@@ -211,6 +213,7 @@ class _FirebaseAttractionListViewState
         experienceHandler: widget.experienceHandler,
         ignoreCallback: widget.ignoreCallback,
         slidableController: _slidableController,
+        submissionCallback: (b) => widget.submissionCallback(b, false),
         userData: attraction,
         timeChanged: widget.dateHandler,
         db: widget.db,

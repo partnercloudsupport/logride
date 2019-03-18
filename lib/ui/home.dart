@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/animations/slide_in_transition.dart';
+import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/check_in_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/parks_manager.dart';
@@ -11,14 +12,15 @@ import 'package:log_ride/data/webfetcher.dart';
 import 'package:log_ride/data/auth_manager.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/ui/stats_page.dart';
-import 'package:log_ride/ui/park_search.dart';
+import 'package:log_ride/ui/dialogs/park_search.dart';
 import 'package:log_ride/ui/attractions_list_page.dart';
 import 'package:log_ride/ui/app_info_page.dart';
-import 'package:log_ride/widgets/home_icon.dart';
-import 'package:log_ride/widgets/check_in_widget.dart';
-import 'package:log_ride/widgets/park_list_widget.dart';
-import 'package:log_ride/widgets/park_list_entry.dart';
-import 'package:log_ride/widgets/content_frame.dart';
+import 'package:log_ride/ui/submission/submit_attraction_page.dart';
+import 'package:log_ride/widgets/shared/home_icon.dart';
+import 'package:log_ride/widgets/home_page/check_in_widget.dart';
+import 'package:log_ride/widgets/parks_page/park_list_widget.dart';
+import 'package:log_ride/widgets/parks_page/park_list_entry.dart';
+import 'package:log_ride/widgets/shared/content_frame.dart';
 
 enum SectionFocus { favorites, all, balanced }
 
@@ -46,6 +48,7 @@ class _HomePageState extends State<HomePage> {
 
   // Used for debugging and future features
   String userName = "";
+  String email = "";
 
   // Data management
   ParksManager _parksManager = ParksManager();
@@ -120,7 +123,8 @@ class _HomePageState extends State<HomePage> {
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.0)),
                 title: Text("Delete Park Data?"),
                 content: Text(
                     "This will permanately delete your progress for ${park.name}"),
@@ -171,6 +175,7 @@ class _HomePageState extends State<HomePage> {
               pm: _parksManager,
               db: widget.db,
               serverParkData: serverPark,
+              submissionCallback: (a, n) => _handleAttractionSubmissionCallback(a, serverPark, isNewAttraction: n),
             )));
   }
 
@@ -194,7 +199,29 @@ class _HomePageState extends State<HomePage> {
             direction: SlideInDirection.UP,
             dialogStyle: true,
             widget: AttractionsPage(
-                pm: _parksManager, db: widget.db, serverParkData: serverPark)));
+                pm: _parksManager, db: widget.db, serverParkData: serverPark, submissionCallback: (a, n) => _handleAttractionSubmissionCallback(a, serverPark, isNewAttraction: n))));
+  }
+
+  void _handleAttractionSubmissionCallback(
+      BluehostAttraction attr, BluehostPark parent, {bool isNewAttraction = false}) async {
+
+    isNewAttraction ? print("New Attraction") : print("Modified Attraction");
+
+    dynamic result = await Navigator.push(
+        context,
+        SlideInRoute(
+            widget: SubmitAttractionPage(
+                attractionTypes: _parksManager.attractionTypes,
+                existingData: attr,
+                parentPark: parent),
+            dialogStyle: true,
+            direction: SlideInDirection.RIGHT));
+
+    if (result == null) return;
+
+    BluehostAttraction newAttraction = result as BluehostAttraction;
+    _webFetcher.submitAttractionData(newAttraction, parent, username: userName, uid: widget.uid, isNewAttraction: isNewAttraction);
+    // TODO: DIALOG TO LET USER KNOW ABOUT SUBMISSION
   }
 
   void _signOut() async {
@@ -214,6 +241,8 @@ class _HomePageState extends State<HomePage> {
     // Fetch user information
     // Build specific parks from user information & parks list
     //widget.db.storeUserID(widget.uid);
+    
+    widget.db.storeUserID(widget.uid);
 
     _webFetcher = WebFetcher();
     _parksManager = ParksManager(db: widget.db, wf: _webFetcher);
@@ -228,6 +257,10 @@ class _HomePageState extends State<HomePage> {
 
     widget.auth.getCurrentUserName().then((name) {
       userName = name;
+    });
+
+    widget.auth.getCurrentUserEmail().then((email) {
+      email = email;
     });
 
     super.initState();
@@ -354,7 +387,8 @@ class _HomePageState extends State<HomePage> {
         ),
         onPressed: () {
           if (!_parksManager.searchInitialized) {
-            print("Search hasn't been initialized yet. Preventing user from viewing search page.");
+            print(
+                "Search hasn't been initialized yet. Preventing user from viewing search page.");
             return;
           }
 

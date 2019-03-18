@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/ui/standard_page_structure.dart';
-import 'package:log_ride/widgets/generic_list_entry.dart';
-import 'package:log_ride/widgets/content_frame.dart';
+import 'package:log_ride/widgets/shared/generic_list_entry.dart';
+import 'package:log_ride/widgets/shared/content_frame.dart';
 
 class SearchParksCard extends StatefulWidget {
   SearchParksCard({Key key, this.parkList, this.tapBack}) : super(key: key);

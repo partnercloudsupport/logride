@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/park_structures.dart';
-import 'package:log_ride/widgets/interface_button.dart';
-import 'package:log_ride/widgets/side_strike_text.dart';
+import 'package:log_ride/widgets/shared/interface_button.dart';
+import 'package:log_ride/widgets/shared/side_strike_text.dart';
 
 class CheckInDialog extends StatelessWidget {
   CheckInDialog({this.park});

@@ -30,10 +30,11 @@ dependencies:
   ## Firebase libraries
   firebase_core: 0.3.0+2
   ## This version of firebase_auth has proper error handling - adopting this
-  firebase_auth: 0.8.1+1
-  firebase_database: 2.0.1+1
-  firebase_analytics: 2.0.1
-  firebase_storage: 2.0.1+1
+  firebase_auth: 0.8.1+4
+  firebase_database: 2.0.2
+  firebase_analytics: 2.0.3
+  firebase_storage: 2.1.0+1
+  firebase_messaging: 4.0.0+1
   # Used for icons where material icons fail
   font_awesome_flutter: ^8.2.0
   # Used throughout the app for launching external links

@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:log_ride/widgets/submit_button.dart';
-import 'package:log_ride/widgets/home_icon.dart';
-import 'package:log_ride/widgets/page_controller_slider_bar.dart';
+import 'package:log_ride/widgets/shared/submit_button.dart';
+import 'package:log_ride/widgets/shared/home_icon.dart';
+import 'package:log_ride/widgets/shared/page_controller_slider_bar.dart';
 import 'package:log_ride/data/auth_manager.dart';
 import 'package:log_ride/data/contact_url_constants.dart';
 

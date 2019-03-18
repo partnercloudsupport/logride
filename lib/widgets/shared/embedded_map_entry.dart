@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:latlong/latlong.dart' as old;
-import 'package:log_ride/widgets/back_button.dart';
+import 'package:log_ride/widgets/shared/back_button.dart';
 
 const API_KEY = "AIzaSyDA8ZiyR1TeQtQHWEKj5T__5U4FJyya5V8";
 

@@ -8,22 +8,23 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:log_ride/animations/slide_in_transition.dart';
 import 'package:log_ride/ui/details_page.dart';
 import 'package:log_ride/ui/standard_page_structure.dart';
-import 'package:log_ride/ui/park_settings_page.dart';
+import 'package:log_ride/widgets/dialogs/park_settings_dialog.dart';
 import 'package:log_ride/data/color_constants.dart';
 import 'package:log_ride/data/parks_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
-import 'package:log_ride/widgets/content_frame.dart';
-import 'package:log_ride/widgets/progress_bars.dart';
-import 'package:log_ride/widgets/attraction_list_widget.dart';
-import 'package:log_ride/widgets/title_bar_icon.dart';
+import 'package:log_ride/widgets/shared/content_frame.dart';
+import 'package:log_ride/widgets/shared/progress_bars.dart';
+import 'package:log_ride/widgets/attractions_page/attraction_list_widget.dart';
+import 'package:log_ride/widgets/shared/title_bar_icon.dart';
 
 class AttractionsPage extends StatefulWidget {
-  AttractionsPage({this.pm, this.db, this.serverParkData});
+  AttractionsPage({this.pm, this.db, this.serverParkData, this.submissionCallback});
 
   final ParksManager pm;
   final BaseDB db;
   final BluehostPark serverParkData;
+  final Function(dynamic, bool) submissionCallback;
 
   @override
   _AttractionsPageState createState() => _AttractionsPageState();
@@ -39,8 +40,13 @@ class _AttractionsPageState extends State<AttractionsPage>
 
   @override
   void initState() {
+
+    print("Initializing State for the Attraction List Page of park ${widget.serverParkData.parkName}");
+    print("Bluehost ID: ${widget.serverParkData.id.toString()}");
+
     _parkStream = widget.db.getLiveEntryAtPath(
         path: DatabasePath.PARKS, key: widget.serverParkData.id.toString());
+
     FirebaseAnalytics().logEvent(name: "view_park", parameters: {"parkName": widget.serverParkData.parkName});
     super.initState();
   }
@@ -74,6 +80,7 @@ class _AttractionsPageState extends State<AttractionsPage>
                     constraints: BoxConstraints.expand(),
                     child: Center(child: CircularProgressIndicator()));
               } else {
+
                 FirebasePark parkData =
                     FirebasePark.fromMap(Map.from(stream.data.snapshot.value));
 
@@ -127,6 +134,7 @@ class _AttractionsPageState extends State<AttractionsPage>
                     slidableController: _slidableController,
                     pm: widget.pm,
                     db: widget.db,
+                    submissionCallback: widget.submissionCallback
                     // Data here
                   ))
                 ]);
@@ -203,9 +211,10 @@ class _AttractionsPageState extends State<AttractionsPage>
 
   void _openSettingsPage(FirebasePark userData) {
     showDialog(context: context, builder: (BuildContext context) {
-      return ParkSettingsPage(
+      return ParkSettingsDialog(
         userData: userData,
         parkData: widget.serverParkData,
+        submissionCallback: widget.submissionCallback,
         callback: (cat, dat) =>
             _settingsChangeCallback(cat, dat, userData),
       );

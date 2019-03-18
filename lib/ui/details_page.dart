@@ -10,25 +10,25 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
-import 'package:log_ride/widgets/content_frame.dart';
-import 'package:log_ride/widgets/embedded_map_entry.dart';
-import 'package:log_ride/widgets/side_strike_text.dart';
-import 'package:log_ride/widgets/stored_image_widget.dart';
-import 'package:log_ride/widgets/photo_credit_text.dart';
-import 'package:log_ride/widgets/title_bar_icon.dart';
-import 'package:log_ride/widgets/not_implemented_dialog.dart';
-import 'package:log_ride/ui/attraction_scorecard_page.dart';
+import 'package:log_ride/widgets/shared/content_frame.dart';
+import 'package:log_ride/widgets/shared/embedded_map_entry.dart';
+import 'package:log_ride/widgets/shared/side_strike_text.dart';
+import 'package:log_ride/widgets/shared/stored_image_widget.dart';
+import 'package:log_ride/widgets/shared/photo_credit_text.dart';
+import 'package:log_ride/widgets/shared/title_bar_icon.dart';
+import 'package:log_ride/ui/dialogs/attraction_scorecard_page.dart';
 import 'package:log_ride/ui/standard_page_structure.dart';
 
 enum _DetailsType { PARK_DETAILS, ATTRACTION_DETAILS }
 
 class DetailsPage extends StatefulWidget {
-  DetailsPage({this.db, this.data, this.userData, this.dateChangeHandler});
+  DetailsPage({this.db, this.data, this.userData, this.dateChangeHandler, this.submissionCallback});
 
   final BaseDB db;
   final dynamic data;
   final FirebaseAttraction userData;
   final Function(bool first, DateTime newTime) dateChangeHandler;
+  final Function(dynamic attraction) submissionCallback;
 
   @override
   _DetailsPageState createState() => _DetailsPageState();
@@ -162,10 +162,8 @@ class _DetailsPageState extends State<DetailsPage> {
       _rightIcon = TitleBarIcon(
         icon: FontAwesomeIcons.pencilAlt,
         onTap: () {
-          print("Edit");
-          showDialog(
-              context: context, builder: (ctx) => NotImplementedDialog());
-        }, // TODO: Call up attraction edit page
+          widget.submissionCallback(attractionData);
+        },
       );
     }
 

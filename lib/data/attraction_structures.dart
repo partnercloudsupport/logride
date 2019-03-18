@@ -14,7 +14,7 @@ class FirebaseAttraction {
 
   factory FirebaseAttraction.fromMap(Map<String, dynamic> map){
     FirebaseAttraction newAttraction = FirebaseAttraction(rideID: map["rideID"]);
-    newAttraction.numberOfTimesRidden = map["numberOfTimesRidden"];
+    newAttraction.numberOfTimesRidden = map["numberOfTimesRidden"] ?? 0;
 
     // DateTime is defined as seconds since epoch on iOS. It's milliseconds since epoch on flutter. We need to fix this, so we multiply by 1000
     newAttraction.firstRideDate = DateTime.fromMillisecondsSinceEpoch(((map["firstRideDate"] as num) * 1000).toInt());
@@ -38,13 +38,13 @@ class BluehostAttraction {
   String attractionName;
   int attractionID;
   int parkID;
-  int rideType;
+  int rideType = 0;
   int yearOpen;
   int yearClosed;
   String inactivePeriods;
-  bool active;
-  bool seasonal;
-  bool scoreCard;
+  bool active = true;
+  bool seasonal = false;
+  bool scoreCard = false;
   String manufacturer;
   String additionalContributors;
   String formerNames;

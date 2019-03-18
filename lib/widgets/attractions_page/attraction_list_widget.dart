@@ -5,10 +5,10 @@ import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/parks_manager.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/scorecard_structures.dart';
-import 'package:log_ride/ui/single_value_dialog.dart';
-import 'package:log_ride/widgets/experience_button.dart';
-import 'package:log_ride/widgets/firebase_attraction_list.dart';
-import 'package:log_ride/widgets/set_experience_box.dart';
+import 'package:log_ride/ui/dialogs/single_value_dialog.dart';
+import 'package:log_ride/widgets/attractions_page/experience_button.dart';
+import 'package:log_ride/widgets/attractions_page/firebase_attraction_list.dart';
+import 'package:log_ride/widgets/dialogs/set_experience_box.dart';
 
 class AttractionsListView extends StatefulWidget {
   AttractionsListView(
@@ -16,13 +16,15 @@ class AttractionsListView extends StatefulWidget {
       this.db,
       this.pm,
       this.slidableController,
-      this.parentPark});
+      this.parentPark,
+      this.submissionCallback});
 
   final List<BluehostAttraction> sourceAttractions;
   final BaseDB db;
   final ParksManager pm;
   final FirebasePark parentPark;
   final SlidableController slidableController;
+  final Function(dynamic, bool) submissionCallback;
 
   @override
   _AttractionsListViewState createState() => _AttractionsListViewState();
@@ -290,6 +292,7 @@ class _AttractionsListViewState extends State<AttractionsListView> {
               key: widget.parentPark.parkID.toString()),
           experienceHandler: _experienceCallbackHandler,
           ignoreCallback: _ignoreCallbackHandler,
+          submissionCallback: widget.submissionCallback,
           countHandler: _updateCountHandler,
           dateHandler: _dateUpdateHandler,
           db: widget.db,

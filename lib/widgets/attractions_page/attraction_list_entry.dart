@@ -5,7 +5,7 @@ import 'package:log_ride/animations/slide_in_transition.dart';
 import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
-import 'package:log_ride/widgets/experience_button.dart';
+import 'package:log_ride/widgets/attractions_page/experience_button.dart';
 import 'package:log_ride/ui/details_page.dart';
 
 class AttractionListEntry extends StatefulWidget {
@@ -17,7 +17,8 @@ class AttractionListEntry extends StatefulWidget {
       this.experienceHandler,
       this.parentPark,
       this.timeChanged,
-      this.db});
+      this.db,
+      this.submissionCallback});
 
   final BluehostAttraction attractionData;
   final FirebaseAttraction userData;
@@ -26,6 +27,7 @@ class AttractionListEntry extends StatefulWidget {
   final Function(BluehostAttraction, bool) ignoreCallback;
   final Function(ExperienceAction, FirebaseAttraction) experienceHandler;
   final Function(DateTime, FirebaseAttraction, bool) timeChanged;
+  final Function(dynamic) submissionCallback;
   final BaseDB db;
 
   @override
@@ -144,6 +146,7 @@ class AttractionListState extends State<AttractionListEntry> {
               data: widget.attractionData,
               db: widget.db,
               userData: widget.userData,
+              submissionCallback: widget.submissionCallback,
               dateChangeHandler: (first, newTime) =>
                   widget.timeChanged(newTime, widget.userData, first),
             )));
