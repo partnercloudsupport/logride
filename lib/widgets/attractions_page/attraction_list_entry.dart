@@ -68,7 +68,9 @@ class AttractionListState extends State<AttractionListEntry> {
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.subhead,
                   ),
-                  Text(widget.attractionData.typeLabel,
+                  Text( widget.attractionData.upcoming
+                      ? "Opening Soon"
+                      : widget.attractionData.typeLabel,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context)
                           .textTheme
@@ -81,6 +83,7 @@ class AttractionListState extends State<AttractionListEntry> {
                 interactHandler: widget.experienceHandler,
                 parentPark: widget.parentPark,
                 ignored: (widget.attractionData.seasonal || !widget.attractionData.active) ? false : (ignored ?? false),
+                upcoming: widget.attractionData.upcoming,
                 data: widget.userData ??
                     FirebaseAttraction(
                         rideID: widget.attractionData.attractionID),
@@ -94,10 +97,10 @@ class AttractionListState extends State<AttractionListEntry> {
     // Logic for selecting whether or not there are any slide interactions with
     // this list entry.
     Widget slideAction;
-    if (!widget.attractionData.active || widget.attractionData.seasonal)
+    if (!widget.attractionData.active || widget.attractionData.seasonal || widget.attractionData.upcoming)
       slideAction =
           null; // Already ignored thanks to defunct, no point in ignoring it more
-    if (widget.attractionData.active && !widget.attractionData.seasonal) {
+    if (widget.attractionData.active && !widget.attractionData.seasonal && !widget.attractionData.upcoming) {
       // If we're ignored, show the include slide. If we're included, show the ignore slide.
       slideAction =
           ignored ? _buildIncludeSlideAction() : _buildIgnoreSlideAction();
