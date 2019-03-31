@@ -383,6 +383,20 @@ class _DetailsPageState extends State<DetailsPage> {
 
     if (_type == _DetailsType.ATTRACTION_DETAILS) {
       BluehostAttraction attraction = widget.data as BluehostAttraction;
+
+      // Attractions that are opening soon will have the opening day already displayed
+      if(attraction.openingDay != null && !attraction.upcoming){
+        details.add(_furtherDetailsTextEntry(
+          "Opening Day", DateFormat.yMMMd("en_US").format(attraction.openingDay)
+        ));
+      }
+
+      if(attraction.closingDay != null){
+        details.add(_furtherDetailsTextEntry(
+          "Closing Day", DateFormat.yMMMd("en_US").format(attraction.closingDay)
+        ));
+      }
+
       if (attraction.inactivePeriods != "")
         details.add(_furtherDetailsTextEntry(
             "Inactive Periods", attraction.inactivePeriods));
