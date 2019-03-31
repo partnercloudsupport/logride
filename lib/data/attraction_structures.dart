@@ -100,18 +100,22 @@ class BluehostAttraction {
 
       if (json["Active"] == "2") {
         newAttraction.upcoming = true;
-        newAttraction.openingDay = DateTime.parse(json["dateOpen"]);
       }
     } else {
       newAttraction.active = false;
       newAttraction.upcoming = false;
     }
 
-    List<String> closingDate = json["dateClose"].split("-");
-    if(closingDate[0] != "0000"){
+    if(json["dateClose"][0] != "0"){
       newAttraction.closingDay = DateTime.parse(json["dateClose"]);
     } else {
       newAttraction.closingDay = null;
+    }
+
+    if(json["dateOpen"][0] != "0"){
+      newAttraction.openingDay = DateTime.parse(json["dateOpen"]);
+    } else {
+      newAttraction.openingDay = null;
     }
 
     newAttraction.seasonal = (json["Seasonal"] == "1");
