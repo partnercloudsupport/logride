@@ -90,6 +90,9 @@ class FirebasePark {
       // If it's ignored, it doesn't contribute to total ride count
       if (ignored.contains(serverAttraction.attractionID)) continue;
 
+      // It's effectively ignored too if it's an upcoming attraction
+      if (serverAttraction.upcoming) continue;
+
       // If it's defunct, it only adds to the defunct count if it's been ridden
       if (!serverAttraction.active) {
         // If the park is defunct, add the defunct attraction to the total number of attractions
