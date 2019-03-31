@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/color_constants.dart';
 import 'package:log_ride/data/park_structures.dart';
-import 'package:log_ride/widgets/forms/form_header.dart';
 import 'package:log_ride/widgets/shared/interface_button.dart';
+import 'package:log_ride/widgets/forms/form_header.dart';
 import 'package:log_ride/widgets/forms/proper_adaptive_switch.dart';
 import 'package:log_ride/widgets/forms/submission_divider.dart';
 import 'package:log_ride/widgets/forms/submission_decoration.dart';
+import 'package:log_ride/widgets/forms/ride_status_dropdown.dart';
 import 'package:log_ride/widgets/dialogs/duration_picker.dart';
+import 'package:log_ride/widgets/dialogs/date_picker.dart';
 
 class SubmitAttractionPage extends StatefulWidget {
   SubmitAttractionPage(
@@ -25,18 +27,20 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
   final _formKey = GlobalKey<FormState>();
   bool _isNewSubmission;
 
-  List<DropdownMenuItem<int>> dropDownTypes = List<DropdownMenuItem<int>>();
+  List<DropdownMenuItem<int>> dropDownTypes;
 
   BluehostAttraction _data;
 
-  bool _isDefunct = true;
+  AttractionStatus _attractionStatus;
 
   // Node definitions - used for seamless progression to the next entry
   final FocusNode _nodeName = FocusNode();
 
   final FocusNode _nodeFormer = FocusNode();
-  final FocusNode _nodeOpened = FocusNode();
-  final FocusNode _nodeClosed = FocusNode();
+  final FocusNode _nodeOpenYear = FocusNode();
+  final FocusNode _nodeOpenDate = FocusNode();
+  final FocusNode _nodeCloseYear = FocusNode();
+  final FocusNode _nodeCloseDate = FocusNode();
   final FocusNode _nodeInactive = FocusNode();
 
   final FocusNode _nodeManufacturer = FocusNode();
@@ -60,8 +64,9 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
       _isNewSubmission = false;
     }
 
-    // Establish this variable for the "year closed" text box
-    _isDefunct = !_data.active;
+    _attractionStatus = getAttractionStateFromBluehostAttraction(_data);
+
+    dropDownTypes = List<DropdownMenuItem<int>>();
 
     // Build our attraction types list
     widget.attractionTypes.forEach((val, label) {
@@ -76,8 +81,10 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
     // Disposal of FocusNodes are required
     _nodeName.dispose();
     _nodeFormer.dispose();
-    _nodeOpened.dispose();
-    _nodeClosed.dispose();
+    _nodeOpenYear.dispose();
+    _nodeOpenDate.dispose();
+    _nodeCloseYear.dispose();
+    _nodeCloseDate.dispose();
     _nodeInactive.dispose();
     _nodeManufacturer.dispose();
     _nodeModel.dispose();
@@ -90,6 +97,7 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
@@ -122,6 +130,8 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
                           horizontal: 16.0, vertical: 16.0),
                       child: Column(
                         children: <Widget>[
+                          // ------------ Name and Ride Type information --------- //
+
                           TextFormField(
                             focusNode: _nodeName,
                             onFieldSubmitted: (_) {
@@ -142,7 +152,8 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
                             },
                           ),
                           FormField(
-                            initialValue: (_data.rideType ?? 0) + 1,
+                            // Ok, attractions have it stored as
+                            initialValue: _data.rideType,
                             onSaved: (v) {
                               _data.rideType = v;
                             },
@@ -168,7 +179,8 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
                             focusNode: _nodeFormer,
                             onFieldSubmitted: (_) {
                               _nodeFormer.unfocus();
-                              FocusScope.of(context).requestFocus(_nodeOpened);
+                              FocusScope.of(context)
+                                  .requestFocus(_nodeOpenYear);
                             },
                             initialValue: _data.formerNames,
                             decoration: submissionDecoration(
@@ -180,13 +192,40 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
                             },
                           ),
                           SubmissionDivider(),
+
+                          // --------- Ride Status and operating history ------ //
+
+                          RideStatusDropdown(
+                            onChanged: (status) {
+                              // We update the attraction status if it's both different
+                              // and we're mounted. This is used to select which
+                              // text boxes are available.
+                              if (status != _attractionStatus) {
+                                if (mounted) {
+                                  setState(() {
+                                    _attractionStatus = status;
+                                  });
+                                }
+                              }
+                            },
+                            onSaved: (status) {
+                              _data = applyStatusToAttraction(status, _data);
+                            },
+                            initialValue: _data,
+                          ),
+                          AdaptiveSwitchFormField(
+                            initialValue: _data.seasonal,
+                            label: "Seasonal",
+                            onSaved: (val) => _data.seasonal = val,
+                          ),
                           TextFormField(
-                            focusNode: _nodeOpened,
+                            focusNode: _nodeOpenYear,
                             onFieldSubmitted: (_) {
-                              _nodeOpened.unfocus();
-                              if (_isDefunct) {
+                              _nodeOpenYear.unfocus();
+                              if (_attractionStatus ==
+                                  AttractionStatus.DEFUNCT) {
                                 FocusScope.of(context)
-                                    .requestFocus(_nodeClosed);
+                                    .requestFocus(_nodeCloseYear);
                               } else {
                                 FocusScope.of(context)
                                     .requestFocus(_nodeInactive);
@@ -197,7 +236,7 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
                                     ? _data.yearOpen.toString()
                                     : "",
                             decoration: submissionDecoration(
-                                labelText: "Year Opened",
+                                labelText: (_attractionStatus == AttractionStatus.UPCOMING) ? "Year Opening": "Year Opened",
                                 hintText: "Opening Year"),
                             keyboardType: TextInputType.numberWithOptions(),
                             validator: (value) {
@@ -211,10 +250,23 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
                               _data.yearOpen = num.tryParse(value);
                             },
                           ),
+                          DatePickerFormField(
+                            onSaved: (d) {
+                              _data.openingDay = d;
+                            },
+                            validator: (v) {
+                              if(_attractionStatus == AttractionStatus.UPCOMING && v == null){
+                                return "Enter an opening date";
+                              }
+                            },
+                            initialValue: _data.openingDay,
+                            text: (_attractionStatus == AttractionStatus.UPCOMING) ? "Date Opening": "Date Opened",
+                          ),
+
                           TextFormField(
-                            focusNode: _nodeClosed,
+                            focusNode: _nodeCloseYear,
                             onFieldSubmitted: (_) {
-                              _nodeClosed.unfocus();
+                              _nodeCloseYear.unfocus();
                               FocusScope.of(context)
                                   .requestFocus(_nodeInactive);
                             },
@@ -223,10 +275,11 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
                                 ? _data.yearClosed.toString()
                                 : "",
                             decoration: submissionDecoration(
-                              hintText: "Closing Date",
+                              hintText: "Closing Year",
                               labelText: "Year Closed",
                             ),
-                            enabled: _isDefunct,
+                            enabled:
+                                (_attractionStatus == AttractionStatus.DEFUNCT),
                             keyboardType: TextInputType.numberWithOptions(),
                             validator: (value) {
                               if (value == "") return null;
@@ -239,6 +292,16 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
                               _data.yearClosed = num.tryParse(value);
                             },
                           ),
+                          DatePickerFormField(
+                            onSaved: (d) {
+                              _data.closingDay = d;
+                            },
+                            enabled:
+                                (_attractionStatus == AttractionStatus.DEFUNCT),
+                            initialValue: _data.closingDay,
+                            text: "Date Closed",
+                          ),
+
                           TextFormField(
                             focusNode: _nodeInactive,
                             onFieldSubmitted: (_) {
@@ -254,24 +317,6 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
                             onSaved: (value) {
                               _data.inactivePeriods = value;
                             },
-                          ),
-                          AdaptiveSwitchFormField(
-                            initialValue: !_data.active,
-                            label: "Defunct",
-                            onChanged: (val) {
-                              if (mounted)
-                                setState(() {
-                                  _isDefunct = val;
-                                });
-                            },
-                            onSaved: (val) {
-                              _data.active = !val;
-                            },
-                          ),
-                          AdaptiveSwitchFormField(
-                            initialValue: _data.seasonal,
-                            label: "Seasonal",
-                            onSaved: (val) => _data.seasonal = val,
                           ),
                           SubmissionDivider(),
                           TextFormField(

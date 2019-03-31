@@ -36,6 +36,7 @@
  - Search should show defunct and seasonal regardless of setting
  - Search on former names (park & attraction)
  - Search on ride ID or attraction ID
+ - Search on initials (park)
  - Haptic 
     - Increment thing (maybe)
  - Attraction Site
@@ -43,7 +44,10 @@
  - Models & Manufacturers will eventually be drop-down/pop-up fo
  - Text Pop-up for parks without attractions
 
- - Active = 2 is "To Be Opened"
- - Add DateOpen values to toBeOpenedParks
-   - YYYY-MM-DD
- - Opening Dates - "Opening Soon" toggle, opening date mandatory field
+ - Active = 2 is "To Be Opened" ✔
+ - Add DateOpen values to toBeOpenAttractions ✔
+   - YYYY-MM-DD✔
+ - Opening Dates - "Opening Soon" toggle, opening date mandatory field ✔
+ - The only thing left to do: Display upcoming attractions differently on the main page
+ 
+ - New Line-break structure on Former Names, Initial, Inactive Years

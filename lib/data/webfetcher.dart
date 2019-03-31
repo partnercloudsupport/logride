@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/attraction_structures.dart';
@@ -20,7 +21,7 @@ enum SubmissionType {
   IMAGE
 }
 
-const _VERSION_URL = "Version1.0.5";
+const _VERSION_URL = "test";
 
 class WebFetcher {
 
@@ -31,10 +32,10 @@ class WebFetcher {
     WebLocation.PARK_ATTRACTIONS: "http://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/attractiondbservice.php?parkid=",
     WebLocation.SPECIFIC_ATTRACTION: "http://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/getAttractionDetails.php?rideID=",
     WebLocation.ATTRACTION_TYPES: "http://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/attractionTypes.php",
-    SubmissionType.ATTRACTION_NEW: "https://www.beingpositioned.com/theparksman/LogRide/test/usersuggestservice.php",
-    SubmissionType.ATTRACTION_MODIFY: "https://www.beingpositioned.com/theparksman/LogRide/test/modifyAttracion.php",
-    SubmissionType.IMAGE: "http://www.beingpositioned.com/theparksman/LogRide/test/submitPhotoUpload.php",
-    SubmissionType.PARK: "http://www.beingpositioned.com/theparksman/LogRide/test/suggestParkUploadtoApprove",
+    SubmissionType.ATTRACTION_NEW: "https://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/usersuggestservice.php",
+    SubmissionType.ATTRACTION_MODIFY: "https://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/modifyAttracion.php",
+    SubmissionType.IMAGE: "http://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/submitPhotoUpload.php",
+    SubmissionType.PARK: "http://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/suggestParkUploadtoApprove",
   };
 
   Future<List<BluehostPark>> getAllParkData() async {
@@ -109,25 +110,38 @@ class WebFetcher {
   }
 
   void submitAttractionData(BluehostAttraction attr, BluehostPark park, {String username, String uid, bool isNewAttraction = false}) async {
-    // Check if the data is valid
+
+    // Status Calculations
+    int activeStatus = attr.active ? 1 : 0;
+    if(attr.upcoming) activeStatus = 2;
+
+    // Date Calculations - if it's null, we replace it with 0000-00-00
+    String formattedDateOpen = "0000-00-00";
+    if(attr.openingDay != null){
+      formattedDateOpen = DateFormat("yyyy'-'MM'-'dd").format(attr.openingDay);
+    }
+
     // Prepare payload
     var body = jsonEncode(({
       "parknum": park.id,
       "ride": attr.attractionName,
       "open": attr.yearOpen ?? 0,
+      "dateOpen":formattedDateOpen,
       "close": attr.yearClosed ?? 0,
       "yearsInactive": attr.inactivePeriods ?? "",
       "type": attr.rideType ?? 0,
       "park": park.parkName ?? "",
       "rideID": isNewAttraction ? 0 : attr.attractionID,
-      "active": attr.active ? 1 : 0,
+      "active": activeStatus,
       "seasonal": attr.seasonal ? 1 : 0,
       "manufacturer": attr.manufacturer ?? "",
+      "manID": 0, /// TODO: Implement Manufacturer ID
       "notes": attr.notes ?? "",
       "modify": isNewAttraction ? 0 : 1,
       "scoreCard": attr.scoreCard ? 1 : 0,
       "formerNames": attr.formerNames ?? "",
       "model": attr.model ?? "",
+      "model_id": 0, // TODO: Implement Model ID
       "height": attr.height ?? 0,
       "maxSpeed": attr.maxSpeed ?? 0,
       "length": attr.length ?? 0,
@@ -136,6 +150,8 @@ class WebFetcher {
       "token": await _firebaseMessaging.getToken(),
       "userID": uid
     }));
+
+    print(body);
     // Issue request
     http.post(_serverURLS[SubmissionType.ATTRACTION_NEW], body: body, headers: {"Content-Type": "application/json"}).then((response) {
       print(response.statusCode);
