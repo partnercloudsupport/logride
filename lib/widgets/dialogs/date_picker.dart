@@ -30,6 +30,9 @@ class DatePickerFormField extends StatelessWidget {
           return GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () async {
+              // Makes sense, people shouldn't be able to touch if it's disabled
+              if(!enabled) return;
+
               dynamic result = await showDialog(
                   context: context,
                   builder: (BuildContext context) {
