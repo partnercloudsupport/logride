@@ -129,346 +129,12 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16.0, vertical: 16.0),
                       child: Column(
-                        children: <Widget>[
-                          // ------------ Name and Ride Type information --------- //
-
-                          TextFormField(
-                            focusNode: _nodeName,
-                            onFieldSubmitted: (_) {
-                              _nodeName.unfocus();
-                              FocusScope.of(context).requestFocus(_nodeFormer);
-                            },
-                            decoration: submissionDecoration(
-                                labelText: "Name *",
-                                hintText: "Attraction Name"),
-                            initialValue: _data.attractionName,
-                            validator: (value) {
-                              if (value.isEmpty) {
-                                return "Please enter the name of the attraction";
-                              }
-                            },
-                            onSaved: (value) {
-                              _data.attractionName = value;
-                            },
-                          ),
-                          FormField(
-                            // Ok, attractions have it stored as
-                            initialValue: _data.rideType,
-                            onSaved: (v) {
-                              _data.rideType = v;
-                            },
-                            builder: (FormFieldState<int> state) {
-                              return InputDecorator(
-                                decoration: submissionDecoration(
-                                  hintText: "Attraction Type",
-                                  labelText: "Type *",
-                                ),
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton<int>(
-                                    value: state.value,
-                                    onChanged: (value) {
-                                      state.didChange(value);
-                                    },
-                                    items: dropDownTypes,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                          TextFormField(
-                            focusNode: _nodeFormer,
-                            onFieldSubmitted: (_) {
-                              _nodeFormer.unfocus();
-                              FocusScope.of(context)
-                                  .requestFocus(_nodeOpenYear);
-                            },
-                            initialValue: _data.formerNames,
-                            decoration: submissionDecoration(
-                              hintText: "Former Names",
-                              labelText: "Former Name(s)",
-                            ),
-                            onSaved: (value) {
-                              _data.formerNames = value;
-                            },
-                          ),
-                          SubmissionDivider(),
-
-                          // --------- Ride Status and operating history ------ //
-
-                          RideStatusDropdown(
-                            onChanged: (status) {
-                              // We update the attraction status if it's both different
-                              // and we're mounted. This is used to select which
-                              // text boxes are available.
-                              if (status != _attractionStatus) {
-                                if (mounted) {
-                                  setState(() {
-                                    _attractionStatus = status;
-                                  });
-                                }
-                              }
-                            },
-                            onSaved: (status) {
-                              _data = applyStatusToAttraction(status, _data);
-                            },
-                            initialValue: _data,
-                          ),
-                          AdaptiveSwitchFormField(
-                            initialValue: _data.seasonal,
-                            label: "Seasonal",
-                            onSaved: (val) => _data.seasonal = val,
-                          ),
-                          TextFormField(
-                            focusNode: _nodeOpenYear,
-                            onFieldSubmitted: (_) {
-                              _nodeOpenYear.unfocus();
-                              if (_attractionStatus ==
-                                  AttractionStatus.DEFUNCT) {
-                                FocusScope.of(context)
-                                    .requestFocus(_nodeCloseYear);
-                              } else {
-                                FocusScope.of(context)
-                                    .requestFocus(_nodeInactive);
-                              }
-                            },
-                            initialValue:
-                                (_data.yearOpen != null && _data.yearOpen != 0)
-                                    ? _data.yearOpen.toString()
-                                    : "",
-                            decoration: submissionDecoration(
-                                labelText: (_attractionStatus == AttractionStatus.UPCOMING) ? "Year Opening": "Year Opened",
-                                hintText: "Opening Year"),
-                            keyboardType: TextInputType.numberWithOptions(),
-                            validator: (value) {
-                              if (value == "") return null;
-
-                              if ((num.tryParse(value) ?? 0) <= 0) {
-                                return "Please enter a valid year.";
-                              }
-                            },
-                            onSaved: (value) {
-                              _data.yearOpen = num.tryParse(value);
-                            },
-                          ),
-                          DatePickerFormField(
-                            onSaved: (d) {
-                              _data.openingDay = d;
-                            },
-                            validator: (v) {
-                              if(_attractionStatus == AttractionStatus.UPCOMING && v == null){
-                                return "Enter an opening date";
-                              }
-                            },
-                            initialValue: _data.openingDay,
-                            text: (_attractionStatus == AttractionStatus.UPCOMING) ? "Date Opening": "Date Opened",
-                          ),
-
-                          TextFormField(
-                            focusNode: _nodeCloseYear,
-                            onFieldSubmitted: (_) {
-                              _nodeCloseYear.unfocus();
-                              FocusScope.of(context)
-                                  .requestFocus(_nodeInactive);
-                            },
-                            initialValue: (_data.yearClosed != null &&
-                                    _data.yearClosed != 0)
-                                ? _data.yearClosed.toString()
-                                : "",
-                            decoration: submissionDecoration(
-                              hintText: "Closing Year",
-                              labelText: "Year Closed",
-                            ),
-                            enabled:
-                                (_attractionStatus == AttractionStatus.DEFUNCT),
-                            keyboardType: TextInputType.numberWithOptions(),
-                            validator: (value) {
-                              if (value == "") return null;
-
-                              if ((num.tryParse(value) ?? 0) <= 0) {
-                                return "Please enter a valid year.";
-                              }
-                            },
-                            onSaved: (value) {
-                              _data.yearClosed = num.tryParse(value);
-                            },
-                          ),
-                          DatePickerFormField(
-                            onSaved: (d) {
-                              _data.closingDay = d;
-                            },
-                            enabled:
-                                (_attractionStatus == AttractionStatus.DEFUNCT),
-                            initialValue: _data.closingDay,
-                            text: "Date Closed",
-                          ),
-
-                          TextFormField(
-                            focusNode: _nodeInactive,
-                            onFieldSubmitted: (_) {
-                              _nodeInactive.unfocus();
-                              FocusScope.of(context)
-                                  .requestFocus(_nodeManufacturer);
-                            },
-                            initialValue: _data.inactivePeriods,
-                            decoration: submissionDecoration(
-                              hintText: "ex. 2008-2016",
-                              labelText: "Years Inactive",
-                            ),
-                            onSaved: (value) {
-                              _data.inactivePeriods = value;
-                            },
-                          ),
-                          SubmissionDivider(),
-                          TextFormField(
-                            focusNode: _nodeManufacturer,
-                            onFieldSubmitted: (_) {
-                              _nodeManufacturer.unfocus();
-                              FocusScope.of(context).requestFocus(_nodeModel);
-                            },
-                            initialValue: _data.manufacturer,
-                            decoration: submissionDecoration(
-                              hintText: "Manufacturer",
-                              labelText: "Manufacturer",
-                            ),
-                            onSaved: (value) {
-                              _data.manufacturer = value;
-                            },
-                          ),
-                          TextFormField(
-                            focusNode: _nodeModel,
-                            onFieldSubmitted: (_) {
-                              _nodeModel.unfocus();
-                              FocusScope.of(context).requestFocus(_nodeHeight);
-                            },
-                            initialValue: _data.model,
-                            decoration: submissionDecoration(
-                              hintText: "Model",
-                              labelText: "Model",
-                            ),
-                            onSaved: (value) {
-                              _data.model = value;
-                            },
-                          ),
-                          TextFormField(
-                            focusNode: _nodeHeight,
-                            onFieldSubmitted: (_) {
-                              _nodeHeight.unfocus();
-                              FocusScope.of(context)
-                                  .requestFocus(_nodeMaxSpeed);
-                            },
-                            initialValue:
-                                (_data.height != null && _data.height != 0.0)
-                                    ? _data.height.toString()
-                                    : "",
-                            decoration: submissionDecoration(
-                              hintText: "Height",
-                              labelText: "Height",
-                              suffixText: "ft ",
-                            ),
-                            keyboardType:
-                                TextInputType.numberWithOptions(decimal: true),
-                            validator: (value) {
-                              if (value == "") return null;
-
-                              num parsed = num.tryParse(value);
-                              if (parsed == null) {
-                                return "Please enter a valid height";
-                              } else if (parsed <= 0) {
-                                return "Please enter a positive height";
-                              }
-                            },
-                            onSaved: (value) {
-                              _data.height = num.tryParse(value);
-                            },
-                          ),
-                          TextFormField(
-                            focusNode: _nodeMaxSpeed,
-                            onFieldSubmitted: (_) {
-                              _nodeMaxSpeed.unfocus();
-                              FocusScope.of(context).requestFocus(_nodeLength);
-                            },
-                            initialValue:
-                                (_data.maxSpeed != null && _data.height != 0.0)
-                                    ? _data.maxSpeed.toString()
-                                    : "",
-                            decoration: submissionDecoration(
-                              hintText: "Speed",
-                              labelText: "Max Speed",
-                              suffixText: "mph ",
-                            ),
-                            keyboardType:
-                                TextInputType.numberWithOptions(decimal: true),
-                            validator: (value) {
-                              if (value == "") return null;
-
-                              num parsed = num.tryParse(value);
-                              if (parsed == null) {
-                                return "Please enter a valid speed";
-                              } else if (parsed <= 0) {
-                                return "Please enter a positive speed";
-                              }
-                            },
-                            onSaved: (value) {
-                              _data.maxSpeed = num.tryParse(value);
-                            },
-                          ),
-                          TextFormField(
-                            focusNode: _nodeLength,
-                            onFieldSubmitted: (_) {
-                              _nodeLength.unfocus();
-                              FocusScope.of(context).requestFocus(_nodeNotes);
-                            },
-                            initialValue:
-                                (_data.length != null && _data.height != 0.0)
-                                    ? _data.length.toString()
-                                    : "",
-                            decoration: submissionDecoration(
-                              hintText: "Length",
-                              labelText: "Length",
-                              suffixText: "ft ",
-                            ),
-                            keyboardType:
-                                TextInputType.numberWithOptions(decimal: true),
-                            validator: (value) {
-                              if (value == "") return null;
-
-                              num parsed = num.tryParse(value);
-                              if (parsed == null) {
-                                return "Please enter a valid length";
-                              } else if (parsed <= 0) {
-                                return "Please enter a positive length";
-                              }
-                            },
-                            onSaved: (value) {
-                              _data.length = num.tryParse(value);
-                            },
-                          ),
-                          DurationPickerFormField(
-                            initialValue: Duration(
-                                seconds: _data.attractionDuration ?? 0),
-                            onSaved: (d) =>
-                                _data.attractionDuration = d.inSeconds,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 16.0),
-                            child: AdaptiveSwitchFormField(
-                              label: "Scorecard",
-                              initialValue: _data.scoreCard,
-                              onSaved: (val) => _data.scoreCard = val,
-                            ),
-                          ),
-                          TextFormField(
-                            focusNode: _nodeNotes,
-                            keyboardType: TextInputType.multiline,
-                            maxLines: null,
-                            initialValue: _data.notes,
-                            onSaved: (n) {
-                              _data.notes = n;
-                            },
-                            decoration:
-                                submissionDecoration(labelText: "Notes"),
-                          ),
-                        ].map((entry) {
+                        children: <Widget>[]
+                        // Sections are split into various functions for increased readability
+                          ..addAll(_buildCoreInformation(context))
+                          ..addAll(_buildOperatingHistory(context))
+                          ..addAll(_buildFactsAndStats(context))
+                        ..map((entry) {
                           return Padding(
                             child: entry,
                             padding: EdgeInsets.only(top: 4.0),
@@ -503,5 +169,356 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
         ),
       ],
     );
+  }
+
+  List<Widget> _buildCoreInformation(BuildContext context){
+    return [
+      TextFormField(
+        focusNode: _nodeName,
+        onFieldSubmitted: (_) {
+          _nodeName.unfocus();
+          FocusScope.of(context).requestFocus(_nodeFormer);
+        },
+        decoration: submissionDecoration(
+            labelText: "Name *",
+            hintText: "Attraction Name"),
+        initialValue: _data.attractionName,
+        validator: (value) {
+          if (value.isEmpty) {
+            return "Please enter the name of the attraction";
+          }
+        },
+        onSaved: (value) {
+          _data.attractionName = value;
+        },
+      ),
+      FormField(
+        // Ok, attractions have it stored as
+        initialValue: _data.rideType,
+        onSaved: (v) {
+          _data.rideType = v;
+        },
+        builder: (FormFieldState<int> state) {
+          return InputDecorator(
+            decoration: submissionDecoration(
+              hintText: "Attraction Type",
+              labelText: "Type *",
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<int>(
+                value: state.value,
+                onChanged: (value) {
+                  state.didChange(value);
+                },
+                items: dropDownTypes,
+              ),
+            ),
+          );
+        },
+      ),
+      TextFormField(
+        focusNode: _nodeFormer,
+        onFieldSubmitted: (_) {
+          _nodeFormer.unfocus();
+          FocusScope.of(context)
+              .requestFocus(_nodeOpenYear);
+        },
+        initialValue: _data.formerNames,
+        decoration: submissionDecoration(
+          hintText: "Former Names",
+          labelText: "Former Name(s)",
+        ),
+        onSaved: (value) {
+          _data.formerNames = value;
+        },
+      ),
+      SubmissionDivider(),
+    ];
+  }
+
+  List<Widget> _buildOperatingHistory(BuildContext context){
+    return <Widget>[
+
+      RideStatusDropdown(
+        onChanged: (status) {
+          // We update the attraction status if it's both different
+          // and we're mounted. This is used to select which
+          // text boxes are available.
+          if (status != _attractionStatus) {
+            if (mounted) {
+              setState(() {
+                _attractionStatus = status;
+              });
+            }
+          }
+        },
+        onSaved: (status) {
+          _data = applyStatusToAttraction(status, _data);
+        },
+        initialValue: _data,
+      ),
+      AdaptiveSwitchFormField(
+        initialValue: _data.seasonal,
+        label: "Seasonal",
+        onSaved: (val) => _data.seasonal = val,
+      ),
+      TextFormField(
+        focusNode: _nodeOpenYear,
+        onFieldSubmitted: (_) {
+          _nodeOpenYear.unfocus();
+          if (_attractionStatus ==
+              AttractionStatus.DEFUNCT) {
+            FocusScope.of(context)
+                .requestFocus(_nodeCloseYear);
+          } else {
+            FocusScope.of(context)
+                .requestFocus(_nodeInactive);
+          }
+        },
+        initialValue:
+        (_data.yearOpen != null && _data.yearOpen != 0)
+            ? _data.yearOpen.toString()
+            : "",
+        decoration: submissionDecoration(
+            labelText: (_attractionStatus == AttractionStatus.UPCOMING) ? "Year Opening": "Year Opened",
+            hintText: "Opening Year"),
+        keyboardType: TextInputType.numberWithOptions(),
+        validator: (value) {
+          if (value == "") return null;
+
+          if ((num.tryParse(value) ?? 0) <= 0) {
+            return "Please enter a valid year.";
+          }
+        },
+        onSaved: (value) {
+          _data.yearOpen = num.tryParse(value);
+        },
+      ),
+      DatePickerFormField(
+        onSaved: (d) {
+          _data.openingDay = d;
+        },
+        validator: (v) {
+          if(_attractionStatus == AttractionStatus.UPCOMING && v == null){
+            return "Enter an opening date";
+          }
+        },
+        initialValue: _data.openingDay,
+        text: (_attractionStatus == AttractionStatus.UPCOMING) ? "Date Opening": "Date Opened",
+      ),
+
+      TextFormField(
+        focusNode: _nodeCloseYear,
+        onFieldSubmitted: (_) {
+          _nodeCloseYear.unfocus();
+          FocusScope.of(context)
+              .requestFocus(_nodeInactive);
+        },
+        initialValue: (_data.yearClosed != null &&
+            _data.yearClosed != 0)
+            ? _data.yearClosed.toString()
+            : "",
+        decoration: submissionDecoration(
+          hintText: "Closing Year",
+          labelText: "Year Closed",
+        ),
+        enabled:
+        (_attractionStatus == AttractionStatus.DEFUNCT),
+        keyboardType: TextInputType.numberWithOptions(),
+        validator: (value) {
+          if (value == "") return null;
+
+          if ((num.tryParse(value) ?? 0) <= 0) {
+            return "Please enter a valid year.";
+          }
+        },
+        onSaved: (value) {
+          _data.yearClosed = num.tryParse(value);
+        },
+      ),
+      DatePickerFormField(
+        onSaved: (d) {
+          _data.closingDay = d;
+        },
+        enabled:
+        (_attractionStatus == AttractionStatus.DEFUNCT),
+        initialValue: _data.closingDay,
+        text: "Date Closed",
+      ),
+
+      TextFormField(
+        focusNode: _nodeInactive,
+        onFieldSubmitted: (_) {
+          _nodeInactive.unfocus();
+          FocusScope.of(context)
+              .requestFocus(_nodeManufacturer);
+        },
+        initialValue: _data.inactivePeriods,
+        decoration: submissionDecoration(
+          hintText: "ex. 2008-2016",
+          labelText: "Years Inactive",
+        ),
+        onSaved: (value) {
+          _data.inactivePeriods = value;
+        },
+      ),
+
+      SubmissionDivider(),
+    ];
+  }
+
+  List<Widget> _buildFactsAndStats(BuildContext context) {
+    return <Widget>[
+
+      TextFormField(
+        focusNode: _nodeManufacturer,
+        onFieldSubmitted: (_) {
+          _nodeManufacturer.unfocus();
+          FocusScope.of(context).requestFocus(_nodeModel);
+        },
+        initialValue: _data.manufacturer,
+        decoration: submissionDecoration(
+          hintText: "Manufacturer",
+          labelText: "Manufacturer",
+        ),
+        onSaved: (value) {
+          _data.manufacturer = value;
+        },
+      ),
+      TextFormField(
+        focusNode: _nodeModel,
+        onFieldSubmitted: (_) {
+          _nodeModel.unfocus();
+          FocusScope.of(context).requestFocus(_nodeHeight);
+        },
+        initialValue: _data.model,
+        decoration: submissionDecoration(
+          hintText: "Model",
+          labelText: "Model",
+        ),
+        onSaved: (value) {
+          _data.model = value;
+        },
+      ),
+      TextFormField(
+        focusNode: _nodeHeight,
+        onFieldSubmitted: (_) {
+          _nodeHeight.unfocus();
+          FocusScope.of(context)
+              .requestFocus(_nodeMaxSpeed);
+        },
+        initialValue:
+        (_data.height != null && _data.height != 0.0)
+            ? _data.height.toString()
+            : "",
+        decoration: submissionDecoration(
+          hintText: "Height",
+          labelText: "Height",
+          suffixText: "ft ",
+        ),
+        keyboardType:
+        TextInputType.numberWithOptions(decimal: true),
+        validator: (value) {
+          if (value == "") return null;
+
+          num parsed = num.tryParse(value);
+          if (parsed == null) {
+            return "Please enter a valid height";
+          } else if (parsed <= 0) {
+            return "Please enter a positive height";
+          }
+        },
+        onSaved: (value) {
+          _data.height = num.tryParse(value);
+        },
+      ),
+      TextFormField(
+        focusNode: _nodeMaxSpeed,
+        onFieldSubmitted: (_) {
+          _nodeMaxSpeed.unfocus();
+          FocusScope.of(context).requestFocus(_nodeLength);
+        },
+        initialValue:
+        (_data.maxSpeed != null && _data.height != 0.0)
+            ? _data.maxSpeed.toString()
+            : "",
+        decoration: submissionDecoration(
+          hintText: "Speed",
+          labelText: "Max Speed",
+          suffixText: "mph ",
+        ),
+        keyboardType:
+        TextInputType.numberWithOptions(decimal: true),
+        validator: (value) {
+          if (value == "") return null;
+
+          num parsed = num.tryParse(value);
+          if (parsed == null) {
+            return "Please enter a valid speed";
+          } else if (parsed <= 0) {
+            return "Please enter a positive speed";
+          }
+        },
+        onSaved: (value) {
+          _data.maxSpeed = num.tryParse(value);
+        },
+      ),
+      TextFormField(
+        focusNode: _nodeLength,
+        onFieldSubmitted: (_) {
+          _nodeLength.unfocus();
+          FocusScope.of(context).requestFocus(_nodeNotes);
+        },
+        initialValue:
+        (_data.length != null && _data.height != 0.0)
+            ? _data.length.toString()
+            : "",
+        decoration: submissionDecoration(
+          hintText: "Length",
+          labelText: "Length",
+          suffixText: "ft ",
+        ),
+        keyboardType:
+        TextInputType.numberWithOptions(decimal: true),
+        validator: (value) {
+          if (value == "") return null;
+
+          num parsed = num.tryParse(value);
+          if (parsed == null) {
+            return "Please enter a valid length";
+          } else if (parsed <= 0) {
+            return "Please enter a positive length";
+          }
+        },
+        onSaved: (value) {
+          _data.length = num.tryParse(value);
+        },
+      ),
+      DurationPickerFormField(
+        initialValue: Duration(
+            seconds: _data.attractionDuration ?? 0),
+        onSaved: (d) =>
+        _data.attractionDuration = d.inSeconds,
+      ),
+      Padding(
+        padding: const EdgeInsets.only(bottom: 16.0),
+        child: AdaptiveSwitchFormField(
+          label: "Scorecard",
+          initialValue: _data.scoreCard,
+          onSaved: (val) => _data.scoreCard = val,
+        ),
+      ),
+      TextFormField(
+        focusNode: _nodeNotes,
+        keyboardType: TextInputType.multiline,
+        maxLines: null,
+        initialValue: _data.notes,
+        onSaved: (n) {
+          _data.notes = n;
+        },
+        decoration:
+        submissionDecoration(labelText: "Notes"),
+      ),
+    ];
   }
 }

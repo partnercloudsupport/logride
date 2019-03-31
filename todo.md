@@ -41,13 +41,15 @@
     - Increment thing (maybe)
  - Attraction Site
     - Is partner site, display "via {formatted url}"
- - Models & Manufacturers will eventually be drop-down/pop-up fo
  - Text Pop-up for parks without attractions
+    
+-  Models & Manufacturers IDs and drop-downs
 
  - Active = 2 is "To Be Opened" ✔
  - Add DateOpen values to toBeOpenAttractions ✔
    - YYYY-MM-DD✔
  - Opening Dates - "Opening Soon" toggle, opening date mandatory field ✔
- - The only thing left to do: Display upcoming attractions differently on the main page
+-  The only thing left to do: Display upcoming attractions differently
+   on the main page ✔
  
  - New Line-break structure on Former Names, Initial, Inactive Years
