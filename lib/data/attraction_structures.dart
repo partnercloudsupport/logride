@@ -100,11 +100,7 @@ class BluehostAttraction {
 
       if (json["Active"] == "2") {
         newAttraction.upcoming = true;
-        List<String> openingDate = json["dateOpen"].split("-");
-        newAttraction.openingDay = DateTime(
-            int.fromEnvironment(openingDate[0], defaultValue: 0),
-            int.fromEnvironment(openingDate[1], defaultValue: 0),
-            int.fromEnvironment(openingDate[2], defaultValue: 0));
+        newAttraction.openingDay = DateTime.parse(json["dateOpen"]);
       }
     } else {
       newAttraction.active = false;
@@ -113,11 +109,7 @@ class BluehostAttraction {
 
     List<String> closingDate = json["dateClose"].split("-");
     if(closingDate[0] != "0000"){
-      newAttraction.closingDay = DateTime(
-        int.fromEnvironment(closingDate[0], defaultValue: 0),
-        int.fromEnvironment(closingDate[1], defaultValue: 0),
-        int.fromEnvironment(closingDate[2], defaultValue: 0)
-      );
+      newAttraction.closingDay = DateTime.parse(json["dateClose"]);
     } else {
       newAttraction.closingDay = null;
     }
