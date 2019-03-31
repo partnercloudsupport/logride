@@ -273,17 +273,24 @@ class _DetailsPageState extends State<DetailsPage> {
   }
 
   /// Opening is always displayed if present, and closed is displayed only when active is false
+  /// Upcoming overrides everything
   Widget _buildStatusSection(BuildContext context) {
     int openingYear = widget.data?.yearOpen ?? 0;
     int closingYear = widget.data?.yearClosed ?? 0;
     bool active = widget.data?.active ?? 0;
     bool seasonal = widget.data?.seasonal ?? 0;
+    bool upcoming = widget.data?.upcoming ?? 0;
 
     Widget _leftStatus = _buildYearStatusColumn(openingYear, "Opening Year");
+    if(upcoming && (widget.data as BluehostAttraction).openingDay != null){
+      _leftStatus = _buildDateStatusColumn((widget.data as BluehostAttraction).openingDay, "Opening Date");
+    }
 
     Widget _rightStatus;
 
-    if (!active) {
+    if(upcoming) {
+      _rightStatus = _buildAttractionOperationColumn("Opening Soon");
+    } else if (!active) {
       _rightStatus = _buildYearStatusColumn(closingYear, "Closing Year");
     } else if (seasonal) {
       _rightStatus = _buildAttractionOperationColumn("Seasonal Operation");
@@ -311,6 +318,27 @@ class _DetailsPageState extends State<DetailsPage> {
   /// If year == 0, we'll display "unknown" as our year
   Widget _buildYearStatusColumn(int year, String bottom) {
     String topString = (year == 0) ? "Unknown" : year.toString();
+
+    return Column(
+      children: <Widget>[
+        Text(
+          topString,
+          textScaleFactor: 1.8,
+        ),
+        Text(
+          bottom,
+          textScaleFactor: 1.0,
+        )
+      ],
+    );
+  }
+
+  Widget _buildDateStatusColumn(DateTime date, String bottom) {
+    String topString = "Unknown";
+    print(date);
+    if(date != null){
+      topString = (DateFormat.yMMMd("en_US").format(date));
+    }
 
     return Column(
       children: <Widget>[
