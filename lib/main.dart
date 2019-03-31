@@ -24,13 +24,13 @@ class MyApp extends StatelessWidget {
             disabledColor: new Color.fromARGB(255, 204, 204, 204),
             textTheme: TextTheme(
                 subhead:
-                    TextStyle(fontSize: 22.0, fontWeight: FontWeight.normal),
+                    TextStyle(fontSize: 20.0, fontWeight: FontWeight.normal),
                 subtitle: TextStyle(
-                    fontSize: 16.0,
+                    fontSize: 18.0,
                     fontWeight: FontWeight.normal,
                     color: Colors.grey),
                 headline: TextStyle(
-                  fontSize: 28.0,
+                  fontSize: 26.0,
                   fontWeight: FontWeight.bold
                 ))),
         home: LandingPage(auth: Auth(), db: db,));
