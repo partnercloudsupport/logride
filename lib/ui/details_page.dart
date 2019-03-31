@@ -22,7 +22,12 @@ import 'package:log_ride/ui/standard_page_structure.dart';
 enum _DetailsType { PARK_DETAILS, ATTRACTION_DETAILS }
 
 class DetailsPage extends StatefulWidget {
-  DetailsPage({this.db, this.data, this.userData, this.dateChangeHandler, this.submissionCallback});
+  DetailsPage(
+      {this.db,
+      this.data,
+      this.userData,
+      this.dateChangeHandler,
+      this.submissionCallback});
 
   final BaseDB db;
   final dynamic data;
@@ -279,16 +284,24 @@ class _DetailsPageState extends State<DetailsPage> {
     int closingYear = widget.data?.yearClosed ?? 0;
     bool active = widget.data?.active ?? 0;
     bool seasonal = widget.data?.seasonal ?? 0;
-    bool upcoming = widget.data?.upcoming ?? 0;
+    bool upcoming = false;
+
+    // While these other have somewhat of a similar status on both parks and attractions
+    // only attractions have "upcoming" as of now.
+    if (widget.data.runtimeType == BluehostAttraction &&
+        (widget.data as BluehostAttraction).upcoming) {
+      upcoming = true;
+    }
 
     Widget _leftStatus = _buildYearStatusColumn(openingYear, "Opening Year");
-    if(upcoming && (widget.data as BluehostAttraction).openingDay != null){
-      _leftStatus = _buildDateStatusColumn((widget.data as BluehostAttraction).openingDay, "Opening Date");
+    if (upcoming && (widget.data as BluehostAttraction).openingDay != null) {
+      _leftStatus = _buildDateStatusColumn(
+          (widget.data as BluehostAttraction).openingDay, "Opening Date");
     }
 
     Widget _rightStatus;
 
-    if(upcoming) {
+    if (upcoming) {
       _rightStatus = _buildAttractionOperationColumn("Opening Soon");
     } else if (!active) {
       _rightStatus = _buildYearStatusColumn(closingYear, "Closing Year");
@@ -336,7 +349,7 @@ class _DetailsPageState extends State<DetailsPage> {
   Widget _buildDateStatusColumn(DateTime date, String bottom) {
     String topString = "Unknown";
     print(date);
-    if(date != null){
+    if (date != null) {
       topString = (DateFormat.yMMMd("en_US").format(date));
     }
 
@@ -385,16 +398,14 @@ class _DetailsPageState extends State<DetailsPage> {
       BluehostAttraction attraction = widget.data as BluehostAttraction;
 
       // Attractions that are opening soon will have the opening day already displayed
-      if(attraction.openingDay != null && !attraction.upcoming){
-        details.add(_furtherDetailsTextEntry(
-          "Opening Day", DateFormat.yMMMd("en_US").format(attraction.openingDay)
-        ));
+      if (attraction.openingDay != null && !attraction.upcoming) {
+        details.add(_furtherDetailsTextEntry("Opening Day",
+            DateFormat.yMMMd("en_US").format(attraction.openingDay)));
       }
 
-      if(attraction.closingDay != null){
-        details.add(_furtherDetailsTextEntry(
-          "Closing Day", DateFormat.yMMMd("en_US").format(attraction.closingDay)
-        ));
+      if (attraction.closingDay != null) {
+        details.add(_furtherDetailsTextEntry("Closing Day",
+            DateFormat.yMMMd("en_US").format(attraction.closingDay)));
       }
 
       if (attraction.inactivePeriods != "")
