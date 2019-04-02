@@ -129,17 +129,17 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16.0, vertical: 16.0),
                       child: Column(
-                        children: <Widget>[]
+                        children: (<Widget>[]
                         // Sections are split into various functions for increased readability
                           ..addAll(_buildCoreInformation(context))
                           ..addAll(_buildOperatingHistory(context))
-                          ..addAll(_buildFactsAndStats(context))
-                        ..map((entry) {
+                          ..addAll(_buildFactsAndStats(context)))
+                        .map((entry) {
                           return Padding(
                             child: entry,
                             padding: EdgeInsets.only(top: 4.0),
                           );
-                        }).toList(),
+                        }).toList()
                       ),
                     )
                   ],

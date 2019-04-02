@@ -6,10 +6,12 @@ import 'package:log_ride/widgets/shared/generic_list_entry.dart';
 import 'package:log_ride/widgets/shared/content_frame.dart';
 
 class SearchParksCard extends StatefulWidget {
-  SearchParksCard({Key key, this.parkList, this.tapBack}) : super(key: key);
+  SearchParksCard({Key key, this.parkList, this.tapBack, this.suggestPark})
+      : super(key: key);
 
   final List<BluehostPark> parkList;
   final Function(BluehostPark) tapBack;
+  final VoidCallback suggestPark;
 
   @override
   _SearchParksCardState createState() => new _SearchParksCardState();
@@ -23,6 +25,7 @@ class _SearchParksCardState extends State<SearchParksCard> {
   @override
   void initState() {
     workingList.addAll(widget.parkList);
+    workingList.sort((a, b) => a.parkName.compareTo(b.parkName));
     super.initState();
   }
 
@@ -38,6 +41,7 @@ class _SearchParksCardState extends State<SearchParksCard> {
           tempToDisplay.add(park);
         }
       });
+      tempToDisplay.sort((a, b) => a.parkName.compareTo(b.parkName));
       setState(() {
         workingList.clear();
         workingList.addAll(tempToDisplay);
@@ -47,8 +51,16 @@ class _SearchParksCardState extends State<SearchParksCard> {
       setState(() {
         workingList.clear();
         workingList.addAll(widget.parkList);
+        workingList.sort((a, b) => a.parkName.compareTo(b.parkName));
       });
     }
+  }
+
+  void suggestPark() {
+    print(
+        "User is suggesting park, sending them back to the main page to do so");
+    Navigator.of(context).pop();
+    widget.suggestPark();
   }
 
   @override
@@ -71,10 +83,23 @@ class _SearchParksCardState extends State<SearchParksCard> {
             ),
             Expanded(
               child: ListView.builder(
-                  itemCount: workingList.length,
+                  itemCount: workingList.length + 1,
                   itemBuilder: (context, index) {
-                    return GenericListEntry(
-                        park: workingList[index], onTap: widget.tapBack);
+                    if (workingList.length == index) {
+                      BluehostPark placeholder = BluehostPark(id: -1);
+                      placeholder.parkName = "Park Not Found?";
+                      placeholder.parkCity =
+                          "To add it to our database, please suggest it here";
+
+                      return GenericListEntry(
+                        park: placeholder,
+                        onTap: (b) => suggestPark(),
+                        fillable: false,
+                      );
+                    } else {
+                      return GenericListEntry(
+                          park: workingList[index], onTap: widget.tapBack);
+                    }
                   }),
             )
           ],
@@ -85,10 +110,11 @@ class _SearchParksCardState extends State<SearchParksCard> {
 }
 
 class AllParkSearchCard extends StatelessWidget {
-  AllParkSearchCard({this.allParkData, this.tapBack});
+  AllParkSearchCard({this.allParkData, this.tapBack, this.suggestPark});
 
   final List<BluehostPark> allParkData;
   final Function(BluehostPark) tapBack;
+  final VoidCallback suggestPark;
 
   @override
   Widget build(BuildContext context) {
@@ -96,16 +122,17 @@ class AllParkSearchCard extends StatelessWidget {
       child: Card(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-          child: SearchParksCard(parkList: allParkData, tapBack: tapBack)),
+          child: SearchParksCard(parkList: allParkData, tapBack: tapBack, suggestPark: suggestPark,)),
     );
   }
 }
 
 class AllParkSearchPage extends StatelessWidget {
-  AllParkSearchPage({this.allParks, this.tapBack});
+  AllParkSearchPage({this.allParks, this.tapBack, this.suggestPark});
 
   final List<BluehostPark> allParks;
   final Function(BluehostPark) tapBack;
+  final VoidCallback suggestPark;
 
   @override
   Widget build(BuildContext context) {
@@ -116,7 +143,7 @@ class AllParkSearchPage extends StatelessWidget {
           iconFunction: () => Navigator.of(context).pop(),
           iconDecoration: FontAwesomeIcons.home,
           content: <Widget>[
-            AllParkSearchCard(allParkData: allParks, tapBack: tapBack)
+            AllParkSearchCard(allParkData: allParks, tapBack: tapBack, suggestPark: suggestPark,)
           ],
         ));
   }

@@ -16,6 +16,7 @@ import 'package:log_ride/ui/dialogs/park_search.dart';
 import 'package:log_ride/ui/attractions_list_page.dart';
 import 'package:log_ride/ui/app_info_page.dart';
 import 'package:log_ride/ui/submission/submit_attraction_page.dart';
+import 'package:log_ride/ui/submission/submit_park_page.dart';
 import 'package:log_ride/widgets/shared/home_icon.dart';
 import 'package:log_ride/widgets/home_page/check_in_widget.dart';
 import 'package:log_ride/widgets/parks_page/park_list_widget.dart';
@@ -175,7 +176,9 @@ class _HomePageState extends State<HomePage> {
               pm: _parksManager,
               db: widget.db,
               serverParkData: serverPark,
-              submissionCallback: (a, n) => _handleAttractionSubmissionCallback(a, serverPark, isNewAttraction: n),
+              submissionCallback: (a, n) => _handleAttractionSubmissionCallback(
+                  a, serverPark,
+                  isNewAttraction: n),
             )));
   }
 
@@ -199,12 +202,17 @@ class _HomePageState extends State<HomePage> {
             direction: SlideInDirection.UP,
             dialogStyle: true,
             widget: AttractionsPage(
-                pm: _parksManager, db: widget.db, serverParkData: serverPark, submissionCallback: (a, n) => _handleAttractionSubmissionCallback(a, serverPark, isNewAttraction: n))));
+                pm: _parksManager,
+                db: widget.db,
+                serverParkData: serverPark,
+                submissionCallback: (a, n) =>
+                    _handleAttractionSubmissionCallback(a, serverPark,
+                        isNewAttraction: n))));
   }
 
   void _handleAttractionSubmissionCallback(
-      BluehostAttraction attr, BluehostPark parent, {bool isNewAttraction = false}) async {
-
+      BluehostAttraction attr, BluehostPark parent,
+      {bool isNewAttraction = false}) async {
     isNewAttraction ? print("New Attraction") : print("Modified Attraction");
 
     dynamic result = await Navigator.push(
@@ -220,7 +228,23 @@ class _HomePageState extends State<HomePage> {
     if (result == null) return;
 
     BluehostAttraction newAttraction = result as BluehostAttraction;
-    _webFetcher.submitAttractionData(newAttraction, parent, username: userName, uid: widget.uid, isNewAttraction: isNewAttraction);
+    _webFetcher.submitAttractionData(newAttraction, parent,
+        username: userName, uid: widget.uid, isNewAttraction: isNewAttraction);
+    // TODO: DIALOG TO LET USER KNOW ABOUT SUBMISSION
+  }
+
+  void _handleParkSubmissionCallback() async {
+    dynamic result = await Navigator.push(
+        context,
+        SlideInRoute(
+            widget: SubmitParkPage(),
+            dialogStyle: true,
+            direction: SlideInDirection.RIGHT));
+
+    if (result == null) return;
+
+    BluehostPark newPark = result as BluehostPark;
+    _webFetcher.submitParkData(newPark, username: userName, uid: widget.uid);
     // TODO: DIALOG TO LET USER KNOW ABOUT SUBMISSION
   }
 
@@ -241,7 +265,7 @@ class _HomePageState extends State<HomePage> {
     // Fetch user information
     // Build specific parks from user information & parks list
     //widget.db.storeUserID(widget.uid);
-    
+
     widget.db.storeUserID(widget.uid);
 
     _webFetcher = WebFetcher();
@@ -400,6 +424,7 @@ class _HomePageState extends State<HomePage> {
                   widget: AllParkSearchPage(
                     allParks: _parksManager.allParksInfo,
                     tapBack: _handleAddCallback,
+                    suggestPark: _handleParkSubmissionCallback,
                   )));
         },
         backgroundColor: Theme.of(context).primaryColor,

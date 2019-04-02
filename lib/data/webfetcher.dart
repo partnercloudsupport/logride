@@ -21,7 +21,7 @@ enum SubmissionType {
   IMAGE
 }
 
-const _VERSION_URL = "test";
+const _VERSION_URL = "Version1.2.0";
 
 class WebFetcher {
 
@@ -35,7 +35,7 @@ class WebFetcher {
     SubmissionType.ATTRACTION_NEW: "https://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/usersuggestservice.php",
     SubmissionType.ATTRACTION_MODIFY: "https://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/modifyAttracion.php",
     SubmissionType.IMAGE: "http://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/submitPhotoUpload.php",
-    SubmissionType.PARK: "http://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/suggestParkUploadtoApprove",
+    SubmissionType.PARK: "http://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/suggestParkUploadtoApprove.php",
   };
 
   Future<List<BluehostPark>> getAllParkData() async {
@@ -154,10 +154,35 @@ class WebFetcher {
     print(body);
     // Issue request
     http.post(_serverURLS[SubmissionType.ATTRACTION_NEW], body: body, headers: {"Content-Type": "application/json"}).then((response) {
-      print(response.statusCode);
-      print(response.body);
+      print("[${response.statusCode}]: ${response.body}");
     });
     // State result
+  }
+
+  void submitParkData(BluehostPark newPark, {String username, String uid}) async {
+    var body = {
+      "name": newPark.parkName ?? "",
+      "type": newPark.type ?? "",
+      "city": newPark.parkCity ?? "",
+      "count": newPark.parkCountry ?? "",
+      "lat": newPark.location?.latitude ?? 0,
+      "long": newPark.location?.longitude ?? 0,
+      "open": newPark.yearOpen ?? 0,
+      "closed": newPark.yearClosed ?? 0,
+      "defunct": !newPark.active ? 1 : 0,
+      "prevName": newPark.previousNames ?? "",
+      "seasonal": newPark.seasonal ? 1 : 0,
+      "userName": username ?? "",
+      "website": newPark.website ?? "",
+      "userID": uid ?? "",
+      "token": await _firebaseMessaging.getToken()
+    };
+
+    print(body);
+
+    http.post(_serverURLS[SubmissionType.PARK], body: json.encode(body)).then((response){
+      print("[${response.statusCode}]: ${response.body}");
+    });
   }
 }
 
