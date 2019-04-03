@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:latlong/latlong.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/color_constants.dart';
+import 'package:log_ride/widgets/dialogs/latlong_picker.dart';
 import 'package:log_ride/widgets/forms/form_header.dart';
 import 'package:log_ride/widgets/forms/proper_adaptive_switch.dart';
 import 'package:log_ride/widgets/forms/submission_decoration.dart';
@@ -210,7 +212,14 @@ class _SubmitParkPageState extends State<SubmitParkPage> {
         },
       ),
 
-      // TODO --- GEOLOCATION / POSITION FIELD
+      LatLongField(
+        title: "Location",
+        onSaved: (v) {
+          if(v != null){
+            _data.location = LatLng(v[0], v[1]);
+          }
+        },
+      ),
 
       SubmissionDivider()
     ];

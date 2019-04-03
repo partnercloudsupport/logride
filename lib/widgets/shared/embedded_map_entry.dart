@@ -19,15 +19,32 @@ class EmbeddedMapEntry extends StatefulWidget {
 class _EmbeddedMapEntryState extends State<EmbeddedMapEntry> {
   GoogleMapController mapController;
 
+  Set<Marker> markers;
+
+
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
-    widget.markers.forEach((textData, position) {
-      mapController.addMarker(MarkerOptions(
-          position: position,
-          infoWindowText: InfoWindowText(textData[0], textData[1]),
-          icon: BitmapDescriptor.defaultMarker));
-    });
+
+
     mapController.moveCamera(CameraUpdate.newCameraPosition(CameraPosition(target: widget.center, zoom: widget.zoom)));
+  }
+
+
+  @override
+  void initState() {
+    widget.markers.forEach((textData, position) {
+      markers.add(Marker(
+          position: position,
+          infoWindow: InfoWindow(
+            title: textData[0],
+            snippet: textData[1]
+          ),
+          icon: BitmapDescriptor.defaultMarkerWithHue(128),
+        markerId: MarkerId("${textData[0]}${position.latitude.floor()}${position.longitude.floor()}")
+      ));
+    });
+
+    super.initState();
   }
 
   @override
