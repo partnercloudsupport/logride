@@ -162,6 +162,7 @@ class _UserConfirmationPage extends StatelessWidget {
                   ),
                 ),
                 Positioned(
+                  width: 40.0,
                   right: 8.0,
                   top: 8.0,
                   child: RawMaterialButton(
