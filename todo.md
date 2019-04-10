@@ -3,7 +3,8 @@
 ## Features
  - User Submission (**REQUIRED FOR FULL LAUNCH**)
     - Submission of new attractions ✔ (add opening soon)
-    - Submission of new parks
+-     Submission of new parks ✔ Location Search for location tag thing
+      (After Launch thing)
     - Propose changes to attractions ✔
     - Submit images for attractions
  - User-defined lists
@@ -22,7 +23,7 @@
 ## Notes from iOS
  - Defunct parks shouldn't have the option to hide defunct attractions
  - Fix Font Size depending on phone size
- - Sort "Add Parks" Alphabetically
+-  Sort "Add Parks" Alphabetically ✔
  - Blocking Arrow
  - Show defunct / seasonal attractions that are checked off regardless of setting
  - Look at recentering pie chart

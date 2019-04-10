@@ -127,9 +127,13 @@ class _FirebaseAttractionListViewState
     // We delay the building of the UI until any possible transition has completed. This way any animation part of the transition isn't slowed.
     Future.delayed(
         Duration(milliseconds: 450),
-        () => setState(() {
+        () {
+          if(mounted) {
+            setState(() {
               _delayOver = true;
-            }));
+            });
+          }
+        });
   }
 
   void _filterUpdated() {
@@ -225,6 +229,7 @@ class _FirebaseAttractionListViewState
 
   @override
   Widget build(BuildContext context) {
+    print("$_ignoreLoaded $_attractionLoaded $_delayOver");
     if (_ignoreLoaded && _attractionLoaded && _delayOver) {
       _buildLists();
       widget.countHandler(_builtAttractionList, _builtIgnoreList);

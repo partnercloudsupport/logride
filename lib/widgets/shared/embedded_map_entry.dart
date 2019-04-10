@@ -32,6 +32,9 @@ class _EmbeddedMapEntryState extends State<EmbeddedMapEntry> {
 
   @override
   void initState() {
+
+    markers = Set<Marker>();
+
     widget.markers.forEach((textData, position) {
       markers.add(Marker(
           position: position,
@@ -55,6 +58,7 @@ class _EmbeddedMapEntryState extends State<EmbeddedMapEntry> {
           onMapCreated: _onMapCreated,
           initialCameraPosition: CameraPosition(target: widget.center, zoom: widget.zoom),
           mapType: MapType.normal,
+          markers: markers,
         ),
         GestureDetector(
           onTap: _openFullMap,
@@ -75,6 +79,7 @@ class _EmbeddedMapEntryState extends State<EmbeddedMapEntry> {
                 GoogleMap(
                   onMapCreated: _onMapCreated,
                   mapType: MapType.satellite,
+                  markers: markers,
                   initialCameraPosition: CameraPosition(target: widget.center, zoom: widget.zoom),
                 ),
                 RoundBackButton()
