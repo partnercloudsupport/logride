@@ -2,16 +2,18 @@ import 'dart:async';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:log_ride/ui/submission/submit_attraction_photo.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:log_ride/widgets/shared/hero_network_image.dart';
 import 'package:log_ride/widgets/shared/back_button.dart';
 import 'package:log_ride/widgets/shared/not_implemented_dialog.dart';
 
 class FirebaseAttractionImage extends StatefulWidget {
-  FirebaseAttractionImage({this.parkID, this.attractionID, this.overlay});
+  FirebaseAttractionImage({this.parkID, this.attractionID, this.attractionName, this.overlay});
 
   final int parkID;
   final int attractionID;
+  final String attractionName;
   final Widget overlay;
 
   @override
@@ -50,10 +52,12 @@ class _FirebaseAttractionImageState extends State<FirebaseAttractionImage> {
           // FirebaseStorage spews an error into the console, and I can't seem to prevent it. but it's ok.
           if (!url.hasData || url.hasError) {
             return GestureDetector(
+              behavior: HitTestBehavior.opaque,
               onTap: () => showDialog(
                   context: context,
-                  builder: (ctx) =>
-                      NotImplementedDialog()), // TODO: Implement Image Submission
+                  builder: (ctx) {
+                    return SubmitAttractionPhoto(widget.attractionName);
+                  }), // TODO: Implement Image Submission
               child: Container(
                 constraints: BoxConstraints.expand(),
                 child: Column(

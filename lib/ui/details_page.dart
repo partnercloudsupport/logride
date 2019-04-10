@@ -255,6 +255,7 @@ class _DetailsPageState extends State<DetailsPage> {
         child: _wrapAsWindow(FirebaseAttractionImage(
           attractionID: attraction.attractionID,
           parkID: attraction.parkID,
+          attractionName: attraction.attractionName,
           overlay: _credit,
         )));
   }
