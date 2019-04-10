@@ -44,12 +44,22 @@ class _SubmitAttractionPhotoState extends State<SubmitAttractionPhoto> {
   }
 
   void _confirmUserSelection(File image) async {
-    dynamic result = showDialog(
+    dynamic confirmed = await showDialog(
         context: context,
         builder: (BuildContext context) {
           return _UserConfirmationPage(
               image: image, attractionName: widget.attractionName);
         });
+
+    if(confirmed == null) return;
+
+    if(confirmed as bool){
+      // TODO: Upload Logic
+      print("Upload Thing");
+      Navigator.of(context).pop();
+    } else {
+      return;
+    }
   }
 
   @override
@@ -171,7 +181,7 @@ class _UserConfirmationPage extends StatelessWidget {
                       color: Theme.of(context).primaryColor,
                       size: 24.0,
                     ),
-                    onPressed: () => print("Info"),
+                    onPressed: () => print("Info"), // TODO - Include Usage Information for images
                     shape: CircleBorder(),
                     fillColor: Colors.white,
                     padding: EdgeInsets.all(8.0),
@@ -185,13 +195,13 @@ class _UserConfirmationPage extends StatelessWidget {
       persistentFooterButtons: <Widget>[
         InterfaceButton(
           text: "Cancel",
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => Navigator.of(context).pop(false),
           color: UI_BUTTON_BACKGROUND,
           textColor: Colors.black,
         ),
         InterfaceButton(
           text: "Submit",
-          onPressed: () => print("Submit"),
+          onPressed: () => Navigator.of(context).pop(true),
           color: Theme.of(context).primaryColor,
           textColor: Colors.white,
         ),
