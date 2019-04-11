@@ -22,6 +22,7 @@ import 'package:log_ride/widgets/home_page/check_in_widget.dart';
 import 'package:log_ride/widgets/parks_page/park_list_widget.dart';
 import 'package:log_ride/widgets/parks_page/park_list_entry.dart';
 import 'package:log_ride/widgets/shared/content_frame.dart';
+import 'package:log_ride/widgets/shared/styled_dialog.dart';
 
 enum SectionFocus { favorites, all, balanced }
 
@@ -230,7 +231,14 @@ class _HomePageState extends State<HomePage> {
     BluehostAttraction newAttraction = result as BluehostAttraction;
     _webFetcher.submitAttractionData(newAttraction, parent,
         username: userName, uid: widget.uid, isNewAttraction: isNewAttraction);
-    // TODO: DIALOG TO LET USER KNOW ABOUT SUBMISSION
+    showDialog(context: context, builder:(BuildContext context)
+    {
+      return StyledDialog(
+        title: "Attraction Submitted",
+        body: "Thank you for submitting an attraction.",
+        actionText: "Ok",
+      );
+    });
   }
 
   void _handleParkSubmissionCallback() async {
