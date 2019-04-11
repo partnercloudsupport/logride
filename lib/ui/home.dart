@@ -235,7 +235,7 @@ class _HomePageState extends State<HomePage> {
     {
       return StyledDialog(
         title: "Attraction Submitted",
-        body: "Thank you for submitting an attraction.",
+        body: "Thank you for submitting an attraction. We'll review your change shortly.",
         actionText: "Ok",
       );
     });
