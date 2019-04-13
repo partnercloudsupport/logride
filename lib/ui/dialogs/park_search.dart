@@ -34,10 +34,13 @@ class _SearchParksCardState extends State<SearchParksCard> {
     tempToSearch.addAll(widget.parkList);
     if (search.isNotEmpty) {
       List<BluehostPark> tempToDisplay = List<BluehostPark>();
-      tempToSearch.forEach((park) {
-        // Searching for both the park name or location, with case ignored
+      tempToSearch.forEach((BluehostPark park) {
+        // Searching for both the park name, location, former park name, or park id with case ignored
         if (park.parkName.toLowerCase().contains(search.toLowerCase()) ||
-            park.parkCity.toLowerCase().contains(search.toLowerCase())) {
+            park.parkCity.toLowerCase().contains(search.toLowerCase()) ||
+            park.previousNames.toLowerCase().contains(search.toLowerCase()) ||
+            park.id.toString() == search.toLowerCase()
+        )  {
           tempToDisplay.add(park);
         }
       });
