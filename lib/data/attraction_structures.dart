@@ -93,7 +93,11 @@ class BluehostAttraction {
     newAttraction.rideType = num.parse(json["RideType"]);
     newAttraction.yearOpen = num.parse(json["YearOpen"]);
     newAttraction.yearClosed = num.parse(json["YearClosed"]);
-    newAttraction.inactivePeriods = json["inactivePeriods"];
+
+    // Add line breaks to additional contributors
+    String formattedInactivePeriods =  json["inactivePeriods"];
+    formattedInactivePeriods = formattedInactivePeriods.replaceAll(';','\n');
+    newAttraction.inactivePeriods = formattedInactivePeriods;
 
     if (json["Active"] == "1" || json["Active"] == "2") {
       newAttraction.active = true;
@@ -121,8 +125,17 @@ class BluehostAttraction {
     newAttraction.seasonal = (json["Seasonal"] == "1");
     newAttraction.scoreCard = (json["ScoreCard"] == "1");
     newAttraction.manufacturer = json["Manufacturer"];
-    newAttraction.additionalContributors = json["additionalContributors"];
-    newAttraction.formerNames = json["FormerNames"];
+
+    // Add line breaks to additional contributors
+    String formattedAdditionalContributors =  json["additionalContributors"];
+    formattedAdditionalContributors = formattedAdditionalContributors.replaceAll(';','\n');
+    newAttraction.additionalContributors = formattedAdditionalContributors;
+
+    // Add line breaks to former names
+    String formattedFormerNames =  json["FormerNames"];
+    formattedFormerNames = formattedFormerNames.replaceAll(';','\n');
+    newAttraction.formerNames = formattedFormerNames;
+
     newAttraction.model = json["model"];
     newAttraction.modelID = num.parse(json["model_id"]);
     newAttraction.height = num.parse(json["height"]);

@@ -53,4 +53,4 @@
 -  The only thing left to do: Display upcoming attractions differently
    on the main page ✔
  
- - New Line-break structure on Former Names, Initial, Inactive Years
+ - New Line-break structure on Former Names, additional contributors, Inactive Years ✔
