@@ -28,11 +28,8 @@ class _ParkSettingsDialogState extends State<ParkSettingsDialog> {
   void initState() {
     tally = widget.userData.incrementorEnabled;
     seasonal = widget.userData.showSeasonal;
-    if (widget.parkData.active == true) {
-      defunct = widget.userData.showDefunct;
-    } else {
-      defunct = true;
-    }
+    defunct = widget.userData.showDefunct;
+
     super.initState();
   }
 
@@ -43,53 +40,48 @@ class _ParkSettingsDialogState extends State<ParkSettingsDialog> {
 
   Widget _buildParkSettings(BuildContext context) {
     return DialogFrame(
-        title: "Settings",
-        content: _buildEntries(context)
+      title: "Settings",
+      content: _buildEntries(context)
     );
   }
 
   List<Widget> _buildEntries(BuildContext context) {
     List<Widget> entries = <Widget>[
       SwitchListTile.adaptive(
-        value: tally,
-        onChanged: (value) {
-          if (mounted) {
-            setState(() {
-              tally = value;
-            });
-          }
-          widget.callback(ParkSettingsCategory.TALLY, value);
-        },
-        title: Text("Experience Tally"),
-        activeColor: Theme.of(context).primaryColor,
+            value: tally,
+            onChanged: (value) {
+              if(mounted) {
+                setState(() {
+                  tally = value;
+                });
+              }
+              widget.callback(ParkSettingsCategory.TALLY, value);
+            },
+            title: Text("Experience Tally"),
+            activeColor: Theme.of(context).primaryColor,
       ),
       SwitchListTile.adaptive(
-        value: seasonal,
-        onChanged: (value) {
-          if (mounted) {
-            setState(() {
-              seasonal = value;
-            });
-          }
-          widget.callback(ParkSettingsCategory.SHOW_SEASONAL, value);
-        },
-        title: Text("Show Seasonal Attractions"),
-        activeColor: Theme.of(context).primaryColor,
-      ),
+            value: seasonal,
+            onChanged: (value) {
+              if(mounted) {
+                setState(() {
+                  seasonal = value;
+                });
+              }
+              widget.callback(ParkSettingsCategory.SHOW_SEASONAL, value);
+            },
+            title: Text("Show Seasonal Attractions"),
+            activeColor: Theme.of(context).primaryColor,
+          ),
       FormField(
         builder: (FormFieldState<bool> state) {
           return SwitchListTile.adaptive(
             value: state.value,
             onChanged: (value) {
-              if (widget.parkData.active == true) {
-                if (mounted) {
-                  state.didChange(value);
-                }
-                widget.callback(ParkSettingsCategory.SHOW_DEFUNCT, value);
+              if(mounted) {
+                state.didChange(value);
               }
-              else {
-                null;
-              }
+              widget.callback(ParkSettingsCategory.SHOW_DEFUNCT, value);
             },
             title: Text("Show Defunct Attractions"),
             activeColor: Theme.of(context).primaryColor,
