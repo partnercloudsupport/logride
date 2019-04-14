@@ -231,8 +231,7 @@ class _HomePageState extends State<HomePage> {
     BluehostAttraction newAttraction = result as BluehostAttraction;
     _webFetcher.submitAttractionData(newAttraction, parent,
         username: userName, uid: widget.uid, isNewAttraction: isNewAttraction);
-    showDialog(context: context, builder:(BuildContext context)
-    {
+    showDialog(context: context, builder:(BuildContext context) {
       return StyledDialog(
         title: "Attraction Under Review",
         body: "Thanks for submitting! Your attraction is now under review.",
@@ -253,8 +252,7 @@ class _HomePageState extends State<HomePage> {
 
     BluehostPark newPark = result as BluehostPark;
     _webFetcher.submitParkData(newPark, username: userName, uid: widget.uid);
-    showDialog(context: context, builder:(BuildContext context)
-    {
+    showDialog(context: context, builder:(BuildContext context) {
       return StyledDialog(
         title: "Park Under Review",
         body: "Thanks for submitting! Your park is now under review.",
