@@ -80,16 +80,11 @@ class _ParkSettingsDialogState extends State<ParkSettingsDialog> {
         builder: (FormFieldState<bool> state) {
           return SwitchListTile.adaptive(
             value: state.value,
-            onChanged: (value) {
-              if (widget.parkData.active == true) {
-                if (mounted) {
+            onChanged: (!widget.parkData.active) ? null : (value) {
+               if (mounted) {
                   state.didChange(value);
                 }
                 widget.callback(ParkSettingsCategory.SHOW_DEFUNCT, value);
-              }
-              else {
-                null;
-              }
             },
             title: Text("Show Defunct Attractions"),
             activeColor: Theme.of(context).primaryColor,
