@@ -21,7 +21,7 @@
  - Weird issue with web-fetching and parsing when handling some iOS data - make parsing more robust in all cases
  
 ## Notes from iOS
- - Defunct parks shouldn't have the option to hide defunct attractions
+ - Defunct parks shouldn't have the option to hide defunct attractions ✔
  - Fix Font Size depending on phone size
 -  Sort "Add Parks" Alphabetically ✔
  - Blocking Arrow
@@ -53,4 +53,4 @@
 -  The only thing left to do: Display upcoming attractions differently
    on the main page ✔
  
- - New Line-break structure on Former Names, Initial, Inactive Years
+ - New Line-break structure on Former Names, additional contributors, Inactive Years ✔
