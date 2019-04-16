@@ -30,7 +30,7 @@
  - Increase tap icon area for experience
  - Add close button to the park settings page ✔
  - Fix issue with ignoring attractions you've been on ✔
- - Grey out header instead of the whole tile for excluded
+ - Grey out header instead of the whole tile for excluded ✔
  - Make multiple modified by (don't mess with it when submitting / modifying thing)
  - (IGNORE FOR NOW) Make favorites smol when there's nothing in it X
  - Swipe all the way (maybe?)
