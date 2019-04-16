@@ -41,9 +41,17 @@ class AttractionListState extends State<AttractionListEntry> {
 
     bool ignored = widget.userData.ignored;
 
-    Color tileColor = ignored || !widget.attractionData.active
+    Color tileColor =  !widget.attractionData.active
         ? Theme.of(context).disabledColor
         : Colors.white;
+
+    Color textColor = ignored
+        ? Theme.of(context).disabledColor
+        : Colors.black;
+
+    Color subtitleTextColor = ignored
+        ? Theme.of(context).disabledColor
+        : Colors.grey[700];
 
 
     // Core layout of the row / list item.
@@ -66,7 +74,10 @@ class AttractionListState extends State<AttractionListEntry> {
                   Text(
                     widget.attractionData.attractionName,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.subhead,
+                    style: Theme.of(context)
+                          .textTheme
+                          .subhead
+                          .apply(color: textColor),
                   ),
                   Text( widget.attractionData.upcoming
                       ? "Opening Soon"
@@ -75,7 +86,7 @@ class AttractionListState extends State<AttractionListEntry> {
                       style: Theme.of(context)
                           .textTheme
                           .subtitle
-                          .apply(color: Colors.grey[700]))
+                          .apply(color: subtitleTextColor))
                 ],
               )),
               // If the button's not there for any reason, just show an empty container instead. Prevents null errors.
@@ -97,10 +108,10 @@ class AttractionListState extends State<AttractionListEntry> {
     // Logic for selecting whether or not there are any slide interactions with
     // this list entry.
     Widget slideAction;
-    if (!widget.attractionData.active || widget.attractionData.seasonal || widget.attractionData.upcoming)
+    if (!widget.attractionData.active || widget.attractionData.seasonal || widget.attractionData.upcoming  || widget.userData.numberOfTimesRidden>0)
       slideAction =
           null; // Already ignored thanks to defunct, no point in ignoring it more
-    if (widget.attractionData.active && !widget.attractionData.seasonal && !widget.attractionData.upcoming) {
+    if (widget.attractionData.active && !widget.attractionData.seasonal && !widget.attractionData.upcoming  && widget.userData.numberOfTimesRidden==0) {
       // If we're ignored, show the include slide. If we're included, show the ignore slide.
       slideAction =
           ignored ? _buildIncludeSlideAction() : _buildIgnoreSlideAction();
