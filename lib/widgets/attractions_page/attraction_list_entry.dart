@@ -97,10 +97,10 @@ class AttractionListState extends State<AttractionListEntry> {
     // Logic for selecting whether or not there are any slide interactions with
     // this list entry.
     Widget slideAction;
-    if (!widget.attractionData.active || widget.attractionData.seasonal || widget.attractionData.upcoming)
+    if (!widget.attractionData.active || widget.attractionData.seasonal || widget.attractionData.upcoming  || widget.userData.numberOfTimesRidden>0)
       slideAction =
           null; // Already ignored thanks to defunct, no point in ignoring it more
-    if (widget.attractionData.active && !widget.attractionData.seasonal && !widget.attractionData.upcoming) {
+    if (widget.attractionData.active && !widget.attractionData.seasonal && !widget.attractionData.upcoming  && widget.userData.numberOfTimesRidden==0) {
       // If we're ignored, show the include slide. If we're included, show the ignore slide.
       slideAction =
           ignored ? _buildIncludeSlideAction() : _buildIgnoreSlideAction();
