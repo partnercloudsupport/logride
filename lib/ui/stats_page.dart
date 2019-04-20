@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:latlong/latlong.dart';
 import 'package:log_ride/data/attraction_structures.dart';
@@ -67,7 +67,7 @@ class _StatsPageState extends State<StatsPage> {
       backgroundColor: Colors.transparent,
       body: StandardPageStructure(
         iconFunction: () => Navigator.of(context).pop(),
-        iconDecoration: FontAwesomeIcons.chartPie,
+        iconDecoration:Entypo.getIconData("pie-chart"),
         content: <Widget>[
           ContentFrame(
             child: Card(

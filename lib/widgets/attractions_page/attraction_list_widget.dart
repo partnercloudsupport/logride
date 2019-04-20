@@ -100,7 +100,7 @@ class _AttractionsListViewState extends State<AttractionsListView> {
     if (_hasDefunct && widget.parentPark.showDefunct) {
       headedList.add("Defunct");
       headedList.addAll(defunctList);
-      fullList.addAll(seasonalList);
+      fullList.addAll(defunctList);
     }
 
     return returnMap;
