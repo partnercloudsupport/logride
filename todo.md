@@ -26,7 +26,7 @@
 -  Sort "Add Parks" Alphabetically ✔
  - Blocking Arrow
  - Show defunct / seasonal attractions that are checked off regardless of setting
- - Look at recentering pie chart
+ - Look at recentering pie chart ✔
  - Increase tap icon area for experience
  - Add close button to the park settings page ✔
  - Fix issue with ignoring attractions you've been on ✔

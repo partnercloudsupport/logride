@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/animations/slide_in_transition.dart';
@@ -499,7 +500,7 @@ class _HomePageState extends State<HomePage> {
                               db: widget.db,
                               serverParks: _parksManager.allParksInfo,
                             ))),
-                    child: _buildMenuIcon(FontAwesomeIcons.chartPie))
+                    child: _buildMenuIcon(Entypo.getIconData("pie-chart")))
               ],
             )
           ],

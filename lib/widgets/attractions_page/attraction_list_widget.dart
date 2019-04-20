@@ -32,7 +32,6 @@ class AttractionsListView extends StatefulWidget {
 
 class _AttractionsListViewState extends State<AttractionsListView> {
   Map<String, List<BluehostAttraction>> displayLists;
-  List<BluehostAttraction> fullList;
 
   List<dynamic> headedList;
 
@@ -41,8 +40,7 @@ class _AttractionsListViewState extends State<AttractionsListView> {
 
     List<BluehostAttraction> activeList = List<BluehostAttraction>(),
         seasonalList = List<BluehostAttraction>(),
-        defunctList = List<BluehostAttraction>(),
-        fullList = List<BluehostAttraction>();
+        defunctList = List<BluehostAttraction>();
 
     // Split each attraction into their separate lists
     for (int i = 0; i < widget.sourceAttractions.length; i++) {
@@ -88,19 +86,16 @@ class _AttractionsListViewState extends State<AttractionsListView> {
     if (_hasActive) {
       headedList.add("Active");
       headedList.addAll(activeList);
-      fullList.addAll(activeList);
     }
 
     if (_hasSeasonal && widget.parentPark.showSeasonal) {
       headedList.add("Seasonal");
       headedList.addAll(seasonalList);
-      fullList.addAll(seasonalList);
     }
 
     if (_hasDefunct && widget.parentPark.showDefunct) {
       headedList.add("Defunct");
       headedList.addAll(defunctList);
-      fullList.addAll(seasonalList);
     }
 
     return returnMap;
