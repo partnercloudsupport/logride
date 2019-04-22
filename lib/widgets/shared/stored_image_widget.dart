@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/ui/submission/submit_attraction_photo.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:log_ride/widgets/shared/hero_network_image.dart';
@@ -9,11 +10,11 @@ import 'package:log_ride/widgets/shared/back_button.dart';
 import 'package:log_ride/widgets/shared/not_implemented_dialog.dart';
 
 class FirebaseAttractionImage extends StatefulWidget {
-  FirebaseAttractionImage({this.parkID, this.attractionID, this.attractionName, this.overlay});
+  FirebaseAttractionImage({this.attractionData, this.userName, this.parkName, this.overlay});
 
-  final int parkID;
-  final int attractionID;
-  final String attractionName;
+  final BluehostAttraction attractionData;
+  final String userName;
+  final String parkName;
   final Widget overlay;
 
   @override
@@ -36,8 +37,8 @@ class _FirebaseAttractionImageState extends State<FirebaseAttractionImage> {
   void initState() {
     _target = _storage
         .ref()
-        .child(widget.parkID.toString())
-        .child(widget.attractionID.toString() + ".jpg");
+        .child(widget.attractionData.parkID.toString())
+        .child(widget.attractionData.attractionID.toString() + ".jpg");
     super.initState();
   }
 
@@ -56,7 +57,7 @@ class _FirebaseAttractionImageState extends State<FirebaseAttractionImage> {
               onTap: () => showDialog(
                   context: context,
                   builder: (ctx) {
-                    return SubmitAttractionPhoto(widget.attractionName);
+                    return SubmitAttractionPhoto(widget.attractionData, widget.userName, widget.parkName);
                   }), // TODO: Implement Image Submission
               child: Container(
                 constraints: BoxConstraints.expand(),

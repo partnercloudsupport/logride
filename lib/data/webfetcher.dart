@@ -21,7 +21,7 @@ enum SubmissionType {
   IMAGE
 }
 
-const _VERSION_URL = "Version1.2.0";
+const _VERSION_URL = "Version1.2.1";
 
 class WebFetcher {
 
@@ -109,7 +109,7 @@ class WebFetcher {
     return null;
   }
 
-  void submitAttractionData(BluehostAttraction attr, BluehostPark park, {String username, String uid, bool isNewAttraction = false}) async {
+  Future<int> submitAttractionData(BluehostAttraction attr, BluehostPark park, {String username, String uid, bool isNewAttraction = false}) async {
 
     // Status Calculations
     int activeStatus = attr.active ? 1 : 0;
@@ -151,15 +151,15 @@ class WebFetcher {
       "userID": uid
     }));
 
-    print(body);
     // Issue request
-    http.post(_serverURLS[SubmissionType.ATTRACTION_NEW], body: body, headers: {"Content-Type": "application/json"}).then((response) {
+    return await http.post(_serverURLS[SubmissionType.ATTRACTION_NEW], body: body, headers: {"Content-Type": "application/json"}).then((response) {
       print("[${response.statusCode}]: ${response.body}");
+      return response.statusCode;
     });
     // State result
   }
 
-  void submitParkData(BluehostPark newPark, {String username, String uid}) async {
+  Future<int> submitParkData(BluehostPark newPark, {String username, String uid}) async {
     var body = {
       "name": newPark.parkName ?? "",
       "type": newPark.type ?? "",
@@ -180,9 +180,24 @@ class WebFetcher {
 
     print(body);
 
-    http.post(_serverURLS[SubmissionType.PARK], body: json.encode(body)).then((response){
+    return await http.post(_serverURLS[SubmissionType.PARK], body: json.encode(body)).then((response){
       print("[${response.statusCode}]: ${response.body}");
+      return response.statusCode;
     });
+  }
+
+  Future<int> submitAttractionImage({int rideId, int parkId, String photoArtist, String rideName, String parkName}) async {
+    var body = {
+      "rideID": rideId,
+      "parkID": parkId,
+      "photoArtist": photoArtist,
+      "rideName": rideName,
+      "parkName": parkName
+    };
+
+    print(body);
+
+    return await http.post(_serverURLS[SubmissionType.IMAGE], body: json.encode(body)).then((response) => response.statusCode);
   }
 }
 

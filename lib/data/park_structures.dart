@@ -140,6 +140,7 @@ class BluehostPark {
   String parkName;
   String parkCity;
   String parkCountry;
+  String initials;
   bool active;
   num yearOpen;
   num yearClosed;
@@ -177,6 +178,18 @@ class BluehostPark {
     newParkData.username = json["userName"];
     newParkData.created = DateTime.parse(json["DateTime_Created"]);
     newParkData.lastUpdated = DateTime.parse(json["DateTime_LastUpdated"]);
+
+    newParkData.initials = "";
+    newParkData.parkName.split(" ").forEach((String word) {
+      newParkData.initials += word[0];
+    });
+
+    newParkData.initials = newParkData.initials.replaceAll(RegExp("[^a-zA-Z]"), "");
+
+    // Single letter initials are removed.
+    if(newParkData.initials.length <= 1) {
+      newParkData.initials = "";
+    }
 
     return newParkData;
   }

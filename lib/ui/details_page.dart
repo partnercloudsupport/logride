@@ -5,6 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong/latlong.dart' as oldLatLng;
+import 'package:log_ride/widgets/shared/interface_button.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:log_ride/data/attraction_structures.dart';
@@ -27,10 +28,14 @@ class DetailsPage extends StatefulWidget {
       this.data,
       this.userData,
       this.dateChangeHandler,
-      this.submissionCallback});
+      this.submissionCallback,
+      this.parkName,
+      this.userName});
 
   final BaseDB db;
   final dynamic data;
+  final String parkName; // Used because image submission requires the park name. gah.
+  final String userName;
   final FirebaseAttraction userData;
   final Function(bool first, DateTime newTime) dateChangeHandler;
   final Function(dynamic attraction) submissionCallback;
@@ -253,9 +258,9 @@ class _DetailsPageState extends State<DetailsPage> {
     return Container(
         height: 250,
         child: _wrapAsWindow(FirebaseAttractionImage(
-          attractionID: attraction.attractionID,
-          parkID: attraction.parkID,
-          attractionName: attraction.attractionName,
+          parkName: widget.parkName,
+          attractionData: attraction,
+          userName: widget.userName,
           overlay: _credit,
         )));
   }
@@ -412,59 +417,93 @@ class _DetailsPageState extends State<DetailsPage> {
       if (attraction.inactivePeriods != "")
         details.add(_furtherDetailsTextEntry(
             "Inactive Periods", attraction.inactivePeriods));
+
       if (attraction.manufacturer != "")
         details.add(
             _furtherDetailsTextEntry("Manufacturer", attraction.manufacturer));
+
       if (attraction.additionalContributors != "")
         details.add(_furtherDetailsTextEntry(
             "Additional Contributors", attraction.additionalContributors));
+
       if (attraction.formerNames != "")
         details.add(
             _furtherDetailsTextEntry("Former Names", attraction.formerNames));
+
       if (attraction.model != "")
         details.add(_furtherDetailsTextEntry("Model", attraction.model));
+
       if (attraction.height != 0)
         details
             .add(_furtherDetailsTextEntry("Height", "${attraction.height} ft"));
+
       if (attraction.liftHeight != 0.0)
         details.add(_furtherDetailsTextEntry(
             "Lift Height", "${attraction.liftHeight} ft"));
+
       if (attraction.dropHeight != 0.0)
         details.add(_furtherDetailsTextEntry(
             "Drop Height", "${attraction.dropHeight} ft"));
+
       if (attraction.maxSpeed != 0)
         details.add(_furtherDetailsTextEntry(
             "Max Speed", "${attraction.maxSpeed} mph"));
+
       if (attraction.length != 0)
         details
             .add(_furtherDetailsTextEntry("Length", "${attraction.length} ft"));
+
       if (attraction.attractionDuration != 0)
         details.add(_furtherDetailsTextEntry("Duration",
             "${attraction.attractionDuration ~/ 60}m ${attraction.attractionDuration % 60}s"));
+
       if (attraction.capacity != 0)
         details.add(
             _furtherDetailsTextEntry("Capacity", "${attraction.capacity} pph"));
+
       if (attraction.inversions != 0)
         details.add(
             _furtherDetailsTextEntry("Inversions", "${attraction.inversions}"));
+
       if (attraction.cost != 0)
         details.add(_furtherDetailsTextEntry(
             "Cost",
             NumberFormat.compactCurrency(symbol: "\$")
                 .format(attraction.cost)));
+
       if (attraction.previousParkLabel != "")
         details.add(_furtherDetailsTextEntry(
             "Previous Park Label", "${attraction.previousParkLabel}"));
-      if (attraction.attractionLink != "")
-        details.add(_furtherDetailsEntry(
-            "Website",
-            _urlTextButton(
-                context, "Attraction Site", attraction.attractionLink)));
+
+      if (attraction.attractionLink != "") {
+        String partnerURL = attraction.attractionLink;
+        Uri partnerUri = Uri.parse(attraction.attractionLink);
+        partnerURL = partnerUri.host;
+
+
+        Widget partnerButton = Padding(padding: const EdgeInsets.symmetric(horizontal: 8.0), child: InterfaceButton(
+          text: "Learn More Information",
+          subtext: "via $partnerURL",
+          color: Theme
+              .of(context)
+              .primaryColor,
+          textColor: Colors.white,
+          onPressed: () async {
+            if (await canLaunch(attraction.attractionLink)) {
+              launch(attraction.attractionLink);
+            }
+          },
+        ));
+        details.add(partnerButton);
+      }
+
       if (attraction.modifyBy != "")
         details.add(_furtherDetailsTextEntry(
             "Entry Last Modified by", attraction.modifyBy));
+
       if (attraction.notes != "")
         details.add(_longDetailsEntry("Notes", attraction.notes));
+
       return details;
     }
 

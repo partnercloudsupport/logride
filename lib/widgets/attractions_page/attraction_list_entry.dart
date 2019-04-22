@@ -12,6 +12,7 @@ class AttractionListEntry extends StatefulWidget {
   AttractionListEntry(
       {this.attractionData,
       this.userData,
+      this.userName,
       this.slidableController,
       this.ignoreCallback,
       this.experienceHandler,
@@ -22,6 +23,7 @@ class AttractionListEntry extends StatefulWidget {
 
   final BluehostAttraction attractionData;
   final FirebaseAttraction userData;
+  final String userName;
   final FirebasePark parentPark;
   final SlidableController slidableController;
   final Function(BluehostAttraction, bool) ignoreCallback;
@@ -41,18 +43,14 @@ class AttractionListState extends State<AttractionListEntry> {
 
     bool ignored = widget.userData.ignored;
 
-    Color tileColor =  !widget.attractionData.active
+    Color tileColor = !widget.attractionData.active
         ? Theme.of(context).disabledColor
         : Colors.white;
 
-    Color textColor = ignored
-        ? Theme.of(context).disabledColor
-        : Colors.black;
+    Color textColor = ignored ? Theme.of(context).disabledColor : Colors.black;
 
-    Color subtitleTextColor = ignored
-        ? Theme.of(context).disabledColor
-        : Colors.grey[700];
-
+    Color subtitleTextColor =
+        ignored ? Theme.of(context).disabledColor : Colors.grey[700];
 
     // Core layout of the row / list item.
     built = Material(
@@ -75,13 +73,14 @@ class AttractionListState extends State<AttractionListEntry> {
                     widget.attractionData.attractionName,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context)
-                          .textTheme
-                          .subhead
-                          .apply(color: textColor),
+                        .textTheme
+                        .subhead
+                        .apply(color: textColor),
                   ),
-                  Text( widget.attractionData.upcoming
-                      ? "Opening Soon"
-                      : widget.attractionData.typeLabel,
+                  Text(
+                      widget.attractionData.upcoming
+                          ? "Opening Soon"
+                          : widget.attractionData.typeLabel,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context)
                           .textTheme
@@ -93,7 +92,10 @@ class AttractionListState extends State<AttractionListEntry> {
               ExperienceButton(
                 interactHandler: widget.experienceHandler,
                 parentPark: widget.parentPark,
-                ignored: (widget.attractionData.seasonal || !widget.attractionData.active) ? false : (ignored ?? false),
+                ignored: (widget.attractionData.seasonal ||
+                        !widget.attractionData.active)
+                    ? false
+                    : (ignored ?? false),
                 upcoming: widget.attractionData.upcoming,
                 data: widget.userData ??
                     FirebaseAttraction(
@@ -108,10 +110,16 @@ class AttractionListState extends State<AttractionListEntry> {
     // Logic for selecting whether or not there are any slide interactions with
     // this list entry.
     Widget slideAction;
-    if (!widget.attractionData.active || widget.attractionData.seasonal || widget.attractionData.upcoming  || widget.userData.numberOfTimesRidden>0)
+    if (!widget.attractionData.active ||
+        widget.attractionData.seasonal ||
+        widget.attractionData.upcoming ||
+        widget.userData.numberOfTimesRidden > 0)
       slideAction =
           null; // Already ignored thanks to defunct, no point in ignoring it more
-    if (widget.attractionData.active && !widget.attractionData.seasonal && !widget.attractionData.upcoming  && widget.userData.numberOfTimesRidden==0) {
+    if (widget.attractionData.active &&
+        !widget.attractionData.seasonal &&
+        !widget.attractionData.upcoming &&
+        widget.userData.numberOfTimesRidden == 0) {
       // If we're ignored, show the include slide. If we're included, show the ignore slide.
       slideAction =
           ignored ? _buildIncludeSlideAction() : _buildIgnoreSlideAction();
@@ -160,6 +168,8 @@ class AttractionListState extends State<AttractionListEntry> {
               data: widget.attractionData,
               db: widget.db,
               userData: widget.userData,
+              parkName: widget.parentPark.name,
+              userName: widget.userName,
               submissionCallback: widget.submissionCallback,
               dateChangeHandler: (first, newTime) =>
                   widget.timeChanged(newTime, widget.userData, first),

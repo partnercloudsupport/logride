@@ -19,12 +19,14 @@ import 'package:log_ride/widgets/attractions_page/attraction_list_widget.dart';
 import 'package:log_ride/widgets/shared/title_bar_icon.dart';
 
 class AttractionsPage extends StatefulWidget {
-  AttractionsPage({this.pm, this.db, this.serverParkData, this.submissionCallback});
+
+  AttractionsPage({this.pm, this.db, this.serverParkData, this.submissionCallback, this.userName});
 
   final ParksManager pm;
   final BaseDB db;
   final BluehostPark serverParkData;
   final Function(dynamic, bool) submissionCallback;
+  final String userName;
 
   @override
   _AttractionsPageState createState() => _AttractionsPageState();
@@ -132,6 +134,7 @@ class _AttractionsPageState extends State<AttractionsPage>
                     sourceAttractions: widget.serverParkData.attractions,
                     parentPark: parkData,
                     slidableController: _slidableController,
+                    userName: widget.userName,
                     pm: widget.pm,
                     db: widget.db,
                     submissionCallback: widget.submissionCallback

@@ -19,7 +19,10 @@ class _SingleValueDialogState extends State<SingleValueDialog> {
 
   @override
   Widget build(BuildContext context) {
+
+    /* ----- Unused for now --------
     TextInputType type = TextInputType.text;
+
     switch (widget.type) {
       case SingleValueDialogType.NUMBER:
         type = TextInputType.number;
@@ -27,7 +30,7 @@ class _SingleValueDialogState extends State<SingleValueDialog> {
       case SingleValueDialogType.TEXT:
         type = TextInputType.text;
         break;
-    }
+    }*/
 
     return Scaffold(
       backgroundColor: Colors.transparent,

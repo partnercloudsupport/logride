@@ -17,7 +17,7 @@ class AttractionsListView extends StatefulWidget {
       this.pm,
       this.slidableController,
       this.parentPark,
-      this.submissionCallback});
+      this.submissionCallback, this.userName});
 
   final List<BluehostAttraction> sourceAttractions;
   final BaseDB db;
@@ -26,17 +26,17 @@ class AttractionsListView extends StatefulWidget {
   final SlidableController slidableController;
   final Function(dynamic, bool) submissionCallback;
 
+  final String userName;
+
   @override
   _AttractionsListViewState createState() => _AttractionsListViewState();
 }
 
 class _AttractionsListViewState extends State<AttractionsListView> {
-  Map<String, List<BluehostAttraction>> displayLists;
+  Map<String, List<BluehostAttraction>> headedList;
 
-  List<dynamic> headedList;
-
-  Map<String, List<BluehostAttraction>> _buildPreparedList() {
-    headedList = List<dynamic>();
+  void _buildPreparedList() {
+    headedList = Map<String, List<BluehostAttraction>>();
 
     List<BluehostAttraction> activeList = List<BluehostAttraction>(),
         seasonalList = List<BluehostAttraction>(),
@@ -72,33 +72,20 @@ class _AttractionsListViewState extends State<AttractionsListView> {
         "SeasonalList => Data: $_hasSeasonal | Length: ${seasonalList.length}");
     print("DefunctList => Data: $_hasDefunct | Length: ${defunctList.length}");
 
-    Map<String, List<BluehostAttraction>> returnMap = Map();
-
-    if (_hasActive) returnMap["Active"] = activeList;
-    if (_hasSeasonal && widget.parentPark.showSeasonal)
-      returnMap["Seasonal"] = seasonalList;
-    if (_hasDefunct && widget.parentPark.showDefunct)
-      returnMap["Defunct"] = defunctList;
-
     // Strings are used as headers for the list. These are checked for in the
     // Build functions for the listview.
 
     if (_hasActive) {
-      headedList.add("Active");
-      headedList.addAll(activeList);
+      headedList["Active"] = activeList;
     }
 
-    if (_hasSeasonal && widget.parentPark.showSeasonal) {
-      headedList.add("Seasonal");
-      headedList.addAll(seasonalList);
+    if (_hasSeasonal) {
+      headedList["Seasonal"] = seasonalList;
     }
 
-    if (_hasDefunct && widget.parentPark.showDefunct) {
-      headedList.add("Defunct");
-      headedList.addAll(defunctList);
+    if (_hasDefunct) {
+      headedList["Defunct"] = defunctList;
     }
-
-    return returnMap;
   }
 
   /// Simple function that sets the value of the current state to the inverse of whatever it currently is for the user.
@@ -267,18 +254,18 @@ class _AttractionsListViewState extends State<AttractionsListView> {
   @override
   void initState() {
     super.initState();
-    //displayLists = _buildPreparedList();
   }
 
   @override
   Widget build(BuildContext context) {
-    displayLists = _buildPreparedList();
+    _buildPreparedList();
     return ClipRRect(
         borderRadius: BorderRadius.only(
             bottomLeft: Radius.circular(15), bottomRight: Radius.circular(15)),
         child: FirebaseAttractionListView(
           parentPark: widget.parentPark,
           headedList: headedList,
+          userName: widget.userName,
           attractionQuery: widget.db.getQueryForUser(
               path: DatabasePath.ATTRACTIONS,
               key: widget.parentPark.parkID.toString()),

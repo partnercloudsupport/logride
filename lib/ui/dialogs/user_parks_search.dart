@@ -3,8 +3,8 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:log_ride/ui/standard_page_structure.dart';
+import 'package:log_ride/widgets/home_page/park_list_widget.dart';
 import 'package:log_ride/widgets/shared/content_frame.dart';
-import 'package:log_ride/widgets/parks_page/park_list_widget.dart';
 import 'package:log_ride/widgets/shared/custom_animated_firebase_list.dart';
 
 class UserParksSearchPage extends StatefulWidget {
