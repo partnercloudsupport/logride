@@ -22,7 +22,6 @@
 -  (IGNORE FOR NOW) Make favorites smol when there's nothing in it
  - Swipe all the way (maybe?)
  - Search should show defunct and seasonal regardless of setting
- - Search on initials (park)
  - Haptic 
     - Increment thing (maybe)
  - Text Pop-up for parks without attractions
@@ -58,3 +57,4 @@
   -   Submit images for attractions ✔
  - Attraction Site
   -   Is partner site, display "via {formatted url}" ✔
+-  Search on initials (park) ✔
