@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:log_ride/data/auth_manager.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
-import 'package:log_ride/ui/park_search.dart';
+import 'package:log_ride/ui/dialogs/park_search.dart';
 import 'package:log_ride/ui/landing_page.dart';
 
 class MyApp extends StatelessWidget {
@@ -19,18 +19,18 @@ class MyApp extends StatelessWidget {
         },
         theme: ThemeData(
             primaryColor: new Color.fromARGB(255, 57, 164, 72),
-            accentColor: new Color.fromARGB(255, 91, 220, 70),
+            accentColor: new Color.fromARGB(255, 57, 164, 72),
             buttonColor: new Color.fromARGB(255, 57, 164, 72),
             disabledColor: new Color.fromARGB(255, 204, 204, 204),
             textTheme: TextTheme(
                 subhead:
-                    TextStyle(fontSize: 22.0, fontWeight: FontWeight.normal),
+                    TextStyle(fontSize: 20.0, fontWeight: FontWeight.normal),
                 subtitle: TextStyle(
-                    fontSize: 16.0,
+                    fontSize: 18.0,
                     fontWeight: FontWeight.normal,
                     color: Colors.grey),
                 headline: TextStyle(
-                  fontSize: 28.0,
+                  fontSize: 26.0,
                   fontWeight: FontWeight.bold
                 ))),
         home: LandingPage(auth: Auth(), db: db,));

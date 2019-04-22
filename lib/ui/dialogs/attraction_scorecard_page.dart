@@ -8,8 +8,8 @@ import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/color_constants.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/scorecard_structures.dart';
-import 'package:log_ride/ui/single_value_dialog.dart';
-import 'package:log_ride/widgets/interface_button.dart';
+import 'package:log_ride/ui/dialogs/single_value_dialog.dart';
+import 'package:log_ride/widgets/shared/interface_button.dart';
 
 Map<int, Color> positionalColors = {
   0: POSITION_FIRST,
@@ -274,36 +274,6 @@ class _ScorecardTitleBar extends StatelessWidget {
     );
   }
 }
-/*
-
-class _ScorecardTopScore extends StatelessWidget {
-  _ScorecardTopScore({this.topScore});
-  final int topScore;
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Icon(
-            FontAwesomeIcons.trophy,
-            color: POSITION_FIRST,
-          ),
-        ),
-        Expanded(
-          child: Text(
-            NumberFormat.decimalPattern().format(topScore) + " points",
-            textAlign: TextAlign.left,
-            style: Theme.of(context).textTheme.title.apply(fontSizeDelta: 8),
-          ),
-        )
-      ],
-    );
-  }
-}
-*/
 
 class _ScorecardEntry extends StatelessWidget {
   _ScorecardEntry(

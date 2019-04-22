@@ -1,4 +1,3 @@
-
 class FirebaseAttraction {
   final int rideID;
   int numberOfTimesRidden = 0;
@@ -12,13 +11,16 @@ class FirebaseAttraction {
 
   FirebaseAttraction({this.rideID});
 
-  factory FirebaseAttraction.fromMap(Map<String, dynamic> map){
-    FirebaseAttraction newAttraction = FirebaseAttraction(rideID: map["rideID"]);
-    newAttraction.numberOfTimesRidden = map["numberOfTimesRidden"];
+  factory FirebaseAttraction.fromMap(Map<String, dynamic> map) {
+    FirebaseAttraction newAttraction =
+        FirebaseAttraction(rideID: map["rideID"]);
+    newAttraction.numberOfTimesRidden = map["numberOfTimesRidden"] ?? 0;
 
     // DateTime is defined as seconds since epoch on iOS. It's milliseconds since epoch on flutter. We need to fix this, so we multiply by 1000
-    newAttraction.firstRideDate = DateTime.fromMillisecondsSinceEpoch(((map["firstRideDate"] as num) * 1000).toInt());
-    newAttraction.lastRideDate = DateTime.fromMillisecondsSinceEpoch(((map["lastRideDate"] as num) * 1000).toInt());
+    newAttraction.firstRideDate = DateTime.fromMillisecondsSinceEpoch(
+        ((map["firstRideDate"] as num) * 1000).toInt());
+    newAttraction.lastRideDate = DateTime.fromMillisecondsSinceEpoch(
+        ((map["lastRideDate"] as num) * 1000).toInt());
 
     return newAttraction;
   }
@@ -27,23 +29,25 @@ class FirebaseAttraction {
     return {
       "rideID": this.rideID,
       "numberOfTimesRidden": this.numberOfTimesRidden,
-      "firstRideDate": this.firstRideDate.millisecondsSinceEpoch / 1000, // Again, milliseconds since epoch -> seconds since epoch
+      "firstRideDate": this.firstRideDate.millisecondsSinceEpoch /
+          1000, // Again, milliseconds since epoch -> seconds since epoch
       "lastRideDate": this.lastRideDate.millisecondsSinceEpoch / 1000,
     };
   }
 }
 
-
 class BluehostAttraction {
   String attractionName;
-  final int attractionID;
+  int attractionID;
   int parkID;
-  int rideType;
+  int rideType = 1;
   int yearOpen;
   int yearClosed;
-  bool active;
-  bool seasonal;
-  bool scoreCard;
+  String inactivePeriods;
+  bool active = true;
+  bool upcoming = false;
+  bool seasonal = false;
+  bool scoreCard = false;
   String manufacturer;
   String additionalContributors;
   String formerNames;
@@ -70,6 +74,8 @@ class BluehostAttraction {
   String notes;
   DateTime lastUpdated;
   DateTime created;
+  DateTime openingDay;
+  DateTime closingDay;
 
   // This is established by the webfetcher using data taken from the server.
   // Note: this isn't from the same bluehost request as the rest of the
@@ -78,9 +84,9 @@ class BluehostAttraction {
 
   BluehostAttraction({this.attractionID});
 
-  factory BluehostAttraction.fromJson(Map<String, dynamic> json){
-
-    BluehostAttraction newAttraction = BluehostAttraction(attractionID: num.parse(json["RideID"]));
+  factory BluehostAttraction.fromJson(Map<String, dynamic> json) {
+    BluehostAttraction newAttraction =
+        BluehostAttraction(attractionID: num.parse(json["RideID"]));
 
     newAttraction.attractionName = json["Name"];
     newAttraction.parkID = num.parse(json["ParkID"]);
@@ -88,12 +94,48 @@ class BluehostAttraction {
     newAttraction.yearOpen = num.parse(json["YearOpen"]);
     newAttraction.yearClosed = num.parse(json["YearClosed"]);
 
-    newAttraction.active = (json["Active"] == "1");
+    // Add line breaks to additional contributors
+    String formattedInactivePeriods =  json["inactivePeriods"];
+    formattedInactivePeriods = formattedInactivePeriods.replaceAll(';','\n');
+    newAttraction.inactivePeriods = formattedInactivePeriods;
+
+    if (json["Active"] == "1" || json["Active"] == "2") {
+      newAttraction.active = true;
+
+      if (json["Active"] == "2") {
+        newAttraction.upcoming = true;
+      }
+    } else {
+      newAttraction.active = false;
+      newAttraction.upcoming = false;
+    }
+
+    if(json["dateClose"][0] != "0"){
+      newAttraction.closingDay = DateTime.parse(json["dateClose"]);
+    } else {
+      newAttraction.closingDay = null;
+    }
+
+    if(json["dateOpen"][0] != "0"){
+      newAttraction.openingDay = DateTime.parse(json["dateOpen"]);
+    } else {
+      newAttraction.openingDay = null;
+    }
+
     newAttraction.seasonal = (json["Seasonal"] == "1");
     newAttraction.scoreCard = (json["ScoreCard"] == "1");
     newAttraction.manufacturer = json["Manufacturer"];
-    newAttraction.additionalContributors = json["additionalContributors"];
-    newAttraction.formerNames = json["FormerNames"];
+
+    // Add line breaks to additional contributors
+    String formattedAdditionalContributors =  json["additionalContributors"];
+    formattedAdditionalContributors = formattedAdditionalContributors.replaceAll(';','\n');
+    newAttraction.additionalContributors = formattedAdditionalContributors;
+
+    // Add line breaks to former names
+    String formattedFormerNames =  json["FormerNames"];
+    formattedFormerNames = formattedFormerNames.replaceAll(';','\n');
+    newAttraction.formerNames = formattedFormerNames;
+
     newAttraction.model = json["model"];
     newAttraction.modelID = num.parse(json["model_id"]);
     newAttraction.height = num.parse(json["height"]);
@@ -111,7 +153,7 @@ class BluehostAttraction {
     newAttraction.ccType = json["CCType"];
     newAttraction.attractionLink = json["attractionLink"];
 
-    if(json["sourceIDs"] != ""){
+    if (json["sourceIDs"] != "") {
       List<String> sourceIDStrings = json["sourceIDs"].toString().split(",");
       List<num> sourceIDInts = List<num>();
       sourceIDStrings.forEach((e) {
@@ -129,22 +171,25 @@ class BluehostAttraction {
     return newAttraction;
   }
 
-  FirebaseAttraction toNewFirebaseAttraction(){
-    FirebaseAttraction newAttraction = FirebaseAttraction(rideID: this.attractionID);
+  FirebaseAttraction toNewFirebaseAttraction() {
+    FirebaseAttraction newAttraction =
+        FirebaseAttraction(rideID: this.attractionID);
     return newAttraction;
   }
 }
 
-FirebaseAttraction getFirebaseAttractionFromList(List<FirebaseAttraction> toSearch, int attractionID){
-  for(int i = 0; i < toSearch.length; i++){
-    if(toSearch[i].rideID == attractionID) return toSearch[i];
+FirebaseAttraction getFirebaseAttractionFromList(
+    List<FirebaseAttraction> toSearch, int attractionID) {
+  for (int i = 0; i < toSearch.length; i++) {
+    if (toSearch[i].rideID == attractionID) return toSearch[i];
   }
   return null;
 }
 
-BluehostAttraction getBluehostAttractionFromList(List<BluehostAttraction> toSearch, int attractionID){
-  for(int i = 0; i < toSearch.length; i++){
-    if(toSearch[i].attractionID == attractionID) return toSearch[i];
+BluehostAttraction getBluehostAttractionFromList(
+    List<BluehostAttraction> toSearch, int attractionID) {
+  for (int i = 0; i < toSearch.length; i++) {
+    if (toSearch[i].attractionID == attractionID) return toSearch[i];
   }
   return null;
 }

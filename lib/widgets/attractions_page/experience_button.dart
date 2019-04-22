@@ -7,12 +7,22 @@ enum ExperienceAction { ADD, REMOVE, SET }
 
 class ExperienceButton extends StatelessWidget {
   ExperienceButton(
-      {this.parentPark, this.data, this.ignored, this.interactHandler});
+      {this.parentPark, this.data, this.ignored, this.upcoming = false, this.interactHandler});
 
   final FirebasePark parentPark;
   final FirebaseAttraction data;
   final bool ignored;
+  final bool upcoming;
   final Function(ExperienceAction, FirebaseAttraction) interactHandler;
+
+  // This functions as as filter for our interact - if the attraction
+  // is ignored or upcoming, we just don't let the user interact with the count
+  void interactPassthrough(ExperienceAction act) {
+    if(ignored || upcoming) return;
+
+    interactHandler(act, data);
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +55,24 @@ class ExperienceButton extends StatelessWidget {
 
     if (!ignored) {
       buttonColor = Theme.of(context).primaryColor;
-      if (data.numberOfTimesRidden > 0) {
+      if(upcoming){
+        iconWidget = Icon(
+          FontAwesomeIcons.solidClock,
+          color: Color.fromARGB(255, 135, 207, 129),
+          size: 32.0
+        );
+
+        iconWidget = Padding(
+          padding: EdgeInsets.only(left: 2.0),
+          child: Stack(
+            children: <Widget>[
+              Icon(FontAwesomeIcons.solidCircle, color: buttonColor, size: 32.0),
+              iconWidget,
+              Icon(FontAwesomeIcons.circle, color: buttonColor, size: 32.0)
+            ],
+          ),
+        );
+      } else if (data.numberOfTimesRidden > 0) {
         // Plus button is displayed when there's at least one count and incrementor isn't on
         iconWidget = Icon(
           parentPark.incrementorEnabled
@@ -59,7 +86,7 @@ class ExperienceButton extends StatelessWidget {
         // so I just stacked two appropriate ones on top of each other.
         // The padding inset of 2 is used to mimic the other normal icons appropriately.
         iconWidget = Padding(
-          padding: EdgeInsets.all(2.0),
+          padding: EdgeInsets.only(left: 2.0),
           child: Stack(
             children: <Widget>[
               Icon(
@@ -86,6 +113,11 @@ class ExperienceButton extends StatelessWidget {
       child: iconWidget,
     );
 
+    buttonWidget = Padding(
+      child: buttonWidget,
+      padding: EdgeInsets.only(top: 2.0)
+    );
+
     children.add(buttonWidget);
 
     /// Note about latency
@@ -97,18 +129,25 @@ class ExperienceButton extends StatelessWidget {
 
     return Container(
       constraints:
-          BoxConstraints(maxHeight: 44, minHeight: 44.0, minWidth: 32.0),
+          BoxConstraints(maxHeight: 45.0, minHeight: 45.0, minWidth: 32.0),
       child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8.0)
+        ),
         child: InkWell(
           child: Row(
             children: children,
           ),
-          onTap: () => interactHandler(ExperienceAction.ADD, data),
+          onTap: () => interactPassthrough(ExperienceAction.ADD),
           //onDoubleTap: () => interactHandler(ExperienceAction.SET, data),
-          onLongPress: () => interactHandler(ExperienceAction.SET,
-              data), // If a user wants to remove a value, they have to set it. I doubt they use the single remove often.
+          onLongPress: () => interactPassthrough(ExperienceAction.SET), // If a user wants to remove a value, they have to set it. I doubt they use the single remove often.
         ),
       ),
+      decoration: BoxDecoration(boxShadow: [BoxShadow(
+        color: Colors.black,
+        blurRadius: 8.0,
+        spreadRadius: -8.0,
+      )]),
     );
   }
 }

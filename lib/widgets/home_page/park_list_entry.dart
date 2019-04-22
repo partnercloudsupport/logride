@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:log_ride/widgets/progress_bars.dart';
+import 'package:log_ride/widgets/shared/progress_bars.dart';
 import 'package:log_ride/data/park_structures.dart';
 
 enum ParkSlideActionType { faveAdd, faveRemove, delete }

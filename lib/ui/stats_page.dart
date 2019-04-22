@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:latlong/latlong.dart';
 import 'package:log_ride/data/attraction_structures.dart';
@@ -10,11 +10,11 @@ import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/stats_calculator.dart';
 import 'package:log_ride/ui/standard_page_structure.dart';
-import 'package:log_ride/widgets/attraction_stats_list.dart';
-import 'package:log_ride/widgets/content_frame.dart';
-import 'package:log_ride/widgets/embedded_map_entry.dart';
-import 'package:log_ride/widgets/page_controller_slider_bar.dart';
-import 'package:log_ride/widgets/progress_bars.dart';
+import 'package:log_ride/widgets/stats_page/attraction_stats_list.dart';
+import 'package:log_ride/widgets/shared/content_frame.dart';
+import 'package:log_ride/widgets/shared/embedded_map_entry.dart';
+import 'package:log_ride/widgets/shared/page_controller_slider_bar.dart';
+import 'package:log_ride/widgets/shared/progress_bars.dart';
 
 class StatsPage extends StatefulWidget {
   StatsPage({this.serverParks, this.db});
@@ -67,7 +67,7 @@ class _StatsPageState extends State<StatsPage> {
       backgroundColor: Colors.transparent,
       body: StandardPageStructure(
         iconFunction: () => Navigator.of(context).pop(),
-        iconDecoration: FontAwesomeIcons.chartPie,
+        iconDecoration:Entypo.getIconData("pie-chart"),
         content: <Widget>[
           ContentFrame(
             child: Card(

@@ -5,9 +5,10 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:log_ride/animations/slide_in_transition.dart';
 import 'package:log_ride/data/park_structures.dart';
-import 'package:log_ride/widgets/park_list_entry.dart';
-import 'package:log_ride/widgets/custom_animated_firebase_list.dart';
-import 'package:log_ride/ui/user_parks_search.dart';
+import 'package:log_ride/data/search_comparators.dart';
+import 'package:log_ride/widgets/home_page/park_list_entry.dart';
+import 'package:log_ride/widgets/shared/custom_animated_firebase_list.dart';
+import 'package:log_ride/ui/dialogs/user_parks_search.dart';
 
 class ParkListView extends StatelessWidget {
   ParkListView(
@@ -65,12 +66,9 @@ class ParkListView extends StatelessWidget {
         Map<String, dynamic> converted = jsonDecode(jsonEncode(snapshot.value));
         FirebasePark thisPark = FirebasePark.fromMap(converted);
 
-        String parkName = thisPark.name.toLowerCase();
-        String parkLocation = thisPark.location.toLowerCase();
-        String lowerFilter = filter?.toLowerCase() ?? "";
+        String search = filter ?? "";
 
-        if (parkName.contains(lowerFilter) ||
-            parkLocation.contains(lowerFilter)) {
+        if (isFirebaseParkInSearch(thisPark, search)) {
           Widget builtWidget = ParkListEntry(
               parkData: thisPark,
               onTap: onTap,

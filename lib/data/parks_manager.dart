@@ -38,7 +38,11 @@ class ParksManager {
       }
       Map<dynamic, dynamic> values = jsonDecode(jsonEncode(snap));
       for (int i = 0; i < values.keys.length; i++) {
-        int entryID = num.parse(values.keys.elementAt(i));
+        int entryID = num.tryParse(values.keys.elementAt(i));
+        if(entryID == null) {
+          print("CATASTROPHIC ERROR: Key value at index $i for adding user's attractions is not a number");
+          continue;
+        }
         BluehostPark targetPark = getBluehostParkByID(allParksInfo, entryID);
 
         // This part appears to take the longest. I'm going to let it run async
@@ -134,6 +138,7 @@ class ParksManager {
       List<FirebaseAttraction> userAttractionData) {
     BluehostPark targetBHPark =
         getBluehostParkByID(allParksInfo, targetFBPark.parkID);
+
     targetFBPark.updateAttractionCount(
         targetPark: targetBHPark,
         userData: userAttractionData,

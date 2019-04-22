@@ -5,30 +5,40 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong/latlong.dart' as oldLatLng;
+import 'package:log_ride/widgets/shared/interface_button.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
-import 'package:log_ride/widgets/content_frame.dart';
-import 'package:log_ride/widgets/embedded_map_entry.dart';
-import 'package:log_ride/widgets/side_strike_text.dart';
-import 'package:log_ride/widgets/stored_image_widget.dart';
-import 'package:log_ride/widgets/photo_credit_text.dart';
-import 'package:log_ride/widgets/title_bar_icon.dart';
-import 'package:log_ride/widgets/not_implemented_dialog.dart';
-import 'package:log_ride/ui/attraction_scorecard_page.dart';
+import 'package:log_ride/widgets/shared/content_frame.dart';
+import 'package:log_ride/widgets/shared/embedded_map_entry.dart';
+import 'package:log_ride/widgets/shared/side_strike_text.dart';
+import 'package:log_ride/widgets/shared/stored_image_widget.dart';
+import 'package:log_ride/widgets/shared/photo_credit_text.dart';
+import 'package:log_ride/widgets/shared/title_bar_icon.dart';
+import 'package:log_ride/ui/dialogs/attraction_scorecard_page.dart';
 import 'package:log_ride/ui/standard_page_structure.dart';
 
 enum _DetailsType { PARK_DETAILS, ATTRACTION_DETAILS }
 
 class DetailsPage extends StatefulWidget {
-  DetailsPage({this.db, this.data, this.userData, this.dateChangeHandler});
+  DetailsPage(
+      {this.db,
+      this.data,
+      this.userData,
+      this.dateChangeHandler,
+      this.submissionCallback,
+      this.parkName,
+      this.userName});
 
   final BaseDB db;
   final dynamic data;
+  final String parkName; // Used because image submission requires the park name. gah.
+  final String userName;
   final FirebaseAttraction userData;
   final Function(bool first, DateTime newTime) dateChangeHandler;
+  final Function(dynamic attraction) submissionCallback;
 
   @override
   _DetailsPageState createState() => _DetailsPageState();
@@ -45,14 +55,18 @@ class _DetailsPageState extends State<DetailsPage> {
     super.initState();
     if (widget.data is BluehostAttraction) {
       _type = _DetailsType.ATTRACTION_DETAILS;
-      FirebaseAnalytics().logEvent(name: "view_attraction", parameters: {"attractionName": (widget.data as BluehostAttraction).attractionName});
+      FirebaseAnalytics().logEvent(name: "view_attraction", parameters: {
+        "attractionName": (widget.data as BluehostAttraction).attractionName
+      });
       if (widget.userData.firstRideDate.millisecondsSinceEpoch != 0)
         firstRide = widget.userData.firstRideDate;
       if (widget.userData.lastRideDate.millisecondsSinceEpoch != 0)
         lastRide = widget.userData.lastRideDate;
     } else if (widget.data is BluehostPark) {
       _type = _DetailsType.PARK_DETAILS;
-      FirebaseAnalytics().logEvent(name: "view_park_detail", parameters: {"parkName": (widget.data as BluehostPark).parkName});
+      FirebaseAnalytics().logEvent(
+          name: "view_park_detail",
+          parameters: {"parkName": (widget.data as BluehostPark).parkName});
     } else {
       throw FormatException("Improper data structure passed to details page.");
     }
@@ -145,10 +159,12 @@ class _DetailsPageState extends State<DetailsPage> {
         _leftIcon = TitleBarIcon(
           icon: FontAwesomeIcons.medal,
           onTap: () {
-            showDialog(context: context, builder: (BuildContext context) {
-              return AttractionScorecardPage(
-                  attraction: attractionData, db: widget.db);
-            });
+            showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AttractionScorecardPage(
+                      attraction: attractionData, db: widget.db);
+                });
           },
         );
       }
@@ -156,9 +172,8 @@ class _DetailsPageState extends State<DetailsPage> {
       _rightIcon = TitleBarIcon(
         icon: FontAwesomeIcons.pencilAlt,
         onTap: () {
-          print("Edit");
-          showDialog(context: context, builder: (ctx) => NotImplementedDialog());
-        }, // TODO: Call up attraction edit page
+          widget.submissionCallback(attractionData);
+        },
       );
     }
 
@@ -243,8 +258,9 @@ class _DetailsPageState extends State<DetailsPage> {
     return Container(
         height: 250,
         child: _wrapAsWindow(FirebaseAttractionImage(
-          attractionID: attraction.attractionID,
-          parkID: attraction.parkID,
+          parkName: widget.parkName,
+          attractionData: attraction,
+          userName: widget.userName,
           overlay: _credit,
         )));
   }
@@ -268,17 +284,32 @@ class _DetailsPageState extends State<DetailsPage> {
   }
 
   /// Opening is always displayed if present, and closed is displayed only when active is false
+  /// Upcoming overrides everything
   Widget _buildStatusSection(BuildContext context) {
     int openingYear = widget.data?.yearOpen ?? 0;
     int closingYear = widget.data?.yearClosed ?? 0;
     bool active = widget.data?.active ?? 0;
     bool seasonal = widget.data?.seasonal ?? 0;
+    bool upcoming = false;
+
+    // While these other have somewhat of a similar status on both parks and attractions
+    // only attractions have "upcoming" as of now.
+    if (widget.data.runtimeType == BluehostAttraction &&
+        (widget.data as BluehostAttraction).upcoming) {
+      upcoming = true;
+    }
 
     Widget _leftStatus = _buildYearStatusColumn(openingYear, "Opening Year");
+    if (upcoming && (widget.data as BluehostAttraction).openingDay != null) {
+      _leftStatus = _buildDateStatusColumn(
+          (widget.data as BluehostAttraction).openingDay, "Opening Date");
+    }
 
     Widget _rightStatus;
 
-    if (!active) {
+    if (upcoming) {
+      _rightStatus = _buildAttractionOperationColumn("Opening Soon");
+    } else if (!active) {
       _rightStatus = _buildYearStatusColumn(closingYear, "Closing Year");
     } else if (seasonal) {
       _rightStatus = _buildAttractionOperationColumn("Seasonal Operation");
@@ -306,6 +337,27 @@ class _DetailsPageState extends State<DetailsPage> {
   /// If year == 0, we'll display "unknown" as our year
   Widget _buildYearStatusColumn(int year, String bottom) {
     String topString = (year == 0) ? "Unknown" : year.toString();
+
+    return Column(
+      children: <Widget>[
+        Text(
+          topString,
+          textScaleFactor: 1.8,
+        ),
+        Text(
+          bottom,
+          textScaleFactor: 1.0,
+        )
+      ],
+    );
+  }
+
+  Widget _buildDateStatusColumn(DateTime date, String bottom) {
+    String topString = "Unknown";
+    print(date);
+    if (date != null) {
+      topString = (DateFormat.yMMMd("en_US").format(date));
+    }
 
     return Column(
       children: <Widget>[
@@ -350,59 +402,108 @@ class _DetailsPageState extends State<DetailsPage> {
 
     if (_type == _DetailsType.ATTRACTION_DETAILS) {
       BluehostAttraction attraction = widget.data as BluehostAttraction;
+
+      // Attractions that are opening soon will have the opening day already displayed
+      if (attraction.openingDay != null && !attraction.upcoming) {
+        details.add(_furtherDetailsTextEntry("Opening Day",
+            DateFormat.yMMMd("en_US").format(attraction.openingDay)));
+      }
+
+      if (attraction.closingDay != null) {
+        details.add(_furtherDetailsTextEntry("Closing Day",
+            DateFormat.yMMMd("en_US").format(attraction.closingDay)));
+      }
+
+      if (attraction.inactivePeriods != "")
+        details.add(_furtherDetailsTextEntry(
+            "Inactive Periods", attraction.inactivePeriods));
+
       if (attraction.manufacturer != "")
         details.add(
             _furtherDetailsTextEntry("Manufacturer", attraction.manufacturer));
+
       if (attraction.additionalContributors != "")
         details.add(_furtherDetailsTextEntry(
             "Additional Contributors", attraction.additionalContributors));
+
       if (attraction.formerNames != "")
         details.add(
             _furtherDetailsTextEntry("Former Names", attraction.formerNames));
+
       if (attraction.model != "")
         details.add(_furtherDetailsTextEntry("Model", attraction.model));
+
       if (attraction.height != 0)
         details
             .add(_furtherDetailsTextEntry("Height", "${attraction.height} ft"));
+
       if (attraction.liftHeight != 0.0)
         details.add(_furtherDetailsTextEntry(
             "Lift Height", "${attraction.liftHeight} ft"));
+
       if (attraction.dropHeight != 0.0)
         details.add(_furtherDetailsTextEntry(
             "Drop Height", "${attraction.dropHeight} ft"));
+
       if (attraction.maxSpeed != 0)
         details.add(_furtherDetailsTextEntry(
             "Max Speed", "${attraction.maxSpeed} mph"));
+
       if (attraction.length != 0)
         details
             .add(_furtherDetailsTextEntry("Length", "${attraction.length} ft"));
+
       if (attraction.attractionDuration != 0)
         details.add(_furtherDetailsTextEntry("Duration",
             "${attraction.attractionDuration ~/ 60}m ${attraction.attractionDuration % 60}s"));
+
       if (attraction.capacity != 0)
         details.add(
             _furtherDetailsTextEntry("Capacity", "${attraction.capacity} pph"));
+
       if (attraction.inversions != 0)
         details.add(
             _furtherDetailsTextEntry("Inversions", "${attraction.inversions}"));
+
       if (attraction.cost != 0)
         details.add(_furtherDetailsTextEntry(
             "Cost",
             NumberFormat.compactCurrency(symbol: "\$")
                 .format(attraction.cost)));
+
       if (attraction.previousParkLabel != "")
         details.add(_furtherDetailsTextEntry(
             "Previous Park Label", "${attraction.previousParkLabel}"));
-      if (attraction.attractionLink != "")
-        details.add(_furtherDetailsEntry(
-            "Website",
-            _urlTextButton(
-                context, "Attraction Site", attraction.attractionLink)));
+
+      if (attraction.attractionLink != "") {
+        String partnerURL = attraction.attractionLink;
+        Uri partnerUri = Uri.parse(attraction.attractionLink);
+        partnerURL = partnerUri.host;
+
+
+        Widget partnerButton = Padding(padding: const EdgeInsets.symmetric(horizontal: 8.0), child: InterfaceButton(
+          text: "Learn More Information",
+          subtext: "via $partnerURL",
+          color: Theme
+              .of(context)
+              .primaryColor,
+          textColor: Colors.white,
+          onPressed: () async {
+            if (await canLaunch(attraction.attractionLink)) {
+              launch(attraction.attractionLink);
+            }
+          },
+        ));
+        details.add(partnerButton);
+      }
+
       if (attraction.modifyBy != "")
         details.add(_furtherDetailsTextEntry(
             "Entry Last Modified by", attraction.modifyBy));
+
       if (attraction.notes != "")
         details.add(_longDetailsEntry("Notes", attraction.notes));
+
       return details;
     }
 
