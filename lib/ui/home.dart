@@ -20,8 +20,8 @@ import 'package:log_ride/ui/submission/submit_attraction_page.dart';
 import 'package:log_ride/ui/submission/submit_park_page.dart';
 import 'package:log_ride/widgets/shared/home_icon.dart';
 import 'package:log_ride/widgets/home_page/check_in_widget.dart';
-import 'package:log_ride/widgets/parks_page/park_list_widget.dart';
-import 'package:log_ride/widgets/parks_page/park_list_entry.dart';
+import 'package:log_ride/widgets/home_page/park_list_widget.dart';
+import 'package:log_ride/widgets/home_page/park_list_entry.dart';
 import 'package:log_ride/widgets/shared/content_frame.dart';
 import 'package:log_ride/widgets/shared/styled_dialog.dart';
 

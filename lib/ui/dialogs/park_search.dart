@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/park_structures.dart';
+import 'package:log_ride/data/search_comparators.dart';
 import 'package:log_ride/ui/standard_page_structure.dart';
 import 'package:log_ride/widgets/shared/generic_list_entry.dart';
 import 'package:log_ride/widgets/shared/content_frame.dart';
@@ -36,11 +37,7 @@ class _SearchParksCardState extends State<SearchParksCard> {
       List<BluehostPark> tempToDisplay = List<BluehostPark>();
       tempToSearch.forEach((BluehostPark park) {
         // Searching for both the park name, location, former park name, or park id with case ignored
-        if (park.parkName.toLowerCase().contains(search.toLowerCase()) ||
-            park.parkCity.toLowerCase().contains(search.toLowerCase()) ||
-            park.previousNames.toLowerCase().contains(search.toLowerCase()) ||
-            park.id.toString() == search.toLowerCase()
-        )  {
+        if (isBluehostParkInSearch(park, search))  {
           tempToDisplay.add(park);
         }
       });

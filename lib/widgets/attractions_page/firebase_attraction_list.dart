@@ -6,6 +6,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:log_ride/data/color_constants.dart';
 import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/park_structures.dart';
+import 'package:log_ride/data/search_comparators.dart';
 import 'package:log_ride/widgets/attractions_page/attraction_list_entry.dart';
 import 'package:log_ride/widgets/attractions_page/experience_button.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
@@ -189,9 +190,8 @@ class _FirebaseAttractionListViewState
 
       // We've got certain logic for each header. Let's do this.
       attractions.forEach((BluehostAttraction attr) {
-
         // All active entries are always displayed. No fancy logic required here.
-        if(key == "Active"){
+        if (key == "Active") {
           numToDisplay++;
           displayList.add(attr);
           return;
@@ -199,19 +199,22 @@ class _FirebaseAttractionListViewState
 
         // Seasonal and defunct attractions will display if either the display of them is enabled or
         // the attraction has existing user ride number data. So we need to know our user data for this attraction.
-        FirebaseAttraction target = getFirebaseAttractionFromList(_builtAttractionList, attr.attractionID);
-        if(key == "Seasonal"){
+        FirebaseAttraction target = getFirebaseAttractionFromList(
+            _builtAttractionList, attr.attractionID);
+        if (key == "Seasonal") {
           // We don't have to check to see if the attraction is seasonal or not because if it is in
           // this list, we can be certain that it is.
-          if(widget.parentPark.showSeasonal || (target?.numberOfTimesRidden ?? 0) >= 1) {
+          if (widget.parentPark.showSeasonal ||
+              (target?.numberOfTimesRidden ?? 0) >= 1) {
             numToDisplay++;
             displayList.add(attr);
             return;
           }
         }
 
-        if(key == "Defunct") {
-          if(widget.parentPark.showDefunct || (target?.numberOfTimesRidden ?? 0) >= 1) {
+        if (key == "Defunct") {
+          if (widget.parentPark.showDefunct ||
+              (target?.numberOfTimesRidden ?? 0) >= 1) {
             numToDisplay++;
             displayList.add(attr);
             return;
@@ -220,7 +223,7 @@ class _FirebaseAttractionListViewState
       });
 
       // Again, display header (and insert attractions) if attractions are here.
-      if(numToDisplay >= 1){
+      if (numToDisplay >= 1) {
         _builtDisplayList.add(key);
         _builtDisplayList.addAll(displayList);
       }
@@ -266,16 +269,14 @@ class _FirebaseAttractionListViewState
       );
     }
 
-    BluehostAttraction target =_builtDisplayList[index] as BluehostAttraction;
+    BluehostAttraction target = _builtDisplayList[index] as BluehostAttraction;
     FirebaseAttraction attraction = getFirebaseAttractionFromList(
             _builtAttractionList, target.attractionID) ??
         FirebaseAttraction(rideID: target.attractionID);
 
-    if (target.attractionName
-            .toLowerCase()
-            .contains(filter.value.toLowerCase()) ||
-        target.typeLabel.toLowerCase().contains(filter.value.toLowerCase())) {
+    String search = filter.value;
 
+    if (isBluehostAttractionInSearch(target, search)) {
       Widget entry = AttractionListEntry(
         attractionData: target,
         parentPark: widget.parentPark,
@@ -290,7 +291,6 @@ class _FirebaseAttractionListViewState
       );
 
       return entry;
-
     } else {
       return Container();
     }
