@@ -37,7 +37,7 @@ class _AttractionsListViewState extends State<AttractionsListView> {
 
   List<dynamic> headedList;
 
-  Map<String, List<BluehostAttraction>> _buildPreparedList() {
+  void _buildPreparedList() {
     headedList = List<dynamic>();
 
     List<BluehostAttraction> activeList = List<BluehostAttraction>(),
@@ -74,14 +74,6 @@ class _AttractionsListViewState extends State<AttractionsListView> {
         "SeasonalList => Data: $_hasSeasonal | Length: ${seasonalList.length}");
     print("DefunctList => Data: $_hasDefunct | Length: ${defunctList.length}");
 
-    Map<String, List<BluehostAttraction>> returnMap = Map();
-
-    if (_hasActive) returnMap["Active"] = activeList;
-    if (_hasSeasonal && widget.parentPark.showSeasonal)
-      returnMap["Seasonal"] = seasonalList;
-    if (_hasDefunct && widget.parentPark.showDefunct)
-      returnMap["Defunct"] = defunctList;
-
     // Strings are used as headers for the list. These are checked for in the
     // Build functions for the listview.
 
@@ -90,17 +82,15 @@ class _AttractionsListViewState extends State<AttractionsListView> {
       headedList.addAll(activeList);
     }
 
-    if (_hasSeasonal && widget.parentPark.showSeasonal) {
+    if (_hasSeasonal) {
       headedList.add("Seasonal");
       headedList.addAll(seasonalList);
     }
 
-    if (_hasDefunct && widget.parentPark.showDefunct) {
+    if (_hasDefunct) {
       headedList.add("Defunct");
       headedList.addAll(defunctList);
     }
-
-    return returnMap;
   }
 
   /// Simple function that sets the value of the current state to the inverse of whatever it currently is for the user.
@@ -274,7 +264,7 @@ class _AttractionsListViewState extends State<AttractionsListView> {
 
   @override
   Widget build(BuildContext context) {
-    displayLists = _buildPreparedList();
+    _buildPreparedList();
     return ClipRRect(
         borderRadius: BorderRadius.only(
             bottomLeft: Radius.circular(15), bottomRight: Radius.circular(15)),

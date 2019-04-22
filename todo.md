@@ -3,10 +3,10 @@
 ## Features
  - User Submission (**REQUIRED FOR FULL LAUNCH**)
     - Submission of new attractions ✔ (add opening soon)
--     Submission of new parks ✔ Location Search for location tag thing
-      (After Launch thing)
+    - Submission of new parks ✔ Location Search for location tag thing
+  (After Launch thing)
     - Propose changes to attractions ✔
-    - Submit images for attractions
+  -   Submit images for attractions ✔
  - User-defined lists
  - Trip Reports
  - Geo-fencing notifications

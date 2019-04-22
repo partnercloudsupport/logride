@@ -169,6 +169,8 @@ class _FirebaseAttractionListViewState
   }
 
   Widget _entryBuilder(BuildContext context, int index) {
+    // Logic for handling the insertion of the search bar - it takes up index 0,
+    // and as such the index needs to be adjusted afterwards for regular use.
     if (index == 0) {
       // We need to return our text field
       return TextField(
@@ -190,6 +192,8 @@ class _FirebaseAttractionListViewState
     } else {
       index--;
     }
+
+    // Handling of headers
     if (widget.headedList[index] is String) {
       return Container(
         height: 22.0,
@@ -212,7 +216,7 @@ class _FirebaseAttractionListViewState
             .toLowerCase()
             .contains(filter.value.toLowerCase()) ||
         target.typeLabel.toLowerCase().contains(filter.value.toLowerCase())) {
-      return AttractionListEntry(
+      Widget entry = AttractionListEntry(
         attractionData: target,
         parentPark: widget.parentPark,
         experienceHandler: widget.experienceHandler,
@@ -224,6 +228,25 @@ class _FirebaseAttractionListViewState
         timeChanged: widget.dateHandler,
         db: widget.db,
       );
+
+      if(target.seasonal) {
+        if(widget.parentPark.showSeasonal || attraction.numberOfTimesRidden >= 1) {
+          return entry;
+        } else {
+          return Container();
+        }
+      }
+
+      if(!target.active) {
+        if(widget.parentPark.showDefunct || attraction.numberOfTimesRidden >= 1){
+          return entry;
+        } else {
+          return Container();
+        }
+      }
+
+      return entry;
+
     } else {
       return Container();
     }
