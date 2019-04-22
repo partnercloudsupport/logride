@@ -176,6 +176,7 @@ class _HomePageState extends State<HomePage> {
             widget: AttractionsPage(
               pm: _parksManager,
               db: widget.db,
+              userName: userName,
               serverParkData: serverPark,
               submissionCallback: (a, n) => _handleAttractionSubmissionCallback(
                   a, serverPark,

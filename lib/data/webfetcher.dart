@@ -21,7 +21,7 @@ enum SubmissionType {
   IMAGE
 }
 
-const _VERSION_URL = "Version1.2.0";
+const _VERSION_URL = "Version1.2.1";
 
 class WebFetcher {
 
@@ -183,6 +183,20 @@ class WebFetcher {
     http.post(_serverURLS[SubmissionType.PARK], body: json.encode(body)).then((response){
       print("[${response.statusCode}]: ${response.body}");
     });
+  }
+
+  Future<int> submitAttractionImage({int rideId, int parkId, String photoArtist, String rideName, String parkName}) async {
+    var body = {
+      "rideID": rideId,
+      "parkID": parkId,
+      "photoArtist": photoArtist,
+      "rideName": rideName,
+      "parkName": parkName
+    };
+
+    print(body);
+
+    return await http.post(_serverURLS[SubmissionType.IMAGE], body: json.encode(body)).then((response) => response.statusCode);
   }
 }
 

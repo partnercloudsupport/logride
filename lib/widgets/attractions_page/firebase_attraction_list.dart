@@ -20,6 +20,7 @@ class FirebaseAttractionListView extends StatefulWidget {
       this.ignoreQuery,
       this.headedList,
       this.parentPark,
+      this.userName,
       this.ignoreCallback,
       this.experienceHandler,
       this.countHandler,
@@ -32,6 +33,8 @@ class FirebaseAttractionListView extends StatefulWidget {
 
   final List<dynamic> headedList;
   final FirebasePark parentPark;
+
+  final String userName;
 
   final Function(BluehostAttraction target, bool currentState) ignoreCallback;
   final Function(ExperienceAction, FirebaseAttraction) experienceHandler;
@@ -125,15 +128,13 @@ class _FirebaseAttractionListViewState
     filter.addListener(_filterUpdated);
 
     // We delay the building of the UI until any possible transition has completed. This way any animation part of the transition isn't slowed.
-    Future.delayed(
-        Duration(milliseconds: 450),
-        () {
-          if(mounted) {
-            setState(() {
-              _delayOver = true;
-            });
-          }
+    Future.delayed(Duration(milliseconds: 450), () {
+      if (mounted) {
+        setState(() {
+          _delayOver = true;
         });
+      }
+    });
   }
 
   void _filterUpdated() {
@@ -216,6 +217,7 @@ class _FirebaseAttractionListViewState
         parentPark: widget.parentPark,
         experienceHandler: widget.experienceHandler,
         ignoreCallback: widget.ignoreCallback,
+        userName: widget.userName,
         slidableController: _slidableController,
         submissionCallback: (b) => widget.submissionCallback(b, false),
         userData: attraction,

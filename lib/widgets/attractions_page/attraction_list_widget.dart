@@ -17,7 +17,7 @@ class AttractionsListView extends StatefulWidget {
       this.pm,
       this.slidableController,
       this.parentPark,
-      this.submissionCallback});
+      this.submissionCallback, this.userName});
 
   final List<BluehostAttraction> sourceAttractions;
   final BaseDB db;
@@ -25,6 +25,8 @@ class AttractionsListView extends StatefulWidget {
   final FirebasePark parentPark;
   final SlidableController slidableController;
   final Function(dynamic, bool) submissionCallback;
+
+  final String userName;
 
   @override
   _AttractionsListViewState createState() => _AttractionsListViewState();
@@ -284,6 +286,7 @@ class _AttractionsListViewState extends State<AttractionsListView> {
         child: FirebaseAttractionListView(
           parentPark: widget.parentPark,
           headedList: headedList,
+          userName: widget.userName,
           attractionQuery: widget.db.getQueryForUser(
               path: DatabasePath.ATTRACTIONS,
               key: widget.parentPark.parkID.toString()),

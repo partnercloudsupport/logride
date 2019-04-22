@@ -27,10 +27,14 @@ class DetailsPage extends StatefulWidget {
       this.data,
       this.userData,
       this.dateChangeHandler,
-      this.submissionCallback});
+      this.submissionCallback,
+      this.parkName,
+      this.userName});
 
   final BaseDB db;
   final dynamic data;
+  final String parkName; // Used because image submission requires the park name. gah.
+  final String userName;
   final FirebaseAttraction userData;
   final Function(bool first, DateTime newTime) dateChangeHandler;
   final Function(dynamic attraction) submissionCallback;
@@ -253,9 +257,9 @@ class _DetailsPageState extends State<DetailsPage> {
     return Container(
         height: 250,
         child: _wrapAsWindow(FirebaseAttractionImage(
-          attractionID: attraction.attractionID,
-          parkID: attraction.parkID,
-          attractionName: attraction.attractionName,
+          parkName: widget.parkName,
+          attractionData: attraction,
+          userName: widget.userName,
           overlay: _credit,
         )));
   }
