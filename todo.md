@@ -33,7 +33,7 @@
  - Fix issue with ignoring attractions you've been on ✔
  - Grey out header instead of the whole tile for excluded ✔
  - Make multiple modified by (don't mess with it when submitting / modifying thing)
- - (IGNORE FOR NOW) Make favorites smol when there's nothing in it X
+-  (IGNORE FOR NOW) Make favorites smol when there's nothing in it
  - Swipe all the way (maybe?)
  - Search should show defunct and seasonal regardless of setting
  - Search on former names (park & attraction) ✔

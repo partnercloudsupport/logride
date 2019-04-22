@@ -9,11 +9,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/color_constants.dart';
 import 'package:log_ride/data/webfetcher.dart';
+import 'package:log_ride/data/contact_url_constants.dart';
 import 'package:log_ride/widgets/dialogs/dialog_frame.dart';
 import 'package:log_ride/widgets/forms/form_header.dart';
 import 'package:log_ride/widgets/shared/interface_button.dart';
+import 'package:log_ride/widgets/shared/styled_dialog.dart';
 import 'package:log_ride/widgets/shared/working_popup.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // Provide users the option to take new image or upload existing one
 // New Image:
@@ -59,14 +62,13 @@ class _SubmitAttractionPhotoState extends State<SubmitAttractionPhoto> {
         context: context,
         builder: (BuildContext context) {
           return _UserConfirmationPage(
-              image: image, attractionName: widget.attractionData.attractionName);
+              image: image,
+              attractionName: widget.attractionData.attractionName);
         });
 
     if (confirmed == null) return;
 
     if (confirmed as bool) {
-      // TODO: Upload Logic
-
       WorkingController controller = WorkingController(
           progress: 0.0, workingText: "Preparing Image for Upload...");
       ValueNotifier<WorkingController> workingController =
@@ -84,15 +86,13 @@ class _SubmitAttractionPhotoState extends State<SubmitAttractionPhoto> {
       Im.Image processed = Im.decodeImage(image.readAsBytesSync());
       List<int> data = Im.encodeJpg(processed, quality: 25);
 
-
       // Step 2: Establish MetaData
       StorageMetadata _metaData = StorageMetadata(contentType: "image/jpg");
 
       workingController.value = WorkingController(
-        status: WorkingStatus.processing,
-        workingText: "Uploading Prepared Image...",
-        progress: 0.5
-      );
+          status: WorkingStatus.processing,
+          workingText: "Uploading Prepared Image...",
+          progress: 0.5);
 
       // Step 3: Upload to Firebase
       var success = await storage
@@ -106,34 +106,31 @@ class _SubmitAttractionPhotoState extends State<SubmitAttractionPhoto> {
             status: WorkingStatus.error,
             progress: 1.0,
             workingText: "Error during upload process.");
-            await Future.delayed(Duration(seconds: 5));
-            Navigator.of(context).pop();
+        await Future.delayed(Duration(seconds: 5));
+        Navigator.of(context).pop();
         return;
       }
 
       workingController.value = WorkingController(
-        status: WorkingStatus.processing,
-        workingText: "Submitting image information...",
-        progress: 0.75
-      );
+          status: WorkingStatus.processing,
+          workingText: "Submitting image information...",
+          progress: 0.75);
 
       // Step 4: On Success, post info to bluehost
       WebFetcher wf = WebFetcher();
       int result = await wf.submitAttractionImage(
-        rideId: widget.attractionData.attractionID,
-        parkId: widget.attractionData.parkID,
-        photoArtist: widget.userName,
-        rideName: widget.attractionData.attractionName,
-        parkName: widget.parkName
-      );
+          rideId: widget.attractionData.attractionID,
+          parkId: widget.attractionData.parkID,
+          photoArtist: widget.userName,
+          rideName: widget.attractionData.attractionName,
+          parkName: widget.parkName);
 
-      if(result == 200){
+      if (result == 200) {
         // Success!
         workingController.value = WorkingController(
-          status: WorkingStatus.complete,
-          workingText: "Submission Complete!",
-          progress: 1.0
-        );
+            status: WorkingStatus.complete,
+            workingText: "Submission Complete!",
+            progress: 1.0);
         await Future.delayed(Duration(seconds: 5));
         // Pop progress, then options
         Navigator.of(context).pop();
@@ -142,10 +139,9 @@ class _SubmitAttractionPhotoState extends State<SubmitAttractionPhoto> {
       } else {
         // Report error with submission process
         workingController.value = WorkingController(
-          status: WorkingStatus.error,
-          workingText: "Error $result with submission.",
-          progress: 1.0
-        );
+            status: WorkingStatus.error,
+            workingText: "Error $result with submission.",
+            progress: 1.0);
         await Future.delayed(Duration(seconds: 5));
         // Pop progress, return to options
         Navigator.of(context).pop();
@@ -278,8 +274,23 @@ class _UserConfirmationPage extends StatelessWidget {
                       color: Theme.of(context).primaryColor,
                       size: 24.0,
                     ),
-                    onPressed: () => print(
-                        "Info"), // TODO - Include Usage Information for images
+                    onPressed: () => showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return StyledDialog(
+                            body:
+                                "Images you submit for review must comply with our Terms of Service. For more information, tap the \"Terms\" button below.",
+                            title: "Image Terms",
+                            actionText: "Close",
+                            additionalAction: FlatButton(
+                                onPressed: () async {
+                                  if (await canLaunch(URL_TOS)) {
+                                    launch(URL_TOS);
+                                  }
+                                },
+                                child: Text("Terms")),
+                          );
+                        }),
                     shape: CircleBorder(),
                     fillColor: Colors.white,
                     padding: EdgeInsets.all(8.0),
