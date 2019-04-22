@@ -33,12 +33,10 @@ class AttractionsListView extends StatefulWidget {
 }
 
 class _AttractionsListViewState extends State<AttractionsListView> {
-  Map<String, List<BluehostAttraction>> displayLists;
-
-  List<dynamic> headedList;
+  Map<String, List<BluehostAttraction>> headedList;
 
   void _buildPreparedList() {
-    headedList = List<dynamic>();
+    headedList = Map<String, List<BluehostAttraction>>();
 
     List<BluehostAttraction> activeList = List<BluehostAttraction>(),
         seasonalList = List<BluehostAttraction>(),
@@ -78,18 +76,15 @@ class _AttractionsListViewState extends State<AttractionsListView> {
     // Build functions for the listview.
 
     if (_hasActive) {
-      headedList.add("Active");
-      headedList.addAll(activeList);
+      headedList["Active"] = activeList;
     }
 
     if (_hasSeasonal) {
-      headedList.add("Seasonal");
-      headedList.addAll(seasonalList);
+      headedList["Seasonal"] = seasonalList;
     }
 
     if (_hasDefunct) {
-      headedList.add("Defunct");
-      headedList.addAll(defunctList);
+      headedList["Defunct"] = defunctList;
     }
   }
 
@@ -259,7 +254,6 @@ class _AttractionsListViewState extends State<AttractionsListView> {
   @override
   void initState() {
     super.initState();
-    //displayLists = _buildPreparedList();
   }
 
   @override

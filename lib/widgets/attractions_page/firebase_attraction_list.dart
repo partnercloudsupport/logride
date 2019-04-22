@@ -31,7 +31,7 @@ class FirebaseAttractionListView extends StatefulWidget {
   final Query attractionQuery;
   final Query ignoreQuery;
 
-  final List<dynamic> headedList;
+  final Map<String, List<BluehostAttraction>> headedList;
   final FirebasePark parentPark;
 
   final String userName;
@@ -64,6 +64,7 @@ class _FirebaseAttractionListViewState
 
   List<FirebaseAttraction> _builtAttractionList;
   List<int> _builtIgnoreList;
+  List<dynamic> _builtDisplayList;
 
   bool _ignoreLoaded = false;
   bool _attractionLoaded = false;
@@ -142,6 +143,7 @@ class _FirebaseAttractionListViewState
   }
 
   void _buildLists() {
+    // Handle the parsing of all attractions from our firebase attraction list.
     _builtAttractionList = List<FirebaseAttraction>();
     _attractionList.forEach((snap) {
       FirebaseAttraction parsed =
@@ -149,8 +151,13 @@ class _FirebaseAttractionListViewState
       _builtAttractionList.add(parsed);
     });
 
+    // Handle the parsing of all ignore data from our firebase ignore list.
     _builtIgnoreList = List<int>();
     _ignoreList.forEach((snap) {
+      // This one is a bit more complicated - an attraction can be ignored without
+      // ever having a firebase entry. So, we have to create an empty firebase entry
+      // without any information except for the fact that it is empty for LogRide
+      // to handle it properly.
       bool newEntry = false;
 
       int targetID = snap.value["rideID"];
@@ -165,6 +172,58 @@ class _FirebaseAttractionListViewState
       target.ignored = true;
       if (newEntry) _builtAttractionList.add(target);
       _builtIgnoreList.add(targetID);
+    });
+
+    // Our list is passed to us as a map of attractions for each category.
+    // We need to convert this into something our listview builder can handle
+    // all while following the specific display rules we know.
+    _builtDisplayList = List<dynamic>();
+    widget.headedList.keys.forEach((String key) {
+      // Get our attractions for this section.
+      List<BluehostAttraction> attractions = widget.headedList[key];
+      List<BluehostAttraction> displayList = List<BluehostAttraction>();
+
+      // We only want to display the header for a section if there exists data under that header.
+      // This keeps track of the number of elements under that header.
+      int numToDisplay = 0;
+
+      // We've got certain logic for each header. Let's do this.
+      attractions.forEach((BluehostAttraction attr) {
+
+        // All active entries are always displayed. No fancy logic required here.
+        if(key == "Active"){
+          numToDisplay++;
+          displayList.add(attr);
+          return;
+        }
+
+        // Seasonal and defunct attractions will display if either the display of them is enabled or
+        // the attraction has existing user ride number data. So we need to know our user data for this attraction.
+        FirebaseAttraction target = getFirebaseAttractionFromList(_builtAttractionList, attr.attractionID);
+        if(key == "Seasonal"){
+          // We don't have to check to see if the attraction is seasonal or not because if it is in
+          // this list, we can be certain that it is.
+          if(widget.parentPark.showSeasonal || (target?.numberOfTimesRidden ?? 0) >= 1) {
+            numToDisplay++;
+            displayList.add(attr);
+            return;
+          }
+        }
+
+        if(key == "Defunct") {
+          if(widget.parentPark.showDefunct || (target?.numberOfTimesRidden ?? 0) >= 1) {
+            numToDisplay++;
+            displayList.add(attr);
+            return;
+          }
+        }
+      });
+
+      // Again, display header (and insert attractions) if attractions are here.
+      if(numToDisplay >= 1){
+        _builtDisplayList.add(key);
+        _builtDisplayList.addAll(displayList);
+      }
     });
   }
 
@@ -194,7 +253,7 @@ class _FirebaseAttractionListViewState
     }
 
     // Handling of headers
-    if (widget.headedList[index] is String) {
+    if (_builtDisplayList[index] is String) {
       return Container(
         height: 22.0,
         width: double.infinity,
@@ -202,12 +261,12 @@ class _FirebaseAttractionListViewState
         color: SECTION_HEADER_BACKGROUND,
         child: Padding(
           padding: EdgeInsets.only(left: 8.0),
-          child: Text(widget.headedList[index]),
+          child: Text(_builtDisplayList[index]),
         ),
       );
     }
 
-    BluehostAttraction target = widget.headedList[index] as BluehostAttraction;
+    BluehostAttraction target =_builtDisplayList[index] as BluehostAttraction;
     FirebaseAttraction attraction = getFirebaseAttractionFromList(
             _builtAttractionList, target.attractionID) ??
         FirebaseAttraction(rideID: target.attractionID);
@@ -216,6 +275,7 @@ class _FirebaseAttractionListViewState
             .toLowerCase()
             .contains(filter.value.toLowerCase()) ||
         target.typeLabel.toLowerCase().contains(filter.value.toLowerCase())) {
+
       Widget entry = AttractionListEntry(
         attractionData: target,
         parentPark: widget.parentPark,
@@ -228,22 +288,6 @@ class _FirebaseAttractionListViewState
         timeChanged: widget.dateHandler,
         db: widget.db,
       );
-
-      if(target.seasonal) {
-        if(widget.parentPark.showSeasonal || attraction.numberOfTimesRidden >= 1) {
-          return entry;
-        } else {
-          return Container();
-        }
-      }
-
-      if(!target.active) {
-        if(widget.parentPark.showDefunct || attraction.numberOfTimesRidden >= 1){
-          return entry;
-        } else {
-          return Container();
-        }
-      }
 
       return entry;
 
@@ -260,7 +304,7 @@ class _FirebaseAttractionListViewState
       widget.countHandler(_builtAttractionList, _builtIgnoreList);
       return ListView.builder(
         // +1 is for the search entry
-        itemCount: widget.headedList.length + 1,
+        itemCount: _builtDisplayList.length + 1,
         itemBuilder: _entryBuilder,
         controller: controller,
       );
