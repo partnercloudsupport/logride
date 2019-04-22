@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'dart:async';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -42,6 +43,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final SlidableController _slidableController = SlidableController();
+
+  FirebaseAnalytics analytics = FirebaseAnalytics();
 
   // Variables relating to the focus effect
   SectionFocus focus = SectionFocus.balanced;
@@ -231,15 +234,29 @@ class _HomePageState extends State<HomePage> {
     if (result == null) return;
 
     BluehostAttraction newAttraction = result as BluehostAttraction;
-    _webFetcher.submitAttractionData(newAttraction, parent,
+    int response = await _webFetcher.submitAttractionData(newAttraction, parent,
         username: userName, uid: widget.uid, isNewAttraction: isNewAttraction);
-    showDialog(context: context, builder:(BuildContext context) {
-      return StyledDialog(
-        title: "Attraction Under Review",
-        body: "Thanks for submitting! Your attraction is now under review.",
-        actionText: "Ok",
-      );
-    });
+
+    if(response == 200){
+      analytics.logEvent(name: "new_attraction_suggested");
+      showDialog(context: context, builder:(BuildContext context) {
+        return StyledDialog(
+          title: "Attraction Under Review",
+          body: "Thanks for submitting! Your attraction is now under review.",
+          actionText: "Ok",
+        );
+      });
+    } else {
+      showDialog(context: context, builder:(BuildContext context) {
+        return StyledDialog(
+          title: "Error during submission",
+          body: "Something happened during the submission process. Error $response.",
+          actionText: "Ok",
+        );
+      });
+    }
+
+
   }
 
   void _handleParkSubmissionCallback() async {
@@ -253,14 +270,26 @@ class _HomePageState extends State<HomePage> {
     if (result == null) return;
 
     BluehostPark newPark = result as BluehostPark;
-    _webFetcher.submitParkData(newPark, username: userName, uid: widget.uid);
-    showDialog(context: context, builder:(BuildContext context) {
-      return StyledDialog(
-        title: "Park Under Review",
-        body: "Thanks for submitting! Your park is now under review.",
-        actionText: "Ok",
-      );
-    });
+    int response = await _webFetcher.submitParkData(newPark, username: userName, uid: widget.uid);
+
+    if(response == 200){
+      analytics.logEvent(name: "new_park_sugggested");
+      showDialog(context: context, builder:(BuildContext context) {
+        return StyledDialog(
+          title: "Park Under Review",
+          body: "Thanks for submitting! Your park is now under review.",
+          actionText: "Ok",
+        );
+      });
+    } else {
+      showDialog(context: context, builder:(BuildContext context) {
+        return StyledDialog(
+          title: "Error during Submission",
+          body: "Something happened during the park submission process. Error: $response",
+          actionText: "Ok",
+        );
+      });
+    }
   }
 
   void _signOut() async {
