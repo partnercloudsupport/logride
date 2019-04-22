@@ -25,7 +25,8 @@
  - Fix Font Size depending on phone size
 -  Sort "Add Parks" Alphabetically ✔
  - Blocking Arrow
- - Show defunct / seasonal attractions that are checked off regardless of setting
+-  Show defunct / seasonal attractions that are checked off regardless
+   of setting ✔
  - Look at recentering pie chart ✔
  - Increase tap icon area for experience
  - Add close button to the park settings page ✔
