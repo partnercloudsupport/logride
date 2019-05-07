@@ -5,10 +5,10 @@ import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/parks_manager.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/scorecard_structures.dart';
-import 'package:log_ride/ui/single_value_dialog.dart';
-import 'package:log_ride/widgets/experience_button.dart';
-import 'package:log_ride/widgets/firebase_attraction_list.dart';
-import 'package:log_ride/widgets/set_experience_box.dart';
+import 'package:log_ride/ui/dialogs/single_value_dialog.dart';
+import 'package:log_ride/widgets/attractions_page/experience_button.dart';
+import 'package:log_ride/widgets/attractions_page/firebase_attraction_list.dart';
+import 'package:log_ride/widgets/dialogs/set_experience_box.dart';
 
 class AttractionsListView extends StatefulWidget {
   AttractionsListView(
@@ -16,31 +16,31 @@ class AttractionsListView extends StatefulWidget {
       this.db,
       this.pm,
       this.slidableController,
-      this.parentPark});
+      this.parentPark,
+      this.submissionCallback, this.userName});
 
   final List<BluehostAttraction> sourceAttractions;
   final BaseDB db;
   final ParksManager pm;
   final FirebasePark parentPark;
   final SlidableController slidableController;
+  final Function(dynamic, bool) submissionCallback;
+
+  final String userName;
 
   @override
   _AttractionsListViewState createState() => _AttractionsListViewState();
 }
 
 class _AttractionsListViewState extends State<AttractionsListView> {
-  Map<String, List<BluehostAttraction>> displayLists;
-  List<BluehostAttraction> fullList;
+  Map<String, List<BluehostAttraction>> headedList;
 
-  List<dynamic> headedList;
-
-  Map<String, List<BluehostAttraction>> _buildPreparedList() {
-    headedList = List<dynamic>();
+  void _buildPreparedList() {
+    headedList = Map<String, List<BluehostAttraction>>();
 
     List<BluehostAttraction> activeList = List<BluehostAttraction>(),
         seasonalList = List<BluehostAttraction>(),
-        defunctList = List<BluehostAttraction>(),
-        fullList = List<BluehostAttraction>();
+        defunctList = List<BluehostAttraction>();
 
     // Split each attraction into their separate lists
     for (int i = 0; i < widget.sourceAttractions.length; i++) {
@@ -72,36 +72,20 @@ class _AttractionsListViewState extends State<AttractionsListView> {
         "SeasonalList => Data: $_hasSeasonal | Length: ${seasonalList.length}");
     print("DefunctList => Data: $_hasDefunct | Length: ${defunctList.length}");
 
-    Map<String, List<BluehostAttraction>> returnMap = Map();
-
-    if (_hasActive) returnMap["Active"] = activeList;
-    if (_hasSeasonal && widget.parentPark.showSeasonal)
-      returnMap["Seasonal"] = seasonalList;
-    if (_hasDefunct && widget.parentPark.showDefunct)
-      returnMap["Defunct"] = defunctList;
-
     // Strings are used as headers for the list. These are checked for in the
     // Build functions for the listview.
 
     if (_hasActive) {
-      headedList.add("Active");
-      headedList.addAll(activeList);
-      fullList.addAll(activeList);
+      headedList["Active"] = activeList;
     }
 
-    if (_hasSeasonal && widget.parentPark.showSeasonal) {
-      headedList.add("Seasonal");
-      headedList.addAll(seasonalList);
-      fullList.addAll(seasonalList);
+    if (_hasSeasonal) {
+      headedList["Seasonal"] = seasonalList;
     }
 
-    if (_hasDefunct && widget.parentPark.showDefunct) {
-      headedList.add("Defunct");
-      headedList.addAll(defunctList);
-      fullList.addAll(seasonalList);
+    if (_hasDefunct) {
+      headedList["Defunct"] = defunctList;
     }
-
-    return returnMap;
   }
 
   /// Simple function that sets the value of the current state to the inverse of whatever it currently is for the user.
@@ -270,18 +254,18 @@ class _AttractionsListViewState extends State<AttractionsListView> {
   @override
   void initState() {
     super.initState();
-    //displayLists = _buildPreparedList();
   }
 
   @override
   Widget build(BuildContext context) {
-    displayLists = _buildPreparedList();
+    _buildPreparedList();
     return ClipRRect(
         borderRadius: BorderRadius.only(
             bottomLeft: Radius.circular(15), bottomRight: Radius.circular(15)),
         child: FirebaseAttractionListView(
           parentPark: widget.parentPark,
           headedList: headedList,
+          userName: widget.userName,
           attractionQuery: widget.db.getQueryForUser(
               path: DatabasePath.ATTRACTIONS,
               key: widget.parentPark.parkID.toString()),
@@ -290,6 +274,7 @@ class _AttractionsListViewState extends State<AttractionsListView> {
               key: widget.parentPark.parkID.toString()),
           experienceHandler: _experienceCallbackHandler,
           ignoreCallback: _ignoreCallbackHandler,
+          submissionCallback: widget.submissionCallback,
           countHandler: _updateCountHandler,
           dateHandler: _dateUpdateHandler,
           db: widget.db,

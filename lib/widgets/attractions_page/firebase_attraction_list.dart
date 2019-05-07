@@ -6,8 +6,9 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:log_ride/data/color_constants.dart';
 import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/park_structures.dart';
-import 'package:log_ride/widgets/attraction_list_entry.dart';
-import 'package:log_ride/widgets/experience_button.dart';
+import 'package:log_ride/data/search_comparators.dart';
+import 'package:log_ride/widgets/attractions_page/attraction_list_entry.dart';
+import 'package:log_ride/widgets/attractions_page/experience_button.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 
 class AttractionFilter extends ValueNotifier<String> {
@@ -20,23 +21,28 @@ class FirebaseAttractionListView extends StatefulWidget {
       this.ignoreQuery,
       this.headedList,
       this.parentPark,
+      this.userName,
       this.ignoreCallback,
       this.experienceHandler,
       this.countHandler,
       this.dateHandler,
-      this.db});
+      this.db,
+      this.submissionCallback});
 
   final Query attractionQuery;
   final Query ignoreQuery;
 
-  final List<dynamic> headedList;
+  final Map<String, List<BluehostAttraction>> headedList;
   final FirebasePark parentPark;
+
+  final String userName;
 
   final Function(BluehostAttraction target, bool currentState) ignoreCallback;
   final Function(ExperienceAction, FirebaseAttraction) experienceHandler;
   final Function(List<FirebaseAttraction> userData, List<int> ignoreData)
       countHandler;
   final Function(DateTime, FirebaseAttraction, bool) dateHandler;
+  final Function(dynamic, bool) submissionCallback;
 
   final BaseDB db;
 
@@ -59,6 +65,7 @@ class _FirebaseAttractionListViewState
 
   List<FirebaseAttraction> _builtAttractionList;
   List<int> _builtIgnoreList;
+  List<dynamic> _builtDisplayList;
 
   bool _ignoreLoaded = false;
   bool _attractionLoaded = false;
@@ -123,11 +130,13 @@ class _FirebaseAttractionListViewState
     filter.addListener(_filterUpdated);
 
     // We delay the building of the UI until any possible transition has completed. This way any animation part of the transition isn't slowed.
-    Future.delayed(
-        Duration(milliseconds: 450),
-        () => setState(() {
-              _delayOver = true;
-            }));
+    Future.delayed(Duration(milliseconds: 450), () {
+      if (mounted) {
+        setState(() {
+          _delayOver = true;
+        });
+      }
+    });
   }
 
   void _filterUpdated() {
@@ -135,6 +144,7 @@ class _FirebaseAttractionListViewState
   }
 
   void _buildLists() {
+    // Handle the parsing of all attractions from our firebase attraction list.
     _builtAttractionList = List<FirebaseAttraction>();
     _attractionList.forEach((snap) {
       FirebaseAttraction parsed =
@@ -142,8 +152,13 @@ class _FirebaseAttractionListViewState
       _builtAttractionList.add(parsed);
     });
 
+    // Handle the parsing of all ignore data from our firebase ignore list.
     _builtIgnoreList = List<int>();
     _ignoreList.forEach((snap) {
+      // This one is a bit more complicated - an attraction can be ignored without
+      // ever having a firebase entry. So, we have to create an empty firebase entry
+      // without any information except for the fact that it is empty for LogRide
+      // to handle it properly.
       bool newEntry = false;
 
       int targetID = snap.value["rideID"];
@@ -159,9 +174,65 @@ class _FirebaseAttractionListViewState
       if (newEntry) _builtAttractionList.add(target);
       _builtIgnoreList.add(targetID);
     });
+
+    // Our list is passed to us as a map of attractions for each category.
+    // We need to convert this into something our listview builder can handle
+    // all while following the specific display rules we know.
+    _builtDisplayList = List<dynamic>();
+    widget.headedList.keys.forEach((String key) {
+      // Get our attractions for this section.
+      List<BluehostAttraction> attractions = widget.headedList[key];
+      List<BluehostAttraction> displayList = List<BluehostAttraction>();
+
+      // We only want to display the header for a section if there exists data under that header.
+      // This keeps track of the number of elements under that header.
+      int numToDisplay = 0;
+
+      // We've got certain logic for each header. Let's do this.
+      attractions.forEach((BluehostAttraction attr) {
+        // All active entries are always displayed. No fancy logic required here.
+        if (key == "Active") {
+          numToDisplay++;
+          displayList.add(attr);
+          return;
+        }
+
+        // Seasonal and defunct attractions will display if either the display of them is enabled or
+        // the attraction has existing user ride number data. So we need to know our user data for this attraction.
+        FirebaseAttraction target = getFirebaseAttractionFromList(
+            _builtAttractionList, attr.attractionID);
+        if (key == "Seasonal") {
+          // We don't have to check to see if the attraction is seasonal or not because if it is in
+          // this list, we can be certain that it is.
+          if (widget.parentPark.showSeasonal ||
+              (target?.numberOfTimesRidden ?? 0) >= 1) {
+            numToDisplay++;
+            displayList.add(attr);
+            return;
+          }
+        }
+
+        if (key == "Defunct") {
+          if (widget.parentPark.showDefunct ||
+              (target?.numberOfTimesRidden ?? 0) >= 1) {
+            numToDisplay++;
+            displayList.add(attr);
+            return;
+          }
+        }
+      });
+
+      // Again, display header (and insert attractions) if attractions are here.
+      if (numToDisplay >= 1) {
+        _builtDisplayList.add(key);
+        _builtDisplayList.addAll(displayList);
+      }
+    });
   }
 
   Widget _entryBuilder(BuildContext context, int index) {
+    // Logic for handling the insertion of the search bar - it takes up index 0,
+    // and as such the index needs to be adjusted afterwards for regular use.
     if (index == 0) {
       // We need to return our text field
       return TextField(
@@ -183,7 +254,9 @@ class _FirebaseAttractionListViewState
     } else {
       index--;
     }
-    if (widget.headedList[index] is String) {
+
+    // Handling of headers
+    if (_builtDisplayList[index] is String) {
       return Container(
         height: 22.0,
         width: double.infinity,
@@ -191,30 +264,33 @@ class _FirebaseAttractionListViewState
         color: SECTION_HEADER_BACKGROUND,
         child: Padding(
           padding: EdgeInsets.only(left: 8.0),
-          child: Text(widget.headedList[index]),
+          child: Text(_builtDisplayList[index]),
         ),
       );
     }
 
-    BluehostAttraction target = widget.headedList[index] as BluehostAttraction;
+    BluehostAttraction target = _builtDisplayList[index] as BluehostAttraction;
     FirebaseAttraction attraction = getFirebaseAttractionFromList(
             _builtAttractionList, target.attractionID) ??
         FirebaseAttraction(rideID: target.attractionID);
 
-    if (target.attractionName
-            .toLowerCase()
-            .contains(filter.value.toLowerCase()) ||
-        target.typeLabel.toLowerCase().contains(filter.value.toLowerCase())) {
-      return AttractionListEntry(
+    String search = filter.value;
+
+    if (isBluehostAttractionInSearch(target, search)) {
+      Widget entry = AttractionListEntry(
         attractionData: target,
         parentPark: widget.parentPark,
         experienceHandler: widget.experienceHandler,
         ignoreCallback: widget.ignoreCallback,
+        userName: widget.userName,
         slidableController: _slidableController,
+        submissionCallback: (b) => widget.submissionCallback(b, false),
         userData: attraction,
         timeChanged: widget.dateHandler,
         db: widget.db,
       );
+
+      return entry;
     } else {
       return Container();
     }
@@ -222,12 +298,13 @@ class _FirebaseAttractionListViewState
 
   @override
   Widget build(BuildContext context) {
+    print("$_ignoreLoaded $_attractionLoaded $_delayOver");
     if (_ignoreLoaded && _attractionLoaded && _delayOver) {
       _buildLists();
       widget.countHandler(_builtAttractionList, _builtIgnoreList);
       return ListView.builder(
         // +1 is for the search entry
-        itemCount: widget.headedList.length + 1,
+        itemCount: _builtDisplayList.length + 1,
         itemBuilder: _entryBuilder,
         controller: controller,
       );

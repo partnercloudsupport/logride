@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/check_in_manager.dart';
-import 'package:log_ride/widgets/home_icon.dart';
-import 'package:log_ride/ui/check_in_dialog.dart';
+import 'package:log_ride/widgets/shared/home_icon.dart';
+import 'package:log_ride/ui/dialogs/check_in_dialog.dart';
 
 class CheckInWidget extends StatefulWidget {
   CheckInWidget({this.manager, this.onTap});

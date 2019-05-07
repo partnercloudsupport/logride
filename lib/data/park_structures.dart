@@ -90,6 +90,9 @@ class FirebasePark {
       // If it's ignored, it doesn't contribute to total ride count
       if (ignored.contains(serverAttraction.attractionID)) continue;
 
+      // It's effectively ignored too if it's an upcoming attraction
+      if (serverAttraction.upcoming) continue;
+
       // If it's defunct, it only adds to the defunct count if it's been ridden
       if (!serverAttraction.active) {
         // If the park is defunct, add the defunct attraction to the total number of attractions
@@ -137,6 +140,7 @@ class BluehostPark {
   String parkName;
   String parkCity;
   String parkCountry;
+  String initials;
   bool active;
   num yearOpen;
   num yearClosed;
@@ -174,6 +178,18 @@ class BluehostPark {
     newParkData.username = json["userName"];
     newParkData.created = DateTime.parse(json["DateTime_Created"]);
     newParkData.lastUpdated = DateTime.parse(json["DateTime_LastUpdated"]);
+
+    newParkData.initials = "";
+    newParkData.parkName.split(" ").forEach((String word) {
+      newParkData.initials += word[0];
+    });
+
+    newParkData.initials = newParkData.initials.replaceAll(RegExp("[^a-zA-Z]"), "");
+
+    // Single letter initials are removed.
+    if(newParkData.initials.length <= 1) {
+      newParkData.initials = "";
+    }
 
     return newParkData;
   }

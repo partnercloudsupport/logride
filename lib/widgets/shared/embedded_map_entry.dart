@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:latlong/latlong.dart' as old;
-import 'package:log_ride/widgets/back_button.dart';
+import 'package:log_ride/widgets/shared/back_button.dart';
 
 const API_KEY = "AIzaSyDA8ZiyR1TeQtQHWEKj5T__5U4FJyya5V8";
 
@@ -19,15 +19,35 @@ class EmbeddedMapEntry extends StatefulWidget {
 class _EmbeddedMapEntryState extends State<EmbeddedMapEntry> {
   GoogleMapController mapController;
 
+  Set<Marker> markers;
+
+
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
-    widget.markers.forEach((textData, position) {
-      mapController.addMarker(MarkerOptions(
-          position: position,
-          infoWindowText: InfoWindowText(textData[0], textData[1]),
-          icon: BitmapDescriptor.defaultMarker));
-    });
+
+
     mapController.moveCamera(CameraUpdate.newCameraPosition(CameraPosition(target: widget.center, zoom: widget.zoom)));
+  }
+
+
+  @override
+  void initState() {
+
+    markers = Set<Marker>();
+
+    widget.markers.forEach((textData, position) {
+      markers.add(Marker(
+          position: position,
+          infoWindow: InfoWindow(
+            title: textData[0],
+            snippet: textData[1]
+          ),
+          icon: BitmapDescriptor.defaultMarkerWithHue(128),
+        markerId: MarkerId("${textData[0]}${position.latitude.floor()}${position.longitude.floor()}")
+      ));
+    });
+
+    super.initState();
   }
 
   @override
@@ -38,6 +58,7 @@ class _EmbeddedMapEntryState extends State<EmbeddedMapEntry> {
           onMapCreated: _onMapCreated,
           initialCameraPosition: CameraPosition(target: widget.center, zoom: widget.zoom),
           mapType: MapType.normal,
+          markers: markers,
         ),
         GestureDetector(
           onTap: _openFullMap,
@@ -58,6 +79,7 @@ class _EmbeddedMapEntryState extends State<EmbeddedMapEntry> {
                 GoogleMap(
                   onMapCreated: _onMapCreated,
                   mapType: MapType.satellite,
+                  markers: markers,
                   initialCameraPosition: CameraPosition(target: widget.center, zoom: widget.zoom),
                 ),
                 RoundBackButton()

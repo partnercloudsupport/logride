@@ -3,10 +3,11 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:log_ride/data/park_structures.dart';
 
 class GenericListEntry extends StatefulWidget{
-  GenericListEntry({this.park, this.onTap});
+  GenericListEntry({this.park, this.onTap, this.fillable = true});
 
   final BluehostPark park;
   final Function(BluehostPark) onTap;
+  final bool fillable;
 
   @override
   _GenericListState createState() => _GenericListState();
@@ -17,7 +18,7 @@ class _GenericListState extends State<GenericListEntry> {
   @override
   Widget build(BuildContext context) {
     Widget statusWidget;
-    if(widget.park.filled){
+    if(widget.park.filled && widget.fillable){
       // Park is already in the user's list
       statusWidget = Padding(
         padding: const EdgeInsets.only(right: 16.0),
