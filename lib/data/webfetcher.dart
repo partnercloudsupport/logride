@@ -21,7 +21,7 @@ enum SubmissionType {
   IMAGE
 }
 
-const _VERSION_URL = "Version1.2.1";
+const _VERSION_URL = "Version1.2.0";
 
 class WebFetcher {
 

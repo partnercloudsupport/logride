@@ -4,7 +4,7 @@ import 'package:log_ride/data/attraction_structures.dart';
 class FirebasePark {
   bool checkedInToday = false;
   bool favorite = false;
-  bool incrementorEnabled = false;
+  bool incrementorEnabled = true;
   DateTime lastDayVisited = DateTime.fromMillisecondsSinceEpoch(0);
   String location = "";
   String name = "";
