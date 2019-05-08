@@ -31,6 +31,12 @@ class ParkListEntry extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    // Avoid issues where null parks can possibly appear.
+    if(parkData == null || parkData.parkID == null){
+      return Container();
+    }
+
     Widget leftAction;
     Widget rightAction;
 
