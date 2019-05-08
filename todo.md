@@ -1,32 +1,42 @@
 # All the things I should probably get done at some point, sorted arbitrarily
 
 ## Features
- - User-defined lists
- - Trip Reports
- - Geo-fencing notifications
- - Other things
+- User-defined lists
+- Trip Reports
+- Geo-fencing notifications
+- Today in History
+- Themeparks API
+- News Feed
+- Tab Redesign
 
 ## Changes
- - Better multi-select support for adding attractions
- - Completely different check-in UI (get rid of the pop-up)
- - Turn on tally on check-in
+- Better multi-select support for adding attractions
+- Completely different check-in UI (get rid of the pop-up)
+- Turn on tally on check-in
+- New UI for lists of things in user submission
  
 ## Bugs
- - Weird issue with web-fetching and parsing when handling some iOS data - make parsing more robust in all cases
+- Weird issue with web-fetching and parsing when handling some iOS data
+  \- make parsing more robust in all cases
  
 ## Notes from iOS
- - Fix Font Size depending on phone size
- - Blocking Arrow
- - Increase tap icon area for experience
- - Make multiple modified by (don't mess with it when submitting / modifying thing)
--  (IGNORE FOR NOW) Make favorites smol when there's nothing in it
- - Swipe all the way (maybe?)
- - Search should show defunct and seasonal regardless of setting
- - Haptic 
-    - Increment thing (maybe)
- - Text Pop-up for parks without attractions
+- Fix Font Size depending on phone size
+- Blocking Arrow
+- Increase tap icon area for experience
+- Make multiple modified by (don't mess with it when submitting /
+  modifying thing)
+- (IGNORE FOR NOW) Make favorites smol when there's nothing in it
+- Search should show defunct and seasonal regardless of setting
+- Haptic - Increment thing (maybe)
     
--  Models & Manufacturers IDs and drop-downs
+    
+- Text Pop-up for parks without attractions
+- Models & Manufacturers IDs and drop-downs
+- Switch tally to be default ✔
+- Eliminate Favorites Section (Sorted Alphabetically)
+- Photo icon on attraction subtitles
+- Upcoming attraction
+- Increase satisfaction of incrementing attractions.
 
 
 
