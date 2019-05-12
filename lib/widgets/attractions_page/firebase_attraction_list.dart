@@ -21,6 +21,7 @@ class FirebaseAttractionListView extends StatefulWidget {
       this.ignoreQuery,
       this.headedList,
       this.parentPark,
+      this.parentParkData,
       this.userName,
       this.ignoreCallback,
       this.experienceHandler,
@@ -34,6 +35,7 @@ class FirebaseAttractionListView extends StatefulWidget {
 
   final Map<String, List<BluehostAttraction>> headedList;
   final FirebasePark parentPark;
+  final BluehostPark parentParkData;
 
   final String userName;
 
@@ -204,7 +206,7 @@ class _FirebaseAttractionListViewState
         if (key == "Seasonal") {
           // We don't have to check to see if the attraction is seasonal or not because if it is in
           // this list, we can be certain that it is.
-          if (widget.parentPark.showSeasonal ||
+          if (widget.parentPark.showSeasonal || filter.value.isNotEmpty ||
               (target?.numberOfTimesRidden ?? 0) >= 1) {
             numToDisplay++;
             displayList.add(attr);
@@ -213,7 +215,7 @@ class _FirebaseAttractionListViewState
         }
 
         if (key == "Defunct") {
-          if (widget.parentPark.showDefunct ||
+          if (widget.parentPark.showDefunct || !widget.parentParkData.active || filter.value.isNotEmpty ||
               (target?.numberOfTimesRidden ?? 0) >= 1) {
             numToDisplay++;
             displayList.add(attr);
