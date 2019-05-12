@@ -19,21 +19,18 @@
  
 ## Notes from iOS
 - Fix Font Size depending on phone size
-- Blocking Arrow
 - Increase tap icon area for experience
 - Make multiple modified by (don't mess with it when submitting /
   modifying thing)
-- (IGNORE FOR NOW) Make favorites smol when there's nothing in it
-- Search should show defunct and seasonal regardless of setting
+  -  IOS doesn't follow this behavior, ignore for now
+ 
 - Haptic - Increment thing (maybe)
 - Lat/Long submission UI needs total redo
-- Fix issues with expanding fields when the text overflows
 - Link to copyright info for each copyright type
 - Opening/Closing date/year together.
 - Adding default null attraction type
 - Firebase Analytics "Add New Attraction" event for checking off an
   attraction for the first time.
-- Fill on upcoming attraction should be white
 
 - Text Pop-up for parks without attractions
 - Models & Manufacturers IDs and drop-downs
@@ -85,3 +82,5 @@
 - Show defunct attractions despite setting when searching ✔
 - Show defunct attractions counter regardless of setting with data ✔
 - New UI for lists of things in user submission ✔
+- Search should show defunct and seasonal regardless of setting ✔
+- Fill on upcoming attraction should be white ✔
