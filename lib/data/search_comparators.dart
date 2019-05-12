@@ -33,7 +33,7 @@ bool isBluehostAttractionInSearch(BluehostAttraction attr, String search) {
   if (attr.attractionName.toLowerCase().contains(search) ||
       attr.typeLabel.toLowerCase().contains(search) ||
       attr.attractionID.toString() == search ||
-      attr.formerNames.toLowerCase().contains(search) ||
+      attr.formerNames.join(" ").toLowerCase().contains(search) ||
       attr.yearOpen.toString() == search ||
       attr.yearClosed.toString() == search) return true;
 

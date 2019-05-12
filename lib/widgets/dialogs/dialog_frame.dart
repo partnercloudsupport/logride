@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:log_ride/widgets/shared/interface_button.dart';
 
 class DialogFrame extends StatelessWidget {
-  DialogFrame({@required this.content, this.title = "Dialog", this.dismiss});
+  DialogFrame({@required this.content, this.title = "Dialog", this.dismiss, this.resizeToAvoidBottomInset = true});
 
   final String title;
   final Function dismiss;
   final List<Widget> content;
+  final bool resizeToAvoidBottomInset;
 
   void close(BuildContext context) {
     if (dismiss == null) {
@@ -20,7 +21,9 @@ class DialogFrame extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.transparent,
+        resizeToAvoidBottomInset: resizeToAvoidBottomInset,
         body: Stack(children: <Widget>[
+
           GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () => close(context),
@@ -28,10 +31,11 @@ class DialogFrame extends StatelessWidget {
               constraints: BoxConstraints.expand(),
             ),
           ),
+
           SafeArea(
               child: Center(
                   child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Card(
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15.0)),
@@ -64,6 +68,7 @@ class DialogFrame extends StatelessWidget {
                                   ),
                                 ),
                                 Column(
+                                  mainAxisSize: MainAxisSize.min,
                                   children: content,
                                 )
                               ])))))

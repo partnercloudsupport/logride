@@ -43,14 +43,14 @@ class BluehostAttraction {
   int rideType = 1;
   int yearOpen;
   int yearClosed;
-  String inactivePeriods;
+  List<String> inactivePeriods;
   bool active = true;
   bool upcoming = false;
   bool seasonal = false;
   bool scoreCard = false;
   String manufacturer;
-  String additionalContributors;
-  String formerNames;
+  List<String> additionalContributors;
+  List<String> formerNames;
   String model;
   int modelID;
   num height;
@@ -95,9 +95,17 @@ class BluehostAttraction {
     newAttraction.yearClosed = num.parse(json["YearClosed"]);
 
     // Add line breaks to additional contributors
-    String formattedInactivePeriods =  json["inactivePeriods"];
-    formattedInactivePeriods = formattedInactivePeriods.replaceAll(';','\n');
-    newAttraction.inactivePeriods = formattedInactivePeriods;
+    String formattedInactivePeriods = json["inactivePeriods"];
+    String splitPattern;
+    if (formattedInactivePeriods.contains(",")) {
+      splitPattern = ", ";
+    } else {
+      splitPattern = ";";
+    }
+    newAttraction.inactivePeriods =
+        (formattedInactivePeriods == null || formattedInactivePeriods == "")
+            ? List<String>()
+            : formattedInactivePeriods.split(splitPattern);
 
     if (json["Active"] == "1" || json["Active"] == "2") {
       newAttraction.active = true;
@@ -110,13 +118,13 @@ class BluehostAttraction {
       newAttraction.upcoming = false;
     }
 
-    if(json["dateClose"][0] != "0"){
+    if (json["dateClose"][0] != "0") {
       newAttraction.closingDay = DateTime.parse(json["dateClose"]);
     } else {
       newAttraction.closingDay = null;
     }
 
-    if(json["dateOpen"][0] != "0"){
+    if (json["dateOpen"][0] != "0") {
       newAttraction.openingDay = DateTime.parse(json["dateOpen"]);
     } else {
       newAttraction.openingDay = null;
@@ -127,14 +135,19 @@ class BluehostAttraction {
     newAttraction.manufacturer = json["Manufacturer"];
 
     // Add line breaks to additional contributors
-    String formattedAdditionalContributors =  json["additionalContributors"];
-    formattedAdditionalContributors = formattedAdditionalContributors.replaceAll(';','\n');
-    newAttraction.additionalContributors = formattedAdditionalContributors;
+    String formattedAdditionalContributors = json["additionalContributors"];
+    newAttraction.additionalContributors =
+        (formattedAdditionalContributors == null ||
+                formattedAdditionalContributors == "")
+            ? List<String>()
+            : formattedAdditionalContributors.split(";");
 
     // Add line breaks to former names
-    String formattedFormerNames =  json["FormerNames"];
-    formattedFormerNames = formattedFormerNames.replaceAll(';','\n');
-    newAttraction.formerNames = formattedFormerNames;
+    String formattedFormerNames = json["FormerNames"];
+    newAttraction.formerNames =
+        (formattedFormerNames == null || formattedFormerNames == "")
+            ? List<String>()
+            : formattedFormerNames.split(";");
 
     newAttraction.model = json["model"];
     newAttraction.modelID = num.parse(json["model_id"]);
@@ -167,6 +180,60 @@ class BluehostAttraction {
 
     newAttraction.lastUpdated = DateTime.parse(json["DateTime_LastUpdated"]);
     newAttraction.created = DateTime.parse(json["DateTime_Created"]);
+
+    return newAttraction;
+  }
+
+  factory BluehostAttraction.copy(BluehostAttraction attr) {
+    BluehostAttraction newAttraction =
+        BluehostAttraction(attractionID: attr.attractionID);
+
+    newAttraction.attractionName = attr.attractionName;
+    newAttraction.parkID = attr.parkID;
+    newAttraction.rideType = attr.rideType;
+    newAttraction.yearOpen = attr.yearOpen;
+    newAttraction.yearClosed = attr.yearClosed;
+
+    newAttraction.inactivePeriods = attr.inactivePeriods;
+
+    newAttraction.active = attr.active;
+    newAttraction.upcoming = attr.upcoming;
+
+    newAttraction.closingDay = attr.closingDay;
+
+    newAttraction.openingDay = attr.openingDay;
+
+    newAttraction.seasonal = attr.seasonal;
+    newAttraction.scoreCard = attr.scoreCard;
+    newAttraction.manufacturer = attr.manufacturer;
+
+    newAttraction.additionalContributors = attr.additionalContributors;
+    newAttraction.formerNames = attr.formerNames;
+
+    newAttraction.model = attr.model;
+    newAttraction.modelID = attr.modelID;
+    newAttraction.height = attr.height;
+    newAttraction.liftHeight = attr.liftHeight;
+    newAttraction.dropHeight = attr.dropHeight;
+    newAttraction.maxSpeed = attr.maxSpeed;
+    newAttraction.length = attr.length;
+    newAttraction.attractionDuration = attr.attractionDuration;
+    newAttraction.capacity = attr.capacity;
+    newAttraction.inversions = attr.inversions;
+    newAttraction.cost = attr.cost;
+    newAttraction.previousParkID = attr.previousParkID;
+    newAttraction.photoArtist = attr.photoArtist;
+    newAttraction.photoLink = attr.photoLink;
+    newAttraction.ccType = attr.ccType;
+    newAttraction.attractionLink = attr.attractionLink;
+
+    newAttraction.sourceIDs = attr.sourceIDs;
+
+    newAttraction.modifyBy = attr.modifyBy;
+    newAttraction.notes = attr.notes;
+
+    newAttraction.lastUpdated = attr.lastUpdated;
+    newAttraction.created = attr.created;
 
     return newAttraction;
   }

@@ -55,6 +55,8 @@ dependencies:
   geolocator: 3.0.1
   image_picker: 0.5.2
   image: 2.0.7
+  reorderables: 0.2.7
+  toast: 0.1.3
 
 dev_dependencies:
   flutter_test:

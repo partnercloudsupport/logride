@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:intl/intl.dart';
 import 'package:log_ride/widgets/forms/submission_decoration.dart';
 import 'package:log_ride/widgets/dialogs/dialog_frame.dart';
 
@@ -56,7 +57,7 @@ class DatePickerFormField extends StatelessWidget {
                         .apply(fontWeightDelta: -1, color: enabled ? Colors.grey[700] : Colors.grey[350]),
                   ),
                   Text( (state.value != null) ?
-                    "${state.value.year}-${state.value.month}-${state.value.day}"
+                    DateFormat.yMMMMd("en_US").format(state.value)
                     : "Unknown",
                     style: Theme.of(context).textTheme.title.apply(
                         fontWeightDelta: -1,

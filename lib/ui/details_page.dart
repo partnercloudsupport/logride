@@ -414,21 +414,21 @@ class _DetailsPageState extends State<DetailsPage> {
             DateFormat.yMMMd("en_US").format(attraction.closingDay)));
       }
 
-      if (attraction.inactivePeriods != "")
+      if (attraction.inactivePeriods.length != 0)
         details.add(_furtherDetailsTextEntry(
-            "Inactive Periods", attraction.inactivePeriods));
+            "Inactive Periods", attraction.inactivePeriods.join("\n")));
 
       if (attraction.manufacturer != "")
         details.add(
             _furtherDetailsTextEntry("Manufacturer", attraction.manufacturer));
 
-      if (attraction.additionalContributors != "")
+      if (attraction.additionalContributors.length != 0)
         details.add(_furtherDetailsTextEntry(
-            "Additional Contributors", attraction.additionalContributors));
+            "Additional Contributors", attraction.additionalContributors.join("\n")));
 
-      if (attraction.formerNames != "")
+      if (attraction.formerNames.length != 0)
         details.add(
-            _furtherDetailsTextEntry("Former Names", attraction.formerNames));
+            _furtherDetailsTextEntry("Former Names", attraction.formerNames.join("\n")));
 
       if (attraction.model != "")
         details.add(_furtherDetailsTextEntry("Model", attraction.model));
