@@ -12,8 +12,6 @@
 ## Changes
 - Better multi-select support for adding attractions
 - Completely different check-in UI (get rid of the pop-up)
-- Turn on tally on check-in
-- New UI for lists of things in user submission
  
 ## Bugs
 - Weird issue with web-fetching and parsing when handling some iOS data
@@ -35,12 +33,8 @@
 - Adding default null attraction type
 - Firebase Analytics "Add New Attraction" event for checking off an
   attraction for the first time.
-- Show defunct attractions despite setting when searching
-- Show defunct attractions counter regardless of setting with data
 - Fill on upcoming attraction should be white
 
-    
-    
 - Text Pop-up for parks without attractions
 - Models & Manufacturers IDs and drop-downs
 - Eliminate Favorites Section (Sorted Alphabetically)
@@ -77,11 +71,17 @@
  - Attraction Site
   -   Is partner site, display "via {formatted url}" ✔
 -  Search on initials (park) ✔
+- Upcoming attraction ✔
 
+## Version 0.5.3
 - Ignore defunct toggle setting for defunct parks ✔
 - Switch tally to be default ✔
+
+## Version 0.6.0
 - Fix passing reference ✔
 - Add inversions / Addl Contributors to the attraction modification page
   ✔
 - Change date display to words ✔
-- Upcoming attraction
+- Show defunct attractions despite setting when searching ✔
+- Show defunct attractions counter regardless of setting with data ✔
+- New UI for lists of things in user submission ✔

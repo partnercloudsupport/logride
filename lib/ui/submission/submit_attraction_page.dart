@@ -223,8 +223,8 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
         initialValue: _data.formerNames,
         label: "Former Names",
         headerText: "Former Names",
-        hintText: "Former Name [2001-2012]",
-
+        hintText: "ex: Former Name [2001-2012]",
+        emptyText: "Tap the button below to add a former name to the list.",
       ),
       SubmissionDivider(),
     ];
@@ -341,24 +341,8 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
         label: "Years Inactive",
         headerText: "Years Inactive",
         hintText: "ex: 2008-2012",
+        emptyText: "Tap the button below to add an inactive period to the list.",
       ),
-      /*
-      TextFormField(
-        focusNode: _nodeInactive,
-        onFieldSubmitted: (_) {
-          _nodeInactive.unfocus();
-          FocusScope.of(context)
-              .requestFocus(_nodeManufacturer);
-        },
-        initialValue: _data.inactivePeriods,
-        decoration: submissionDecoration(
-          hintText: "ex. 2008-2016",
-          labelText: "Years Inactive",
-        ),
-        onSaved: (value) {
-          _data.inactivePeriods = value;
-        },
-      ),*/
 
       SubmissionDivider(),
     ];
@@ -389,6 +373,7 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
         label: "Contributors",
         headerText: "Contributors",
         hintText: "ex: ITEC Entertainment, Nassal",
+        emptyText: "Tap the button below to add a Contributing Organization to the list.",
       ),
       TextFormField(
         focusNode: _nodeModel,
