@@ -28,6 +28,9 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
   final _formKey = GlobalKey<FormState>();
   bool _isNewSubmission;
 
+  TextEditingController _openYearController;
+  TextEditingController _closeYearController;
+
   List<DropdownMenuItem<int>> dropDownTypes;
 
   BluehostAttraction _data;
@@ -69,6 +72,15 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
     _attractionStatus = getAttractionStateFromBluehostAttraction(_data);
 
     dropDownTypes = List<DropdownMenuItem<int>>();
+
+    _openYearController = TextEditingController(
+        text: (_data.yearOpen != null && _data.yearOpen != 0)
+            ? _data.yearOpen.toString()
+            : "");
+    _closeYearController = TextEditingController(
+        text: (_data.yearClosed != null && _data.yearClosed != 0)
+            ? _data.yearClosed.toString()
+            : "");
 
     // Build our attraction types list
     widget.attractionTypes.forEach((val, label) {
@@ -265,9 +277,7 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
             FocusScope.of(context).requestFocus(_nodeManufacturer);
           }
         },
-        initialValue: (_data.yearOpen != null && _data.yearOpen != 0)
-            ? _data.yearOpen.toString()
-            : "",
+        controller: _openYearController,
         decoration: submissionDecoration(
             labelText: (_attractionStatus == AttractionStatus.UPCOMING)
                 ? "Year Opening"
@@ -298,6 +308,13 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
         text: (_attractionStatus == AttractionStatus.UPCOMING)
             ? "Date Opening"
             : "Date Opened",
+        onUpdate: (d) {
+          if (_openYearController.text != d.year.toString()) {
+            setState(() {
+              _openYearController.text = d.year.toString();
+            });
+          }
+        },
       ),
       TextFormField(
         focusNode: _nodeCloseYear,
@@ -305,9 +322,7 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
           _nodeCloseYear.unfocus();
           FocusScope.of(context).requestFocus(_nodeManufacturer);
         },
-        initialValue: (_data.yearClosed != null && _data.yearClosed != 0)
-            ? _data.yearClosed.toString()
-            : "",
+        controller: _closeYearController,
         decoration: submissionDecoration(
           hintText: "Closing Year",
           labelText: "Year Closed",
@@ -341,9 +356,9 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
         label: "Years Inactive",
         headerText: "Years Inactive",
         hintText: "ex: 2008-2012",
-        emptyText: "Tap the button below to add an inactive period to the list.",
+        emptyText:
+            "Tap the button below to add an inactive period to the list.",
       ),
-
       SubmissionDivider(),
     ];
   }
@@ -373,7 +388,8 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
         label: "Contributors",
         headerText: "Contributors",
         hintText: "ex: ITEC Entertainment, Nassal",
-        emptyText: "Tap the button below to add a Contributing Organization to the list.",
+        emptyText:
+            "Tap the button below to add a Contributing Organization to the list.",
       ),
       TextFormField(
         focusNode: _nodeModel,

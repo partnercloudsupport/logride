@@ -27,7 +27,6 @@
 - Haptic - Increment thing (maybe)
 - Lat/Long submission UI needs total redo
 - Link to copyright info for each copyright type
-- Opening/Closing date/year together.
 - Adding default null attraction type
 - Firebase Analytics "Add New Attraction" event for checking off an
   attraction for the first time.
@@ -35,7 +34,6 @@
 - Text Pop-up for parks without attractions
 - Models & Manufacturers IDs and drop-downs
 - Eliminate Favorites Section (Sorted Alphabetically)
-- Photo icon on attraction subtitles
 - Increase satisfaction of incrementing attractions.
 
 
@@ -84,3 +82,5 @@
 - New UI for lists of things in user submission ✔
 - Search should show defunct and seasonal regardless of setting ✔
 - Fill on upcoming attraction should be white ✔
+- Photo icon on attraction subtitles ✔
+- Opening/Closing date/year together. ✔

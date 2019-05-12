@@ -5,9 +5,10 @@ import 'package:log_ride/widgets/forms/submission_decoration.dart';
 import 'package:log_ride/widgets/dialogs/dialog_frame.dart';
 
 class DatePickerFormField extends StatelessWidget {
-  DatePickerFormField({this.onSaved, this.validator, this.initialValue, this.text = "Date", this.enabled = true});
+  DatePickerFormField({this.onSaved, this.onUpdate, this.validator, this.initialValue, this.text = "Date", this.enabled = true});
 
   final Function(DateTime) onSaved;
+  final Function(DateTime) onUpdate;
   final Function validator;
   final DateTime initialValue;
   final String text;
@@ -42,6 +43,9 @@ class DatePickerFormField extends StatelessWidget {
                   });
               if (result as DateTime != state.value) {
                 state.didChange(result as DateTime);
+                if(onUpdate != null){
+                  onUpdate(result as DateTime);
+                }
               }
             },
             child: Container(
