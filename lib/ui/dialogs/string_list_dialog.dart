@@ -286,7 +286,8 @@ class StringListField extends StatelessWidget {
                   ),
                   Text(
                       (state.value != null)
-                          ? "${state.value.length} items"
+                      // The ${(state.value.length ==1)} bit is for quick and dirty plurality tidiness.
+                          ? "${state.value.length} item${(state.value.length == 1) ? "" : "s"}"
                           : "",
                       style: Theme.of(context).textTheme.title.apply(
                           fontWeightDelta: -1,
