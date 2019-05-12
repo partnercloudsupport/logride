@@ -28,14 +28,23 @@
 - (IGNORE FOR NOW) Make favorites smol when there's nothing in it
 - Search should show defunct and seasonal regardless of setting
 - Haptic - Increment thing (maybe)
+- Lat/Long submission UI needs total redo
+- Fix issues with expanding fields when the text overflows
+- Link to copyright info for each copyright type
+- Opening/Closing date/year together.
+- Adding default null attraction type
+- Firebase Analytics "Add New Attraction" event for checking off an
+  attraction for the first time.
+- Show defunct attractions despite setting when searching
+- Show defunct attractions counter regardless of setting with data
+- Fill on upcoming attraction should be white
+
     
     
 - Text Pop-up for parks without attractions
 - Models & Manufacturers IDs and drop-downs
-- Switch tally to be default ✔
 - Eliminate Favorites Section (Sorted Alphabetically)
 - Photo icon on attraction subtitles
-- Upcoming attraction
 - Increase satisfaction of incrementing attractions.
 
 
@@ -68,3 +77,11 @@
  - Attraction Site
   -   Is partner site, display "via {formatted url}" ✔
 -  Search on initials (park) ✔
+
+- Ignore defunct toggle setting for defunct parks ✔
+- Switch tally to be default ✔
+- Fix passing reference ✔
+- Add inversions / Addl Contributors to the attraction modification page
+  ✔
+- Change date display to words ✔
+- Upcoming attraction
