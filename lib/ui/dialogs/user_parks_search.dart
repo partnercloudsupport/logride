@@ -26,6 +26,11 @@ class UserParksSearchPage extends StatefulWidget {
 class _UserParksSearchPageState extends State<UserParksSearchPage> {
   ListFilter filter = ListFilter("");
 
+  void entryCallback(var park){
+    Navigator.of(context).pop();
+    widget.entryCallback(park);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,8 +67,7 @@ class _UserParksSearchPageState extends State<UserParksSearchPage> {
                         parksData: widget.parksQuery,
                         favorites: false,
                         slidableController: widget.slidableController,
-                        headerCallback: (faves) => Navigator.of(context).pop(),
-                        onTap: widget.entryCallback,
+                        onTap: entryCallback,
                         sliderActionCallback: widget.sliderActionCallback,
                         arrowWidget: Container(),
                         filter: filter,
