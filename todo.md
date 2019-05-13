@@ -84,3 +84,4 @@
 - Fill on upcoming attraction should be white ✔
 - Photo icon on attraction subtitles ✔
 - Opening/Closing date/year together. ✔
+- Submission entries have proper automatic capitalization

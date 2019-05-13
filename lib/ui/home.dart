@@ -226,7 +226,7 @@ class _HomePageState extends State<HomePage> {
         SlideInRoute(
             widget: SubmitAttractionPage(
                 attractionTypes: _parksManager.attractionTypes,
-                existingData: attr,
+                existingData: isNewAttraction ? attr : BluehostAttraction.copy(attr),
                 parentPark: parent),
             dialogStyle: true,
             direction: SlideInDirection.RIGHT));

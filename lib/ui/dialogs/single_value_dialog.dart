@@ -49,6 +49,7 @@ class _SingleValueDialogState extends State<SingleValueDialog> {
             decoration: InputDecoration(
               hintText: widget.hintText
             ),
+            textCapitalization: TextCapitalization.words,
             autofocus: true,
             keyboardType: type,
             maxLines: 1,

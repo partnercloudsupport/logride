@@ -73,7 +73,7 @@ class DatePickerFormField extends StatelessWidget {
                     child: AutoSizeText(
                       (state.value != null)
                           ? DateFormat.yMMMMd("en_US").format(state.value)
-                          : "Unknown",
+                          : "",
                       textAlign: TextAlign.right,
                       style: Theme.of(context).textTheme.title.apply(
                           fontWeightDelta: -1,

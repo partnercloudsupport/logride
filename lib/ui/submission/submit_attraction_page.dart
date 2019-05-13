@@ -195,6 +195,7 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
         decoration: submissionDecoration(
             labelText: "Name *", hintText: "Attraction Name"),
         initialValue: _data.attractionName,
+        textCapitalization: TextCapitalization.words,
         validator: (value) {
           if (value.isEmpty) {
             return "Please enter the name of the attraction";
@@ -237,6 +238,7 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
         headerText: "Former Names",
         hintText: "ex: Former Name [2001-2012]",
         emptyText: "Tap the button below to add a former name to the list.",
+        unit: "Name",
       ),
       SubmissionDivider(),
     ];
@@ -381,6 +383,7 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
           FocusScope.of(context).requestFocus(_nodeModel);
         },
         initialValue: _data.manufacturer,
+        textCapitalization: TextCapitalization.words,
         decoration: submissionDecoration(
           hintText: "Manufacturer",
           labelText: "Manufacturer",
@@ -407,6 +410,7 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
           FocusScope.of(context).requestFocus(_nodeHeight);
         },
         initialValue: _data.model,
+        textCapitalization: TextCapitalization.words,
         decoration: submissionDecoration(
           hintText: "Model",
           labelText: "Model",
@@ -548,6 +552,7 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
         keyboardType: TextInputType.multiline,
         maxLines: null,
         initialValue: _data.notes,
+        textCapitalization: TextCapitalization.sentences,
         onSaved: (n) {
           _data.notes = n;
         },

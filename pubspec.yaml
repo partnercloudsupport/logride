@@ -10,7 +10,7 @@ description: An app to help users track their progress through theme and amuseme
 version: 0.5.3+8
 
 environment:
-  sdk: ">=2.0.0-dev.68.0 <3.0.0"
+  sdk: ">=2.2.2 <3.0.0"
 
 dependencies:
   flutter:

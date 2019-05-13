@@ -11,15 +11,17 @@ class StringListDialogPage extends StatefulWidget {
   StringListDialogPage(
       {@required this.initialString,
       this.headerTitle = "Values",
-      this.valueText = "Add new value",
+      this.valueText = "Add new Value",
       this.emptyText = "Please submit a value",
-      this.hintText = ""});
+      this.hintText = "",
+      this.unit});
 
   final List<String> initialString;
   final String headerTitle;
   final String valueText;
   final String emptyText;
   final String hintText;
+  final String unit;
 
   @override
   _StringListDialogPageState createState() => _StringListDialogPageState();
@@ -38,7 +40,7 @@ class _StringListDialogPageState extends State<StringListDialogPage> {
         builder: (BuildContext context) {
           return StyledConfirmDialog(
             body: "Are you sure you want to delete \"${entries[index]}\"?",
-            title: "Delete Item",
+            title: "Delete ${widget.unit ?? "item"}",
             confirmButtonText: "Yes",
             denyButtonText: "No",
           );
@@ -59,7 +61,7 @@ class _StringListDialogPageState extends State<StringListDialogPage> {
         builder: (BuildContext context) {
           return SingleValueDialog(
             title: widget.valueText,
-            submitText: "SUBMIT",
+            submitText: "ADD",
             type: SingleValueDialogType.TEXT,
             hintText: widget.hintText,
           );
@@ -83,7 +85,7 @@ class _StringListDialogPageState extends State<StringListDialogPage> {
         context: context,
         builder: (BuildContext context) {
           return SingleValueDialog(
-            title: "Edit Entry",
+            title: "Edit ${widget.unit ?? "Entry"}",
             initialValue: entry,
             submitText: "Save Changes",
             type: SingleValueDialogType.TEXT,
@@ -106,7 +108,11 @@ class _StringListDialogPageState extends State<StringListDialogPage> {
 
   @override
   void initState() {
-    entries = List.from(widget.initialString);
+    if(widget.initialString != null) {
+      entries = List.from(widget.initialString);
+    } else {
+      entries = List<String>();
+    }
 
     super.initState();
   }
@@ -221,9 +227,10 @@ class StringListField extends StatelessWidget {
       this.label = "List",
       this.enabled = true,
       this.headerText = "List",
-      this.valueText = "Add to List",
+      this.valueText = "Add new Value",
       this.emptyText = "Add items to the list",
-      this.hintText = ""});
+      this.hintText = "",
+      this.unit});
 
   final Function(List<String>) onSaved;
   final Function validator;
@@ -235,6 +242,7 @@ class StringListField extends StatelessWidget {
   final String valueText;
   final String emptyText;
   final String hintText;
+  final String unit;
 
   @override
   Widget build(BuildContext context) {
@@ -287,7 +295,7 @@ class StringListField extends StatelessWidget {
                   Text(
                       (state.value != null)
                       // The ${(state.value.length ==1)} bit is for quick and dirty plurality tidiness.
-                          ? "${state.value.length} item${(state.value.length == 1) ? "" : "s"}"
+                          ? "${state.value.length} ${(unit ?? "item").toLowerCase()}${(state.value.length == 1) ? "" : "s"}"
                           : "",
                       style: Theme.of(context).textTheme.title.apply(
                           fontWeightDelta: -1,
