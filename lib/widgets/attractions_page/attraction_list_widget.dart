@@ -264,6 +264,7 @@ class _AttractionsListViewState extends State<AttractionsListView> {
             bottomLeft: Radius.circular(15), bottomRight: Radius.circular(15)),
         child: FirebaseAttractionListView(
           parentPark: widget.parentPark,
+          parentParkData: getBluehostParkByID(widget.pm.allParksInfo, widget.parentPark.parkID),
           headedList: headedList,
           userName: widget.userName,
           attractionQuery: widget.db.getQueryForUser(

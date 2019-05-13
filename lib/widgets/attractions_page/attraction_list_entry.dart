@@ -12,15 +12,15 @@ import 'package:flutter_icons/flutter_icons.dart';
 class AttractionListEntry extends StatefulWidget {
   AttractionListEntry(
       {this.attractionData,
-        this.userData,
-        this.userName,
-        this.slidableController,
-        this.ignoreCallback,
-        this.experienceHandler,
-        this.parentPark,
-        this.timeChanged,
-        this.db,
-        this.submissionCallback});
+      this.userData,
+      this.userName,
+      this.slidableController,
+      this.ignoreCallback,
+      this.experienceHandler,
+      this.parentPark,
+      this.timeChanged,
+      this.db,
+      this.submissionCallback});
 
   final BluehostAttraction attractionData;
   final FirebaseAttraction userData;
@@ -51,7 +51,7 @@ class AttractionListState extends State<AttractionListEntry> {
     Color textColor = ignored ? Theme.of(context).disabledColor : Colors.black;
 
     Color subtitleTextColor =
-    ignored ? Theme.of(context).disabledColor : Colors.grey[700];
+        ignored ? Theme.of(context).disabledColor : Colors.grey[700];
 
     // Core layout of the row / list item.
     built = Material(
@@ -67,46 +67,48 @@ class AttractionListState extends State<AttractionListEntry> {
               // The text should take up as much space as possible, but not overflow under the button
               Expanded(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    widget.attractionData.attractionName,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context)
+                        .textTheme
+                        .subhead
+                        .apply(color: textColor),
+                  ),
+                  Expanded(
+                      child: Row(
                     children: <Widget>[
                       Text(
-                        widget.attractionData.attractionName,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context)
-                            .textTheme
-                            .subhead
-                            .apply(color: textColor),
-                      ),
-                      Expanded(
-                          child: Row(
-                            children: <Widget>[Text(
-                                widget.attractionData.upcoming
-                                    ? "Opening Soon"
-                                    :widget.attractionData.typeLabel,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .subtitle
-                                    .apply(color: subtitleTextColor)),
-                            Padding(
-                                padding: EdgeInsets.all(5.0),
-                                child: Icon(widget.attractionData.photoArtist != ""
-                                    ?  Feather.getIconData("camera"): null,
-                                  color: subtitleTextColor,
-                                  size:17.0,
-                                )
-                            )
-                            ],
+                          widget.attractionData.upcoming
+                              ? "Opening Soon"
+                              : widget.attractionData.typeLabel,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context)
+                              .textTheme
+                              .subtitle
+                              .apply(color: subtitleTextColor)),
+                      Padding(
+                          padding: EdgeInsets.all(5.0),
+                          child: Icon(
+                            widget.attractionData.photoArtist != ""
+                                ? Feather.getIconData("camera")
+                                : null,
+                            color: subtitleTextColor,
+                            size: 17.0,
                           ))
                     ],
-                  )),
+                  ))
+                ],
+              )),
               // If the button's not there for any reason, just show an empty container instead. Prevents null errors.
               ExperienceButton(
                 interactHandler: widget.experienceHandler,
                 parentPark: widget.parentPark,
                 ignored: (widget.attractionData.seasonal ||
-                    !widget.attractionData.active)
+                        !widget.attractionData.active)
                     ? false
                     : (ignored ?? false),
                 upcoming: widget.attractionData.upcoming,
@@ -128,14 +130,14 @@ class AttractionListState extends State<AttractionListEntry> {
         widget.attractionData.upcoming ||
         widget.userData.numberOfTimesRidden > 0)
       slideAction =
-      null; // Already ignored thanks to defunct, no point in ignoring it more
+          null; // Already ignored thanks to defunct, no point in ignoring it more
     if (widget.attractionData.active &&
         !widget.attractionData.seasonal &&
         !widget.attractionData.upcoming &&
         widget.userData.numberOfTimesRidden == 0) {
       // If we're ignored, show the include slide. If we're included, show the ignore slide.
       slideAction =
-      ignored ? _buildIncludeSlideAction() : _buildIgnoreSlideAction();
+          ignored ? _buildIncludeSlideAction() : _buildIgnoreSlideAction();
     }
 
     // This is kinda ugly, but if there's no action that happens on slide,
@@ -143,12 +145,12 @@ class AttractionListState extends State<AttractionListEntry> {
     return slideAction == null
         ? built
         : Slidable(
-      delegate: SlidableDrawerDelegate(),
-      actionExtentRatio: 0.25,
-      child: built,
-      actions: <Widget>[slideAction],
-      controller: widget.slidableController,
-    );
+            delegate: SlidableDrawerDelegate(),
+            actionExtentRatio: 0.25,
+            child: built,
+            actions: <Widget>[slideAction],
+            controller: widget.slidableController,
+          );
   }
 
   Widget _buildIgnoreSlideAction() {
