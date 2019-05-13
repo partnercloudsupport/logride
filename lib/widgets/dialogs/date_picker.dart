@@ -1,11 +1,19 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:log_ride/widgets/forms/submission_decoration.dart';
 import 'package:log_ride/widgets/dialogs/dialog_frame.dart';
+import 'package:log_ride/widgets/shared/interface_button.dart';
 
 class DatePickerFormField extends StatelessWidget {
-  DatePickerFormField({this.onSaved, this.onUpdate, this.validator, this.initialValue, this.text = "Date", this.enabled = true});
+  DatePickerFormField(
+      {this.onSaved,
+      this.onUpdate,
+      this.validator,
+      this.initialValue,
+      this.text = "Date",
+      this.enabled = true});
 
   final Function(DateTime) onSaved;
   final Function(DateTime) onUpdate;
@@ -16,14 +24,13 @@ class DatePickerFormField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return InputDecorator(
       decoration: submissionDecoration(enabled: enabled),
       child: FormField<DateTime>(
         initialValue: initialValue,
         onSaved: (d) => onSaved(d),
         validator: (v) {
-          if(validator != null){
+          if (validator != null) {
             validator(v);
           }
         },
@@ -33,7 +40,7 @@ class DatePickerFormField extends StatelessWidget {
             behavior: HitTestBehavior.opaque,
             onTap: () async {
               // Makes sense, people shouldn't be able to touch if it's disabled
-              if(!enabled) return;
+              if (!enabled) return;
 
               dynamic result = await showDialog(
                   context: context,
@@ -41,9 +48,12 @@ class DatePickerFormField extends StatelessWidget {
                     return DatePickerDialog(
                         initialValue: state.value, title: text);
                   });
+
+              if (result == null) return;
+
               if (result as DateTime != state.value) {
                 state.didChange(result as DateTime);
-                if(onUpdate != null){
+                if (onUpdate != null) {
                   onUpdate(result as DateTime);
                 }
               }
@@ -55,18 +65,28 @@ class DatePickerFormField extends StatelessWidget {
                 children: <Widget>[
                   Text(
                     text,
-                    style: Theme.of(context)
-                        .textTheme
-                        .title
-                        .apply(fontWeightDelta: -1, color: enabled ? Colors.grey[700] : Colors.grey[350]),
-                  ),
-                  Text( (state.value != null) ?
-                    DateFormat.yMMMMd("en_US").format(state.value)
-                    : "Unknown",
                     style: Theme.of(context).textTheme.title.apply(
                         fontWeightDelta: -1,
-                        color: enabled ? Theme.of(context).primaryColor : Theme.of(context).primaryColor.withOpacity(0.5)),
-                  )
+                        color: enabled ? Colors.grey[700] : Colors.grey[350]),
+                  ),
+                  Expanded(
+                    child: AutoSizeText(
+                      (state.value != null)
+                          ? DateFormat.yMMMMd("en_US").format(state.value)
+                          : "Unknown",
+                      textAlign: TextAlign.right,
+                      style: Theme.of(context).textTheme.title.apply(
+                          fontWeightDelta: -1,
+                          color: enabled
+                              ? Theme.of(context).primaryColor
+                              : Theme.of(context).primaryColor.withOpacity(0.5)),
+                    ),
+                  ),
+                  if(state.value != null) // ignore: sdk_version_ui_as_code
+                    IconButton(
+                      icon: Icon(Icons.clear),
+                      onPressed: () { state.didChange(null); onUpdate(null); },
+                    ),
                 ],
               ),
             ),
@@ -100,15 +120,28 @@ class _DatePickerDialogState extends State<DatePickerDialog> {
   Widget build(BuildContext context) {
     return DialogFrame(
       title: widget.title,
-      dismiss: () => Navigator.of(context).pop(_dateTime),
+      dismiss: () => Navigator.of(context).pop(),
       content: <Widget>[
-        Container(
-          height: 250.0,
-          child: CupertinoDatePicker(
-            initialDateTime: _dateTime,
-            mode: CupertinoDatePickerMode.date,
-            onDateTimeChanged: (d) => setState(() => _dateTime = d),
-          ),
+        Column(
+          children: <Widget>[
+            Container(
+              height: 250.0,
+              child: CupertinoDatePicker(
+                initialDateTime: _dateTime,
+                mode: CupertinoDatePickerMode.date,
+                onDateTimeChanged: (d) => setState(() => _dateTime = d),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: InterfaceButton(
+                text: "Select Date",
+                onPressed: () => Navigator.of(context).pop(_dateTime),
+                color: Theme.of(context).primaryColor,
+                textColor: Colors.white,
+              ),
+            )
+          ],
         )
       ],
     );

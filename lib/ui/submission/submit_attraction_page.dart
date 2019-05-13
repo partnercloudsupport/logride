@@ -309,6 +309,8 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
             ? "Date Opening"
             : "Date Opened",
         onUpdate: (d) {
+          if(d == null) return;
+
           if (_openYearController.text != d.year.toString()) {
             setState(() {
               _openYearController.text = d.year.toString();
@@ -347,6 +349,13 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
         enabled: (_attractionStatus == AttractionStatus.DEFUNCT),
         initialValue: _data.closingDay,
         text: "Date Closed",
+        onUpdate: (d) {
+          if(d == null) return;
+
+          if(d.year.toString() != _closeYearController.text){
+            _closeYearController.text = d.year.toString();
+          }
+        },
       ),
       StringListField(
         onSaved: (d) {
