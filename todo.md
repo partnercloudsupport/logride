@@ -33,7 +33,6 @@
 
 - Text Pop-up for parks without attractions
 - Models & Manufacturers IDs and drop-downs
-- Eliminate Favorites Section (Sorted Alphabetically)
 - Increase satisfaction of incrementing attractions.
 
 
@@ -84,4 +83,5 @@
 - Fill on upcoming attraction should be white ✔
 - Photo icon on attraction subtitles ✔
 - Opening/Closing date/year together. ✔
-- Submission entries have proper automatic capitalization
+- Submission entries have proper automatic capitalization ✔
+- Eliminate Favorites Section (Sorted Alphabetically) ✔

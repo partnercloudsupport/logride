@@ -5,6 +5,11 @@ class FirebasePark {
   bool checkedInToday = false;
   bool favorite = false;
   bool incrementorEnabled = true;
+
+  /// inFavorites is used in the parksList to determine the location of the list
+  /// entry (is this park listed in the favorites section?)
+  bool inFavorites = false;
+
   DateTime lastDayVisited = DateTime.fromMillisecondsSinceEpoch(0);
   String location = "";
   String name = "";
@@ -60,6 +65,11 @@ class FirebasePark {
       "showSeasonal": this.showSeasonal,
       "totalRides": this.totalRides
     };
+  }
+
+  @override
+  String toString() {
+    return "[[PARK] id: $parkID, name: $name]";
   }
 
   void updateAttractionCount(
@@ -225,6 +235,18 @@ FirebasePark getFirebasePark(
   }
 
   return null;
+}
+
+/// Returns the index of the park that matches the given id.
+/// Returns -1 if it cannot be found.
+int getFirebaseParkIndex(List<FirebasePark> listToSearch, num idToSearchFor) {
+  for (int i = 0; i < listToSearch.length; i++){
+    if(listToSearch[i].parkID == idToSearchFor){
+      return i;
+    }
+  }
+
+  return -1;
 }
 
 /// Returns the number of favorite parks inside the list to search
