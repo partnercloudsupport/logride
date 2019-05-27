@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/color_constants.dart';
 import 'package:log_ride/data/park_structures.dart';
+import 'package:log_ride/ui/dialogs/string_list_dialog.dart';
 import 'package:log_ride/widgets/shared/interface_button.dart';
 import 'package:log_ride/widgets/forms/form_header.dart';
 import 'package:log_ride/widgets/forms/proper_adaptive_switch.dart';
@@ -27,6 +28,9 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
   final _formKey = GlobalKey<FormState>();
   bool _isNewSubmission;
 
+  TextEditingController _openYearController;
+  TextEditingController _closeYearController;
+
   List<DropdownMenuItem<int>> dropDownTypes;
 
   BluehostAttraction _data;
@@ -41,13 +45,14 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
   final FocusNode _nodeOpenDate = FocusNode();
   final FocusNode _nodeCloseYear = FocusNode();
   final FocusNode _nodeCloseDate = FocusNode();
-  final FocusNode _nodeInactive = FocusNode();
 
   final FocusNode _nodeManufacturer = FocusNode();
+  final FocusNode _nodeContrib = FocusNode();
   final FocusNode _nodeModel = FocusNode();
   final FocusNode _nodeHeight = FocusNode();
   final FocusNode _nodeMaxSpeed = FocusNode();
   final FocusNode _nodeLength = FocusNode();
+  final FocusNode _nodeInversions = FocusNode();
 
   final FocusNode _nodeNotes = FocusNode();
 
@@ -68,6 +73,15 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
 
     dropDownTypes = List<DropdownMenuItem<int>>();
 
+    _openYearController = TextEditingController(
+        text: (_data.yearOpen != null && _data.yearOpen != 0)
+            ? _data.yearOpen.toString()
+            : "");
+    _closeYearController = TextEditingController(
+        text: (_data.yearClosed != null && _data.yearClosed != 0)
+            ? _data.yearClosed.toString()
+            : "");
+
     // Build our attraction types list
     widget.attractionTypes.forEach((val, label) {
       dropDownTypes.add(DropdownMenuItem<int>(child: Text(label), value: val));
@@ -85,19 +99,19 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
     _nodeOpenDate.dispose();
     _nodeCloseYear.dispose();
     _nodeCloseDate.dispose();
-    _nodeInactive.dispose();
     _nodeManufacturer.dispose();
+    _nodeContrib.dispose();
     _nodeModel.dispose();
     _nodeHeight.dispose();
     _nodeMaxSpeed.dispose();
     _nodeLength.dispose();
+    _nodeInversions.dispose();
     _nodeNotes.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
@@ -129,18 +143,17 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16.0, vertical: 16.0),
                       child: Column(
-                        children: (<Widget>[]
-                        // Sections are split into various functions for increased readability
-                          ..addAll(_buildCoreInformation(context))
-                          ..addAll(_buildOperatingHistory(context))
-                          ..addAll(_buildFactsAndStats(context)))
-                        .map((entry) {
-                          return Padding(
-                            child: entry,
-                            padding: EdgeInsets.only(top: 4.0),
-                          );
-                        }).toList()
-                      ),
+                          children: (<Widget>[]
+                                // Sections are split into various functions for increased readability
+                                ..addAll(_buildCoreInformation(context))
+                                ..addAll(_buildOperatingHistory(context))
+                                ..addAll(_buildFactsAndStats(context)))
+                              .map((entry) {
+                        return Padding(
+                          child: entry,
+                          padding: EdgeInsets.only(top: 4.0),
+                        );
+                      }).toList()),
                     )
                   ],
                 ),
@@ -171,18 +184,18 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
     );
   }
 
-  List<Widget> _buildCoreInformation(BuildContext context){
+  List<Widget> _buildCoreInformation(BuildContext context) {
     return [
       TextFormField(
         focusNode: _nodeName,
         onFieldSubmitted: (_) {
           _nodeName.unfocus();
-          FocusScope.of(context).requestFocus(_nodeFormer);
+          FocusScope.of(context).requestFocus(_nodeOpenYear);
         },
         decoration: submissionDecoration(
-            labelText: "Name *",
-            hintText: "Attraction Name"),
+            labelText: "Name *", hintText: "Attraction Name"),
         initialValue: _data.attractionName,
+        textCapitalization: TextCapitalization.words,
         validator: (value) {
           if (value.isEmpty) {
             return "Please enter the name of the attraction";
@@ -216,29 +229,23 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
           );
         },
       ),
-      TextFormField(
-        focusNode: _nodeFormer,
-        onFieldSubmitted: (_) {
-          _nodeFormer.unfocus();
-          FocusScope.of(context)
-              .requestFocus(_nodeOpenYear);
+      StringListField(
+        onSaved: (d) {
+          _data.formerNames = d;
         },
         initialValue: _data.formerNames,
-        decoration: submissionDecoration(
-          hintText: "Former Names",
-          labelText: "Former Name(s)",
-        ),
-        onSaved: (value) {
-          _data.formerNames = value;
-        },
+        label: "Former Names",
+        headerText: "Former Names",
+        hintText: "ex: Former Name [2001-2012]",
+        emptyText: "Tap the button below to add a former name to the list.",
+        unit: "Name",
       ),
       SubmissionDivider(),
     ];
   }
 
-  List<Widget> _buildOperatingHistory(BuildContext context){
+  List<Widget> _buildOperatingHistory(BuildContext context) {
     return <Widget>[
-
       RideStatusDropdown(
         onChanged: (status) {
           // We update the attraction status if it's both different
@@ -266,21 +273,17 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
         focusNode: _nodeOpenYear,
         onFieldSubmitted: (_) {
           _nodeOpenYear.unfocus();
-          if (_attractionStatus ==
-              AttractionStatus.DEFUNCT) {
-            FocusScope.of(context)
-                .requestFocus(_nodeCloseYear);
+          if (_attractionStatus == AttractionStatus.DEFUNCT) {
+            FocusScope.of(context).requestFocus(_nodeCloseYear);
           } else {
-            FocusScope.of(context)
-                .requestFocus(_nodeInactive);
+            FocusScope.of(context).requestFocus(_nodeManufacturer);
           }
         },
-        initialValue:
-        (_data.yearOpen != null && _data.yearOpen != 0)
-            ? _data.yearOpen.toString()
-            : "",
+        controller: _openYearController,
         decoration: submissionDecoration(
-            labelText: (_attractionStatus == AttractionStatus.UPCOMING) ? "Year Opening": "Year Opened",
+            labelText: (_attractionStatus == AttractionStatus.UPCOMING)
+                ? "Year Opening"
+                : "Year Opened",
             hintText: "Opening Year"),
         keyboardType: TextInputType.numberWithOptions(),
         validator: (value) {
@@ -299,31 +302,36 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
           _data.openingDay = d;
         },
         validator: (v) {
-          if(_attractionStatus == AttractionStatus.UPCOMING && v == null){
+          if (_attractionStatus == AttractionStatus.UPCOMING && v == null) {
             return "Enter an opening date";
           }
         },
         initialValue: _data.openingDay,
-        text: (_attractionStatus == AttractionStatus.UPCOMING) ? "Date Opening": "Date Opened",
-      ),
+        text: (_attractionStatus == AttractionStatus.UPCOMING)
+            ? "Date Opening"
+            : "Date Opened",
+        onUpdate: (d) {
+          if(d == null) return;
 
+          if (_openYearController.text != d.year.toString()) {
+            setState(() {
+              _openYearController.text = d.year.toString();
+            });
+          }
+        },
+      ),
       TextFormField(
         focusNode: _nodeCloseYear,
         onFieldSubmitted: (_) {
           _nodeCloseYear.unfocus();
-          FocusScope.of(context)
-              .requestFocus(_nodeInactive);
+          FocusScope.of(context).requestFocus(_nodeManufacturer);
         },
-        initialValue: (_data.yearClosed != null &&
-            _data.yearClosed != 0)
-            ? _data.yearClosed.toString()
-            : "",
+        controller: _closeYearController,
         decoration: submissionDecoration(
           hintText: "Closing Year",
           labelText: "Year Closed",
         ),
-        enabled:
-        (_attractionStatus == AttractionStatus.DEFUNCT),
+        enabled: (_attractionStatus == AttractionStatus.DEFUNCT),
         keyboardType: TextInputType.numberWithOptions(),
         validator: (value) {
           if (value == "") return null;
@@ -340,36 +348,34 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
         onSaved: (d) {
           _data.closingDay = d;
         },
-        enabled:
-        (_attractionStatus == AttractionStatus.DEFUNCT),
+        enabled: (_attractionStatus == AttractionStatus.DEFUNCT),
         initialValue: _data.closingDay,
         text: "Date Closed",
-      ),
+        onUpdate: (d) {
+          if(d == null) return;
 
-      TextFormField(
-        focusNode: _nodeInactive,
-        onFieldSubmitted: (_) {
-          _nodeInactive.unfocus();
-          FocusScope.of(context)
-              .requestFocus(_nodeManufacturer);
+          if(d.year.toString() != _closeYearController.text){
+            _closeYearController.text = d.year.toString();
+          }
+        },
+      ),
+      StringListField(
+        onSaved: (d) {
+          _data.inactivePeriods = d;
         },
         initialValue: _data.inactivePeriods,
-        decoration: submissionDecoration(
-          hintText: "ex. 2008-2016",
-          labelText: "Years Inactive",
-        ),
-        onSaved: (value) {
-          _data.inactivePeriods = value;
-        },
+        label: "Years Inactive",
+        headerText: "Years Inactive",
+        hintText: "ex: 2008-2012",
+        emptyText:
+            "Tap the button below to add an inactive period to the list.",
       ),
-
       SubmissionDivider(),
     ];
   }
 
   List<Widget> _buildFactsAndStats(BuildContext context) {
     return <Widget>[
-
       TextFormField(
         focusNode: _nodeManufacturer,
         onFieldSubmitted: (_) {
@@ -377,6 +383,7 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
           FocusScope.of(context).requestFocus(_nodeModel);
         },
         initialValue: _data.manufacturer,
+        textCapitalization: TextCapitalization.words,
         decoration: submissionDecoration(
           hintText: "Manufacturer",
           labelText: "Manufacturer",
@@ -385,6 +392,17 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
           _data.manufacturer = value;
         },
       ),
+      StringListField(
+        onSaved: (d) {
+          _data.additionalContributors = d;
+        },
+        initialValue: _data.additionalContributors,
+        label: "Contributors",
+        headerText: "Contributors",
+        hintText: "ex: ITEC Entertainment, Nassal",
+        emptyText:
+            "Tap the button below to add a Contributing Organization to the list.",
+      ),
       TextFormField(
         focusNode: _nodeModel,
         onFieldSubmitted: (_) {
@@ -392,6 +410,7 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
           FocusScope.of(context).requestFocus(_nodeHeight);
         },
         initialValue: _data.model,
+        textCapitalization: TextCapitalization.words,
         decoration: submissionDecoration(
           hintText: "Model",
           labelText: "Model",
@@ -404,11 +423,9 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
         focusNode: _nodeHeight,
         onFieldSubmitted: (_) {
           _nodeHeight.unfocus();
-          FocusScope.of(context)
-              .requestFocus(_nodeMaxSpeed);
+          FocusScope.of(context).requestFocus(_nodeMaxSpeed);
         },
-        initialValue:
-        (_data.height != null && _data.height != 0.0)
+        initialValue: (_data.height != null && _data.height != 0.0)
             ? _data.height.toString()
             : "",
         decoration: submissionDecoration(
@@ -416,8 +433,7 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
           labelText: "Height",
           suffixText: "ft ",
         ),
-        keyboardType:
-        TextInputType.numberWithOptions(decimal: true),
+        keyboardType: TextInputType.numberWithOptions(decimal: true),
         validator: (value) {
           if (value == "") return null;
 
@@ -438,8 +454,7 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
           _nodeMaxSpeed.unfocus();
           FocusScope.of(context).requestFocus(_nodeLength);
         },
-        initialValue:
-        (_data.maxSpeed != null && _data.height != 0.0)
+        initialValue: (_data.maxSpeed != null && _data.maxSpeed != 0.0)
             ? _data.maxSpeed.toString()
             : "",
         decoration: submissionDecoration(
@@ -447,8 +462,7 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
           labelText: "Max Speed",
           suffixText: "mph ",
         ),
-        keyboardType:
-        TextInputType.numberWithOptions(decimal: true),
+        keyboardType: TextInputType.numberWithOptions(decimal: true),
         validator: (value) {
           if (value == "") return null;
 
@@ -467,10 +481,9 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
         focusNode: _nodeLength,
         onFieldSubmitted: (_) {
           _nodeLength.unfocus();
-          FocusScope.of(context).requestFocus(_nodeNotes);
+          FocusScope.of(context).requestFocus(_nodeInversions);
         },
-        initialValue:
-        (_data.length != null && _data.height != 0.0)
+        initialValue: (_data.length != null && _data.length != 0.0)
             ? _data.length.toString()
             : "",
         decoration: submissionDecoration(
@@ -478,8 +491,7 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
           labelText: "Length",
           suffixText: "ft ",
         ),
-        keyboardType:
-        TextInputType.numberWithOptions(decimal: true),
+        keyboardType: TextInputType.numberWithOptions(decimal: true),
         validator: (value) {
           if (value == "") return null;
 
@@ -495,10 +507,37 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
         },
       ),
       DurationPickerFormField(
-        initialValue: Duration(
-            seconds: _data.attractionDuration ?? 0),
-        onSaved: (d) =>
-        _data.attractionDuration = d.inSeconds,
+        initialValue: Duration(seconds: _data.attractionDuration ?? 0),
+        onSaved: (d) => _data.attractionDuration = d.inSeconds,
+      ),
+      TextFormField(
+        focusNode: _nodeInversions,
+        onFieldSubmitted: (_) {
+          _nodeInversions.unfocus();
+          FocusScope.of(context).requestFocus(_nodeNotes);
+        },
+        initialValue: (_data.inversions != null && _data.inversions != 0.0)
+            ? _data.inversions.toString()
+            : "",
+        decoration: submissionDecoration(
+          hintText: "Inversions",
+          labelText: "Inversions",
+          suffixText: "  ",
+        ),
+        keyboardType: TextInputType.numberWithOptions(decimal: false),
+        validator: (value) {
+          if (value == "") return null;
+
+          num parsed = num.tryParse(value);
+          if (parsed == null) {
+            return "Please enter a valid number of inversions";
+          } else if (parsed <= 0) {
+            return "Please enter a positive number of inversions";
+          }
+        },
+        onSaved: (value) {
+          _data.inversions = num.tryParse(value);
+        },
       ),
       Padding(
         padding: const EdgeInsets.only(bottom: 16.0),
@@ -513,11 +552,11 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
         keyboardType: TextInputType.multiline,
         maxLines: null,
         initialValue: _data.notes,
+        textCapitalization: TextCapitalization.sentences,
         onSaved: (n) {
           _data.notes = n;
         },
-        decoration:
-        submissionDecoration(labelText: "Notes"),
+        decoration: submissionDecoration(labelText: "Notes"),
       ),
     ];
   }

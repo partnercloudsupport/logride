@@ -7,6 +7,7 @@ import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/widgets/attractions_page/experience_button.dart';
 import 'package:log_ride/ui/details_page.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 
 class AttractionListEntry extends StatefulWidget {
   AttractionListEntry(
@@ -77,15 +78,29 @@ class AttractionListState extends State<AttractionListEntry> {
                         .subhead
                         .apply(color: textColor),
                   ),
-                  Text(
-                      widget.attractionData.upcoming
-                          ? "Opening Soon"
-                          : widget.attractionData.typeLabel,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context)
-                          .textTheme
-                          .subtitle
-                          .apply(color: subtitleTextColor))
+                  Expanded(
+                      child: Row(
+                    children: <Widget>[
+                      Text(
+                          widget.attractionData.upcoming
+                              ? "Opening Soon"
+                              : widget.attractionData.typeLabel,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context)
+                              .textTheme
+                              .subtitle
+                              .apply(color: subtitleTextColor)),
+                      Padding(
+                          padding: EdgeInsets.all(5.0),
+                          child: Icon(
+                            widget.attractionData.photoArtist != ""
+                                ? Feather.getIconData("camera")
+                                : null,
+                            color: subtitleTextColor,
+                            size: 17.0,
+                          ))
+                    ],
+                  ))
                 ],
               )),
               // If the button's not there for any reason, just show an empty container instead. Prevents null errors.

@@ -46,12 +46,6 @@ class _HomePageState extends State<HomePage> {
 
   FirebaseAnalytics analytics = FirebaseAnalytics();
 
-  // Variables relating to the focus effect
-  SectionFocus focus = SectionFocus.balanced;
-  double _favesHeight;
-  Matrix4 _favesArrowRotation;
-  Matrix4 _allArrowRotation;
-
   // Used for debugging and future features
   String userName = "";
   String email = "";
@@ -65,55 +59,6 @@ class _HomePageState extends State<HomePage> {
   CheckInManager _checkInManager;
   bool isInPark = false;
   int inParkID = -1;
-
-  double _calculateFavoritesSectionHeight(SectionFocus focus) {
-    // Get our total possible height
-    double screenHeight = MediaQuery.of(context).size.height;
-    // Remove the menu-bar padding
-    screenHeight -= MediaQuery.of(context).padding.top;
-    screenHeight -= 16.0; // Remove the padding from our padding widget
-    screenHeight -= 50.0; // Remove the floating icon's padding
-    // We now have our total height to play with
-    double titleBarHeight = 61.0;
-    double allParksTitleBarHeight =
-        82.0; // AllParks is slightly bigger thanks to the icon for the search
-    // If we're not in focus, fall back to the titlebarheight
-    switch (focus) {
-      case SectionFocus.balanced:
-        // We split the screen 2:3 if both are in focus
-        return screenHeight * (2 / 5);
-      case SectionFocus.all:
-        // The favorites section is only the header, the other is the rest
-        return titleBarHeight;
-      case SectionFocus.favorites:
-        // Opposite of favorites
-        return screenHeight - allParksTitleBarHeight;
-    }
-    print("Error - calculateSectionHeight was given an improper focus");
-    return 0.0;
-  }
-
-  void _handleHeaderCallback(bool isFavorites) {
-    double downRadians = math.pi * 0.5;
-
-    setState(() {
-      if (isFavorites && focus == SectionFocus.favorites) {
-        focus = SectionFocus.balanced;
-        _favesArrowRotation = _allArrowRotation = Matrix4.rotationZ(0.0);
-      } else if (!isFavorites && focus == SectionFocus.all) {
-        focus = SectionFocus.balanced;
-        _favesArrowRotation = _allArrowRotation = Matrix4.rotationZ(0.0);
-      } else {
-        focus = isFavorites ? SectionFocus.favorites : SectionFocus.all;
-        _favesArrowRotation = isFavorites
-            ? Matrix4.rotationZ(downRadians)
-            : Matrix4.rotationZ(0.0);
-        _allArrowRotation = isFavorites
-            ? Matrix4.rotationZ(0.0)
-            : Matrix4.rotationZ(downRadians);
-      }
-    });
-  }
 
   void _handleSlidableCallback(
       ParkSlideActionType actionType, FirebasePark park) {
@@ -226,7 +171,7 @@ class _HomePageState extends State<HomePage> {
         SlideInRoute(
             widget: SubmitAttractionPage(
                 attractionTypes: _parksManager.attractionTypes,
-                existingData: attr,
+                existingData: isNewAttraction ? attr : BluehostAttraction.copy(attr),
                 parentPark: parent),
             dialogStyle: true,
             direction: SlideInDirection.RIGHT));
@@ -308,7 +253,6 @@ class _HomePageState extends State<HomePage> {
     // Fetch global parks list
     // Fetch user information
     // Build specific parks from user information & parks list
-    //widget.db.storeUserID(widget.uid);
 
     widget.db.storeUserID(widget.uid);
 
@@ -337,17 +281,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     widget.db.storeUserID(widget.uid);
-
-    _favesHeight = _calculateFavoritesSectionHeight(focus);
-
-    Widget arrowIcon = Transform(
-        transform: Matrix4.translationValues(-10, -10, 0.0),
-        child: Icon(
-          Icons.arrow_forward_ios,
-          color: Colors.grey,
-        ));
-
-    Duration animationDuration = const Duration(milliseconds: 400);
 
     Widget content = FutureBuilder(
       future: initialized,
@@ -386,33 +319,6 @@ class _HomePageState extends State<HomePage> {
               child: Container(
                   child: Column(
             children: <Widget>[
-              AnimatedContainer(
-                curve: Curves.linear,
-                duration: animationDuration,
-                height: _favesHeight,
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.0)),
-                  child: ParkListView(
-                    parksData: widget.db.getFilteredQuery(
-                        path: DatabasePath.PARKS, key: "favorite", value: true),
-                    favorites: true,
-                    slidableController: _slidableController,
-                    sliderActionCallback: _handleSlidableCallback,
-                    headerCallback: _handleHeaderCallback,
-                    onTap: _handleEntryCallback,
-                    arrowWidget: Transform(
-                      transform: Matrix4.translationValues(10, 10, 0.0),
-                      child: AnimatedContainer(
-                          curve: Curves.linear,
-                          duration: animationDuration,
-                          transform: _favesArrowRotation,
-                          alignment: Alignment(0.0, 30.0),
-                          child: arrowIcon),
-                    ),
-                  ),
-                ),
-              ),
               Expanded(
                 child: Card(
                   shape: RoundedRectangleBorder(
@@ -420,21 +326,13 @@ class _HomePageState extends State<HomePage> {
                   child: ParkListView(
                     parksData: widget.db
                         .getQueryForUser(path: DatabasePath.PARKS, key: ""),
-                    favorites: false,
+                    favsData: widget.db.getFilteredQuery(
+                        path: DatabasePath.PARKS, key: "favorite", value: true),
                     showSearch: true,
                     slidableController: _slidableController,
-                    headerCallback: _handleHeaderCallback,
                     onTap: _handleEntryCallback,
                     sliderActionCallback: _handleSlidableCallback,
-                    arrowWidget: Transform(
-                      transform: Matrix4.translationValues(10, 10, 0.0),
-                      child: AnimatedContainer(
-                          curve: Curves.linear,
-                          duration: animationDuration,
-                          transform: _allArrowRotation,
-                          alignment: Alignment(0.0, 30.0),
-                          child: arrowIcon),
-                    ),
+                    bottomPadding: true,
                   ),
                 ),
               )

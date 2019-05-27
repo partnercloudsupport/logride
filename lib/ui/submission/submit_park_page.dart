@@ -123,6 +123,7 @@ class _SubmitParkPageState extends State<SubmitParkPage> {
         decoration:
             submissionDecoration(labelText: "Name *", hintText: "Park Name"),
         initialValue: _data.parkName ?? "",
+        textCapitalization: TextCapitalization.words,
         validator: (value) {
           if (value.isEmpty) {
             return "Please enter the name of the park";
@@ -167,6 +168,7 @@ class _SubmitParkPageState extends State<SubmitParkPage> {
           hintText: "City",
           labelText: "City*"
         ),
+        textCapitalization: TextCapitalization.words,
         validator: (v) {
           if(v.isEmpty) {
             return "Please enter the city this park is located in";
@@ -187,6 +189,7 @@ class _SubmitParkPageState extends State<SubmitParkPage> {
             hintText: "State/Province",
             labelText: "State/Province"
         ),
+        textCapitalization: TextCapitalization.words,
         onSaved: (value) {
           cityState[1] = value;
           if(cityState[0] != null){
@@ -202,6 +205,7 @@ class _SubmitParkPageState extends State<SubmitParkPage> {
           hintText: "Country",
           labelText: "Country*"
         ),
+        textCapitalization: TextCapitalization.words,
         onSaved: (value) {
           _data.parkCountry = value;
         },

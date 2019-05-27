@@ -58,19 +58,13 @@ class ExperienceButton extends StatelessWidget {
       if(upcoming){
         iconWidget = Icon(
           FontAwesomeIcons.solidClock,
-          color: Color.fromARGB(255, 135, 207, 129),
+          color: buttonColor,
           size: 32.0
         );
 
         iconWidget = Padding(
           padding: EdgeInsets.only(left: 2.0),
-          child: Stack(
-            children: <Widget>[
-              Icon(FontAwesomeIcons.solidCircle, color: buttonColor, size: 32.0),
-              iconWidget,
-              Icon(FontAwesomeIcons.circle, color: buttonColor, size: 32.0)
-            ],
-          ),
+          child: iconWidget
         );
       } else if (data.numberOfTimesRidden > 0) {
         // Plus button is displayed when there's at least one count and incrementor isn't on
