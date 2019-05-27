@@ -85,3 +85,6 @@
 - Opening/Closing date/year together. ✔
 - Submission entries have proper automatic capitalization ✔
 - Eliminate Favorites Section (Sorted Alphabetically) ✔
+
+## Version 0.6.1
+- Fixed issue with calculating user statistics
