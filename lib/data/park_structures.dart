@@ -191,11 +191,14 @@ class BluehostPark {
 
     newParkData.initials = "";
     newParkData.parkName.split(" ").forEach((String word) {
+      // Prevent improper names from crashing the app
+      if(word.length == 0 || word == null){
+        return;
+      }
       newParkData.initials += word[0];
     });
 
     newParkData.initials = newParkData.initials.replaceAll(RegExp("[^a-zA-Z]"), "");
-
     // Single letter initials are removed.
     if(newParkData.initials.length <= 1) {
       newParkData.initials = "";
