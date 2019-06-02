@@ -181,7 +181,6 @@ class StatsCalculator {
   }
 
   Future<UserStats> countStats() async {
-    print("Calculating user stats...");
     // Since we're calculating user stats fresh each time, we don't have to wait for the old values to load
     UserStats stats = UserStats();
 
@@ -190,9 +189,8 @@ class StatsCalculator {
     dynamic rawResponse =
         await db.getEntryAtPath(path: DatabasePath.PARKS, key: "");
 
-    List entries = Map.from(rawResponse).values.toList();
 
-    print("Got ${userParks.length} parks");
+    List entries = Map.from(rawResponse).values.toList();
 
     entries.forEach((e) {
       FirebasePark park = FirebasePark.fromMap(Map.from(e));
@@ -204,6 +202,10 @@ class StatsCalculator {
     // Base Step: Calculate Park Stats
     for (int i = 0; i < userParks.length; i++) {
       FirebasePark park = userParks[i];
+
+      // Sometime a null park pops up. Treat it like it doesn't exist and skip over it.
+      if(park.name == null) continue;
+
       BluehostPark furtherData = getBluehostParkByID(serverParks, park.parkID);
       // For each park, we need to do a few things
       // 1) Add to checkins
@@ -225,19 +227,44 @@ class StatsCalculator {
 
       // Then we run the loop for each of the user's attractions for the park
       dynamic rawResponse = await db
-          .getEntryAtPath(path: DatabasePath.ATTRACTIONS, key: "${park.parkID}");
+          .getEntryAtPath(path: DatabasePath.ATTRACTIONS, key: "${park.parkID}").timeout(Duration(milliseconds: 500), onTimeout: () => null);
+
       if(rawResponse != null) {
-        List attractionEntries = Map.from(rawResponse).values.toList();
+        List attractionEntries = List();
+
+        // Occasionally, firebase will send us a "list" with a null entry instead
+        // Not sure why, as the null entry does not appear in the firebase console.
+        // In cases where this occurs, the map fails, so we just make it a list instead
+        // and filter out the nulls.
+        try {
+          attractionEntries = Map
+              .from(rawResponse)
+              .values
+              .toList();
+        } catch (e) {
+          List temp = List.from(rawResponse);
+          temp.forEach((i) {
+            if(i != null){
+              attractionEntries.add(i);
+            }
+          });
+        }
 
         attractionEntries.forEach((data) {
           _calculateAttractionStats(data, stats, furtherData.attractions);
         });
+      } else {
+        continue;
       }
     }
+
+    print("Tada!");
 
     stats.countries = countryLabelList.length;
 
     // Finally, we sort and chop the top lists
+
+    print("Done with park stats");
 
     // TOP PARKS
     List<BluehostPark> topParkLabels =
@@ -285,6 +312,8 @@ class StatsCalculator {
       });
       stats.topAttractions = sortedAttractions;
     }
+
+    print(stats.parksCompleted);
 
     _setServerStats(stats);
 

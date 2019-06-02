@@ -21,12 +21,16 @@ class DurationPickerFormField extends StatelessWidget {
             behavior: HitTestBehavior.opaque,
             onTap: () async {
               // Open Dialog
-              dynamic result = await showDialog(context: context, builder: (BuildContext context) {
-                return DurationPickerDialog(initialValue: state.value,);
-              });
+              dynamic result = await showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return DurationPickerDialog(
+                      initialValue: state.value,
+                    );
+                  });
               // Get result
               // Tell State
-              if(result != state.value) {
+              if (result != state.value) {
                 state.didChange(result);
               }
             },
@@ -42,12 +46,23 @@ class DurationPickerFormField extends StatelessWidget {
                         .title
                         .apply(fontWeightDelta: -1, color: Colors.grey[700]),
                   ),
-                  Text(
-                      "${state.value.inMinutes}m ${state.value.inSeconds % 60}s",
-                      style: Theme.of(context)
-                          .textTheme
-                          .title
-                          .apply(fontWeightDelta: -1, color: Theme.of(context).primaryColor))
+                  Expanded(
+                    child: Text(
+                        (state.value.inMinutes + state.value.inSeconds == 0)
+                            ? ""
+                            : "${state.value.inMinutes}m ${state.value.inSeconds % 60}s",
+                        textAlign: TextAlign.right,
+                        style: Theme.of(context).textTheme.title.apply(
+                            fontWeightDelta: -1,
+                            color: Theme.of(context).primaryColor)),
+                  ),
+                  if (state.value != Duration.zero)
+                    IconButton(
+                      icon: Icon(Icons.clear),
+                      onPressed: () {
+                        state.didChange(Duration.zero);
+                      },
+                    )
                 ],
               ),
             ),
@@ -88,8 +103,7 @@ class _DurationPickerDialogState extends State<DurationPickerDialog> {
           child: CupertinoTimerPicker(
             initialTimerDuration: widget.initialValue,
             mode: CupertinoTimerPickerMode.ms,
-            onTimerDurationChanged: (d) =>
-                setState(() => _duration = d),
+            onTimerDurationChanged: (d) => setState(() => _duration = d),
           ),
         )
       ],

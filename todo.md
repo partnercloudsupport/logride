@@ -12,8 +12,6 @@
 ## Changes
 - Better multi-select support for adding attractions
 - Completely different check-in UI (get rid of the pop-up)
-- Turn on tally on check-in
-- New UI for lists of things in user submission
  
 ## Bugs
 - Weird issue with web-fetching and parsing when handling some iOS data
@@ -21,21 +19,20 @@
  
 ## Notes from iOS
 - Fix Font Size depending on phone size
-- Blocking Arrow
 - Increase tap icon area for experience
 - Make multiple modified by (don't mess with it when submitting /
   modifying thing)
-- (IGNORE FOR NOW) Make favorites smol when there's nothing in it
-- Search should show defunct and seasonal regardless of setting
+  -  IOS doesn't follow this behavior, ignore for now
+ 
 - Haptic - Increment thing (maybe)
-    
-    
+- Lat/Long submission UI needs total redo
+- Link to copyright info for each copyright type
+- Adding default null attraction type
+- Firebase Analytics "Add New Attraction" event for checking off an
+  attraction for the first time.
+
 - Text Pop-up for parks without attractions
 - Models & Manufacturers IDs and drop-downs
-- Switch tally to be default ✔
-- Eliminate Favorites Section (Sorted Alphabetically)
-- Photo icon on attraction subtitles
-- Upcoming attraction
 - Increase satisfaction of incrementing attractions.
 
 
@@ -68,3 +65,26 @@
  - Attraction Site
   -   Is partner site, display "via {formatted url}" ✔
 -  Search on initials (park) ✔
+- Upcoming attraction ✔
+
+## Version 0.5.3
+- Ignore defunct toggle setting for defunct parks ✔
+- Switch tally to be default ✔
+
+## Version 0.6.0
+- Fix passing reference ✔
+- Add inversions / Addl Contributors to the attraction modification page
+  ✔
+- Change date display to words ✔
+- Show defunct attractions despite setting when searching ✔
+- Show defunct attractions counter regardless of setting with data ✔
+- New UI for lists of things in user submission ✔
+- Search should show defunct and seasonal regardless of setting ✔
+- Fill on upcoming attraction should be white ✔
+- Photo icon on attraction subtitles ✔
+- Opening/Closing date/year together. ✔
+- Submission entries have proper automatic capitalization ✔
+- Eliminate Favorites Section (Sorted Alphabetically) ✔
+
+## Version 0.6.1
+- Fixed issue with calculating user statistics

@@ -117,7 +117,7 @@ class _AttractionsPageState extends State<AttractionsPage>
                   FullParkProgressBar(
                     oldRatio: tempOldRatio,
                     showSeasonal: parkData.showSeasonal,
-                    showDefunct: parkData.showDefunct,
+                    showDefunct: parkData.showDefunct || !getBluehostParkByID(widget.pm.allParksInfo, parkData.parkID).active,
                     totalCount: parkData.totalRides,
                     riddenCount: parkData.ridesRidden,
                     seasonalCount: parkData.numSeasonalRidden,
