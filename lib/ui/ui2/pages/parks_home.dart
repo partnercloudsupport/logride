@@ -10,6 +10,10 @@ import 'package:log_ride/widgets/home_page/park_list_entry.dart';
 import 'package:log_ride/widgets/home_page/parks_list_advanced.dart';
 import 'package:log_ride/widgets/shared/styled_dialog.dart';
 
+class ParksHomeFocus extends ValueNotifier<bool> {
+  ParksHomeFocus(bool inFocus) : super(inFocus);
+}
+
 class ParksHome extends StatefulWidget {
   ParksHome({
     Key key,
@@ -19,6 +23,7 @@ class ParksHome extends StatefulWidget {
     this.webFetcher,
     this.parksManager,
     this.username,
+    this.parksHomeFocus
   }) : super(key: key);
 
   final BaseAuth auth;
@@ -27,6 +32,7 @@ class ParksHome extends StatefulWidget {
   final WebFetcher webFetcher;
   final String uid;
   final String username;
+  final ParksHomeFocus parksHomeFocus;
 
   @override
   ParksHomeState createState() => ParksHomeState();
@@ -46,12 +52,13 @@ class ParksHomeState extends State<ParksHome> {
     openParkWithID(park.parkID);
   }
 
-  void openParkWithID(int id) {
+  void openParkWithID(int id) async {
     BluehostPark serverPark = getBluehostParkByID(widget.parksManager.allParksInfo, id);
     if(serverPark.attractions == null || serverPark == null) {
       return;
     }
-    Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) {
+    widget.parksHomeFocus.value = false;
+    await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) {
       return AttractionsPage(
         pm: widget.parksManager,
         db: widget.db,
@@ -61,6 +68,7 @@ class ParksHomeState extends State<ParksHome> {
             print("$a, $n"), //TODO: Get submissionCallback working
       );
     }));
+    widget.parksHomeFocus.value = true;
   }
 
   void slidableActionTap(

@@ -39,13 +39,16 @@ class _HomeState extends State<Home> {
 
   Map<Tabs, Widget> rootWidgets;
 
-  int _pageIndex = 2;
+  static const int homeIndex = 2;
+  int _pageIndex = homeIndex;
 
   WebFetcher _webFetcher;
   ParksManager _parksManager;
   Future<bool> initialized;
   CheckInManager _checkInManager;
   String userName;
+
+  ParksHomeFocus _parksHomeFocus = ParksHomeFocus(true);
 
   /// Pushes the parks search page to the top of the navigator stack
   void _handleParkAdditionUI() {
@@ -64,9 +67,6 @@ class _HomeState extends State<Home> {
   /// Tells the parksManager to add park of parkID to a user's account.
   /// Returns a future, which returns true upon a park being successfully added
   Future<bool> _handleAddIDCallback(int parkID) async {
-
-
-
     await _parksManager.addParkToUser(parkID);
     return true;
   }
@@ -75,6 +75,10 @@ class _HomeState extends State<Home> {
   void _handleChainParkAdd(int parkID) async {
     await _handleAddIDCallback(parkID);
     parksHomeKey.currentState.openParkWithID(parkID);
+  }
+
+  void _handleHomeFocusChanged(){
+    setState((){});
   }
 
   @override
@@ -92,11 +96,14 @@ class _HomeState extends State<Home> {
         parksManager: _parksManager,
         username: userName,
         webFetcher: _webFetcher,
-        key: parksHomeKey
+        key: parksHomeKey,
+        parksHomeFocus: _parksHomeFocus,
       ),
       Tabs.LISTS: Center(child: Text("Lists")),
       Tabs.SETTINGS: Center(child: Text("Settings"))
     };
+
+    _parksHomeFocus.addListener(_handleHomeFocusChanged);
     
     super.initState();
   }
@@ -137,7 +144,7 @@ class _HomeState extends State<Home> {
     // We don't want to rebuild if we're already on that page, but...
     if(_pageIndex == index){
       // ... we DO want to open up the park addition page if we're already home
-      if(index == 2) _handleParkAdditionUI();
+      if(index == homeIndex) _handleParkAdditionUI();
       return;
     }
 
@@ -171,8 +178,9 @@ class _HomeState extends State<Home> {
                 alignment: Alignment.bottomCenter,
                 child: ContextNavBar(
                   menuTap: _onMenuBarItemTapped,
-                  homeIndex: 2,
+                  homeIndex: homeIndex,
                   index: _pageIndex,
+                  homeFocus: _parksHomeFocus.value,
                   items: [
                     ContextNavBarItem(
                         label: "News",

@@ -53,6 +53,8 @@
     -  New attractions UI
     -  Add navigation
     -  New Search UI
+    -  Addition of Attractions ✔
+    -  Main page UI ✔
   - Lists
     - Add Lists
   - Settings / Preferences

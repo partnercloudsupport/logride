@@ -11,6 +11,7 @@ class ContextNavBar extends StatelessWidget {
       this.sink = 8,
       this.homeIndex = 0,
       this.menuTap,
+      this.homeFocus,
       @required this.items});
 
   final int index;
@@ -20,6 +21,7 @@ class ContextNavBar extends StatelessWidget {
   final int homeIndex;
   final Function menuTap;
   final List<ContextNavBarItem> items;
+  final bool homeFocus;
 
   @override
   Widget build(BuildContext context) {
@@ -79,14 +81,16 @@ class ContextNavBar extends StatelessWidget {
     Widget display = Image.asset("assets/plain.png");
 
     if (index == homeIndex) {
-      display = Container(
-        constraints: BoxConstraints.expand(),
-        child: Icon(
-          FontAwesomeIcons.plus,
-          color: APP_ICON_FOREGROUND,
-          size: 48,
-        ),
-      );
+      if(homeFocus){
+        display = Container(
+          constraints: BoxConstraints.expand(),
+          child: Icon(
+            FontAwesomeIcons.plus,
+            color: APP_ICON_FOREGROUND,
+            size: 48,
+          ),
+        );
+      }
     }
 
     return ClipRect(
@@ -95,10 +99,8 @@ class ContextNavBar extends StatelessWidget {
       transform: Matrix4.translationValues(0, sink, 0),
       foregroundDecoration: BoxDecoration(
           shape: BoxShape.circle, border: Border.all(color: Colors.white)),
-      decoration: BoxDecoration(
-        color: APP_ICON_BACKGROUND,
-        shape: BoxShape.circle
-      ),
+      decoration:
+          BoxDecoration(color: APP_ICON_BACKGROUND, shape: BoxShape.circle),
       child: ClipOval(
           child: AspectRatio(
         aspectRatio: 1.0,
