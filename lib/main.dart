@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
                   fontSize: 26.0,
                   fontWeight: FontWeight.bold
                 ))),
-        home: LandingPage(auth: Auth(), db: db,));
+      home: LandingPage(auth: Auth(), db: db,));
   }
 }
 

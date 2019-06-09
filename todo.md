@@ -36,6 +36,29 @@
 - Increase satisfaction of incrementing attractions.
 
 
+## UI2
+- Independent navigation for each page/tab ✔
+- Icon / Behavior switching for home button
+  -   Smooth animations? Animated Icon transitions?
+- Tie park & user data to newhome, removing from the parks_home
+- Tab Functionality
+  - News
+    -  Add functionality to webfetcher
+    -  Add functionality to FirebaseDB Manager
+    -  Create UI
+  - Stats
+    -  Link UI page to stats
+  - Home
+    -  New parks UI
+    -  New attractions UI
+    -  Add navigation
+    -  New Search UI
+  - Lists
+    - Add Lists
+  - Settings / Preferences
+    - Add settings
+    - Add logout button / account details
+- Cross-fade animations/transitions
 
 # Complete
 

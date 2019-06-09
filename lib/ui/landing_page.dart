@@ -3,6 +3,7 @@ import 'package:log_ride/data/auth_manager.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/ui/home.dart';
 import 'package:log_ride/ui/auth_page.dart';
+import 'package:log_ride/ui/ui2/new-home.dart';
 
 enum AuthStatus {
   notLoggedIn,
@@ -79,11 +80,11 @@ class _LandingPageState extends State<LandingPage> {
         break;
       case AuthStatus.loggedIn:
         if(userID.length > 0 && userID != null){
-          return HomePage(
-            auth: widget.auth,
+          return Home(
             db: widget.db,
+            auth: widget.auth,
+            onSignedOut: _onSignedOut,
             uid: userID,
-            onSignedOut: _onSignedOut
           );
         } else {
           return _buildWaitingScreen(context);

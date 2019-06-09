@@ -133,7 +133,7 @@ class _HomePageState extends State<HomePage> {
             )));
   }
 
-  void _handleAddCallback(BluehostPark park) {
+  void _handleAddCallback(BluehostPark park, bool _) {
     _parksManager.addParkToUser(park.id);
   }
 

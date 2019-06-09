@@ -17,7 +17,9 @@ class FirebaseParkListView extends StatefulWidget {
       this.parkTapCallback,
       this.sliderActionCallback,
       this.filter,
-      this.bottomPadding = false});
+      this.bottomPadding = false,
+      this.shrinkWrap = false,
+      this.physics});
 
   final Query allParksQuery;
   final Query favsQuery;
@@ -29,6 +31,9 @@ class FirebaseParkListView extends StatefulWidget {
   final ParksFilter filter;
 
   final bool bottomPadding;
+  final bool shrinkWrap;
+
+  final ScrollPhysics physics;
 
   @override
   _FirebaseParkListViewState createState() => _FirebaseParkListViewState();
@@ -216,7 +221,7 @@ class _FirebaseParkListViewState extends State<FirebaseParkListView> {
         parkData: _builtList[index],
         slidableController: _slidableController,
       );
-      if (index + 1 == _builtList.length) {
+      if (index + 1 == _builtList.length && widget.bottomPadding) {
         builtWidget = Padding(
           padding: const EdgeInsets.only(bottom: 60),
           child: builtWidget,
@@ -258,6 +263,9 @@ class _FirebaseParkListViewState extends State<FirebaseParkListView> {
         key: _animatedListKey,
         initialItemCount: _builtList.length,
         itemBuilder: _entryBuilder,
+        shrinkWrap: widget.shrinkWrap,
+        physics: widget.physics,
+        padding: const EdgeInsets.only(top: 8.0),
       );
     } else {
       return Center(child: CircularProgressIndicator());

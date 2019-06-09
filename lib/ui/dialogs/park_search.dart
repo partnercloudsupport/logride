@@ -2,58 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/search_comparators.dart';
-import 'package:log_ride/ui/standard_page_structure.dart';
 import 'package:log_ride/widgets/shared/generic_list_entry.dart';
-import 'package:log_ride/widgets/shared/content_frame.dart';
 
-class SearchParksCard extends StatefulWidget {
-  SearchParksCard({Key key, this.parkList, this.tapBack, this.suggestPark})
-      : super(key: key);
+class AllParkSearchPage extends StatefulWidget {
+  AllParkSearchPage({this.allParks, this.tapBack, this.suggestPark});
 
-  final List<BluehostPark> parkList;
-  final Function(BluehostPark) tapBack;
+  final List<BluehostPark> allParks;
+  final Function(BluehostPark park, bool openPark) tapBack;
   final VoidCallback suggestPark;
 
   @override
-  _SearchParksCardState createState() => new _SearchParksCardState();
+  _AllParkSearchPageState createState() => _AllParkSearchPageState();
 }
 
-class _SearchParksCardState extends State<SearchParksCard> {
+class _AllParkSearchPageState extends State<AllParkSearchPage> {
   TextEditingController editingController = TextEditingController();
 
-  var workingList = List<BluehostPark>();
+  List<BluehostPark> workingList = List<BluehostPark>();
+  bool multiMode = false;
+  String search = "";
 
   @override
   void initState() {
-    workingList.addAll(widget.parkList);
+    workingList.addAll(widget.allParks);
     workingList.sort((a, b) => a.parkName.compareTo(b.parkName));
     super.initState();
-  }
-
-  void filterListBySearch(String search) {
-    List<BluehostPark> tempToSearch = List<BluehostPark>();
-    tempToSearch.addAll(widget.parkList);
-    if (search.isNotEmpty) {
-      List<BluehostPark> tempToDisplay = List<BluehostPark>();
-      tempToSearch.forEach((BluehostPark park) {
-        // Searching for both the park name, location, former park name, or park id with case ignored
-        if (isBluehostParkInSearch(park, search))  {
-          tempToDisplay.add(park);
-        }
-      });
-      tempToDisplay.sort((a, b) => a.parkName.compareTo(b.parkName));
-      setState(() {
-        workingList.clear();
-        workingList.addAll(tempToDisplay);
-      });
-      return;
-    } else {
-      setState(() {
-        workingList.clear();
-        workingList.addAll(widget.parkList);
-        workingList.sort((a, b) => a.parkName.compareTo(b.parkName));
-      });
-    }
   }
 
   void suggestPark() {
@@ -63,87 +36,97 @@ class _SearchParksCardState extends State<SearchParksCard> {
     widget.suggestPark();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: Stack(children: <Widget>[
-        Column(
-          children: <Widget>[
-            TextField(
-              autofocus: true,
-              onChanged: (value) {
-                filterListBySearch(value);
-              },
-              decoration: InputDecoration(
-                labelText: "Add Park",
-                hintText: "Search for new parks",
-                prefixIcon: Icon(Icons.search),
-              ),
-              controller: editingController,
-            ),
-            Expanded(
-              child: ListView.builder(
-                  itemCount: workingList.length + 1,
-                  itemBuilder: (context, index) {
-                    if (workingList.length == index) {
-                      BluehostPark placeholder = BluehostPark(id: -1);
-                      placeholder.parkName = "Park Not Found?";
-                      placeholder.parkCity =
-                          "To add it to our database, please suggest it here";
+  void _handleLongEntryTap(BluehostPark park){
+    if(park.filled) return;
 
-                      return GenericListEntry(
-                        park: placeholder,
-                        onTap: (b) => suggestPark(),
-                        fillable: false,
-                      );
-                    } else {
-                      return GenericListEntry(
-                          park: workingList[index], onTap: widget.tapBack);
-                    }
-                  }),
-            )
-          ],
-        ),
-      ]),
-    );
+    if(!multiMode) multiMode = true;
+    widget.tapBack(park, false);
   }
-}
 
-class AllParkSearchCard extends StatelessWidget {
-  AllParkSearchCard({this.allParkData, this.tapBack, this.suggestPark});
+  void _handleShortEntryTap(BluehostPark park) {
+    if(park.filled) return;
 
-  final List<BluehostPark> allParkData;
-  final Function(BluehostPark) tapBack;
-  final VoidCallback suggestPark;
-
-  @override
-  Widget build(BuildContext context) {
-    return ContentFrame(
-      child: Card(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-          child: SearchParksCard(parkList: allParkData, tapBack: tapBack, suggestPark: suggestPark,)),
-    );
+    if(!multiMode) {
+      widget.tapBack(park, true);
+      Navigator.of(context).pop();
+      return;
+    } else {
+      widget.tapBack(park, false);
+      return;
+    }
   }
-}
-
-class AllParkSearchPage extends StatelessWidget {
-  AllParkSearchPage({this.allParks, this.tapBack, this.suggestPark});
-
-  final List<BluehostPark> allParks;
-  final Function(BluehostPark) tapBack;
-  final VoidCallback suggestPark;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         resizeToAvoidBottomPadding: true,
-        backgroundColor: Colors.transparent,
-        body: StandardPageStructure(
-          iconFunction: () => Navigator.of(context).pop(),
-          iconDecoration: FontAwesomeIcons.home,
-          content: <Widget>[
-            AllParkSearchCard(allParkData: allParks, tapBack: tapBack, suggestPark: suggestPark,)
+        body: CustomScrollView(
+          slivers: <Widget>[
+            SliverAppBar(
+              leading: IconButton(
+                icon: Icon(FontAwesomeIcons.arrowLeft, color: Colors.white,),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+              automaticallyImplyLeading: false,
+              title: TextField(
+                autofocus: true,
+                onChanged: (value) {
+                  if(mounted){
+                    setState(() {
+                      search = value;
+                    });
+                  }
+                },
+                decoration: InputDecoration(
+                  hintText: "Search for new parks",
+                  suffixIcon: Icon(
+                    FontAwesomeIcons.search,
+                    color: Colors.white,
+                  ),
+                  hintStyle: Theme.of(context).textTheme.subhead.apply(color: Colors.white),
+                  border: InputBorder.none
+                ),
+                style: Theme.of(context)
+                    .textTheme
+                    .title
+                    .apply(color: Colors.white),
+                controller: editingController,
+              ),
+              floating: true,
+              snap: true,
+            ),
+            SliverList(
+              delegate: SliverChildListDelegate(
+                [
+                  ListView.builder(
+                    padding: const EdgeInsets.only(top: 4.0),
+                      itemCount: workingList.length + 1,
+                      itemBuilder: (context, index) {
+                        if (workingList.length == index) {
+                          BluehostPark placeholder = BluehostPark(id: -1);
+                          placeholder.parkName = "Park Not Found?";
+                          placeholder.parkCity =
+                              "To add it to our database, please suggest it here";
+
+                          return GenericListEntry(
+                            park: placeholder,
+                            onTap: (b) => suggestPark(),
+                            longTap: (b) => suggestPark(),
+                            fillable: false,
+                          );
+                        } else {
+                          if(isBluehostParkInSearch(workingList[index], search)) {
+                            return GenericListEntry(
+                                park: workingList[index], onTap: _handleShortEntryTap, longTap: _handleLongEntryTap,);
+                          } else {
+                            return Container();
+                          }
+                        }
+                      }, shrinkWrap: true,
+                  physics: ClampingScrollPhysics(),)
+                ],
+              ),
+            )
           ],
         ));
   }

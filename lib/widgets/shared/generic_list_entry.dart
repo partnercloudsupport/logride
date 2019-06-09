@@ -3,10 +3,11 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:log_ride/data/park_structures.dart';
 
 class GenericListEntry extends StatefulWidget{
-  GenericListEntry({this.park, this.onTap, this.fillable = true});
+  GenericListEntry({this.park, this.onTap, this.longTap, this.fillable = true});
 
   final BluehostPark park;
   final Function(BluehostPark) onTap;
+  final Function(BluehostPark) longTap;
   final bool fillable;
 
   @override
@@ -65,10 +66,16 @@ class _GenericListState extends State<GenericListEntry> {
             ],
           )),
       onTap: (){
+        widget.onTap(widget.park);
         setState((){
           widget.park.filled = true;
         });
-        widget.onTap(widget.park);
+      },
+      onLongPress: (){
+        widget.longTap(widget.park);
+        setState(() {
+          widget.park.filled = true;
+        });
       },
       //behavior: HitTestBehavior.opaque,
     );
