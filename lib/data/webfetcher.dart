@@ -16,7 +16,7 @@ enum WebLocation {
 
 enum SubmissionType { ATTRACTION_NEW, ATTRACTION_MODIFY, PARK, IMAGE }
 
-const _VERSION_URL = "Version1.2.0";
+const _VERSION_URL = "Version1.2.1";
 
 class WebFetcher {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
@@ -157,7 +157,7 @@ class WebFetcher {
       "scoreCard": attr.scoreCard ? 1 : 0,
       "formerNames":
           (attr.formerNames == null) ? "" : attr.formerNames.join(";"),
-      "additionalCont": (attr.additionalContributors == null)
+      "addContributors": (attr.additionalContributors == null)
           ? ""
           : attr.additionalContributors.join(";"),
       "model": attr.model ?? "",

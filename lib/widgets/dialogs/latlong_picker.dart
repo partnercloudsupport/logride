@@ -222,7 +222,11 @@ class LatLongField extends StatelessWidget {
       decoration: submissionDecoration(),
       child: FormField<LatLng>(
         initialValue: null,
-        onSaved: (d) => onSaved([d.latitude, d.longitude]),
+        onSaved: (d) {
+          if(d != null){
+            onSaved([d.latitude, d.longitude]);
+          }
+        },
         builder: (FormFieldState<LatLng> state) {
           return GestureDetector(
             behavior: HitTestBehavior.opaque,
