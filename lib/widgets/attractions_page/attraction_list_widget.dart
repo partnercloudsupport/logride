@@ -198,19 +198,43 @@ class _AttractionsListViewState extends State<AttractionsListView> {
               return transaction;
             });
         break;
-
-      /// Technically deprecated, isn't used anywhere in the code
       case ExperienceAction.REMOVE:
+
         // We don't want this going negative.
-        if (data.numberOfTimesRidden > 0) {
-          data.numberOfTimesRidden--;
-          widget.db.setEntryAtPath(
-              path: DatabasePath.ATTRACTIONS,
-              key: widget.parentPark.parkID.toString() +
-                  "/" +
-                  data.rideID.toString(),
-              payload: data.toMap());
+        if (data.numberOfTimesRidden < 1) {
+          break;
         }
+
+        widget.db.performTransaction(
+            path: DatabasePath.ATTRACTIONS,
+            key: widget.parentPark.parkID.toString() +
+                "/" +
+                data.rideID.toString(),
+            transactionHandler: (transaction) {
+              // If there's currently no entry in the firebase for this attraction,
+              // our value will be null. In this case, we're relying on our backup
+              // local data.
+              FirebaseAttraction attraction;
+              if (transaction.value == null) {
+                attraction = data;
+              } else {
+                attraction =
+                    FirebaseAttraction.fromMap(Map.from(transaction.value));
+              }
+
+
+              // If we're not using the incrementor, we'll be setting the number of time ridden to zero
+              if (!widget.parentPark.incrementorEnabled) {
+                attraction.numberOfTimesRidden = 0;
+              } else {
+                attraction.numberOfTimesRidden =
+                    attraction.numberOfTimesRidden - 1;
+              }
+
+              // Return it back to the map/json form before giving it back to the transaction
+              transaction.value = attraction.toMap();
+              return transaction;
+            });
         break;
     }
   }
