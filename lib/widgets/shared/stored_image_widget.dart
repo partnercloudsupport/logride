@@ -58,7 +58,7 @@ class _FirebaseAttractionImageState extends State<FirebaseAttractionImage> {
                   context: context,
                   builder: (ctx) {
                     return SubmitAttractionPhoto(widget.attractionData, widget.userName, widget.parkName);
-                  }), // TODO: Implement Image Submission
+                  }),
               child: Container(
                 constraints: BoxConstraints.expand(),
                 child: Column(

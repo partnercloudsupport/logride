@@ -11,14 +11,12 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
-import 'package:log_ride/widgets/shared/content_frame.dart';
 import 'package:log_ride/widgets/shared/embedded_map_entry.dart';
 import 'package:log_ride/widgets/shared/side_strike_text.dart';
 import 'package:log_ride/widgets/shared/stored_image_widget.dart';
 import 'package:log_ride/widgets/shared/photo_credit_text.dart';
 import 'package:log_ride/widgets/shared/title_bar_icon.dart';
 import 'package:log_ride/ui/dialogs/attraction_scorecard_page.dart';
-import 'package:log_ride/ui/standard_page_structure.dart';
 
 enum _DetailsType { PARK_DETAILS, ATTRACTION_DETAILS }
 
@@ -34,7 +32,8 @@ class DetailsPage extends StatefulWidget {
 
   final BaseDB db;
   final dynamic data;
-  final String parkName; // Used because image submission requires the park name. gah.
+  final String
+      parkName; // Used because image submission requires the park name. gah.
   final String userName;
   final FirebaseAttraction userData;
   final Function(bool first, DateTime newTime) dateChangeHandler;
@@ -75,13 +74,10 @@ class _DetailsPageState extends State<DetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.transparent,
-        resizeToAvoidBottomPadding: false,
-        body: StandardPageStructure(
-          iconFunction: () => Navigator.of(context).pop(),
-          iconDecoration: FontAwesomeIcons.info,
-          content: <Widget>[_buildDetailsCard(context)],
-        ));
+      backgroundColor: Colors.transparent,
+      resizeToAvoidBottomPadding: false,
+      body: _buildDetailsCard(context),
+    );
   }
 
   Widget _buildDetailsCard(context) {
@@ -102,34 +98,53 @@ class _DetailsPageState extends State<DetailsPage> {
     List<Widget> userDetails = [Container()];
     userDetails = _buildUserDetails(context);
 
-    return ContentFrame(
-        child: Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-      child: Column(
+    return SafeArea(
+      child: Stack(
         children: <Widget>[
-          Padding(
-            padding: EdgeInsets.only(top: 34),
-            child: Container(),
+          GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              constraints: BoxConstraints.expand(),
+              child: Container(),
+            ),
           ),
-          // Title Bar
-          _buildTitleBar(context),
+          Padding(
+            padding: const EdgeInsets.only(top: 61.0),
+            child: Card(
+              shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.vertical(top: Radius.circular(15.0))),
+              margin: EdgeInsets.zero,
+              child: Column(
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.only(top: 8),
+                    child: Container(),
+                  ),
+                  // Title Bar
+                  _buildTitleBar(context),
 
-          Expanded(
-            child: ListView(
-              children: <Widget>[
-                // Map Section is built only if map details are passed.
-                mapWidget,
-                mediaWidget,
-                // Status Section
-                statusRow,
-              ]
-                ..addAll(furtherDetails)
-                ..addAll(userDetails),
+                  Expanded(
+                    child: ListView(
+                      children: <Widget>[
+                        // Map Section is built only if map details are passed.
+                        mapWidget,
+                        mediaWidget,
+                        // Status Section
+                        statusRow,
+                      ]
+                        ..addAll(furtherDetails)
+                        ..addAll(userDetails),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
       ),
-    ));
+    );
   }
 
   Widget _buildTitleBar(BuildContext context) {
@@ -423,12 +438,12 @@ class _DetailsPageState extends State<DetailsPage> {
             _furtherDetailsTextEntry("Manufacturer", attraction.manufacturer));
 
       if (attraction.additionalContributors.length != 0)
-        details.add(_furtherDetailsTextEntry(
-            "Additional Contributors", attraction.additionalContributors.join("\n")));
+        details.add(_furtherDetailsTextEntry("Additional Contributors",
+            attraction.additionalContributors.join("\n")));
 
       if (attraction.formerNames.length != 0)
-        details.add(
-            _furtherDetailsTextEntry("Former Names", attraction.formerNames.join("\n")));
+        details.add(_furtherDetailsTextEntry(
+            "Former Names", attraction.formerNames.join("\n")));
 
       if (attraction.model != "")
         details.add(_furtherDetailsTextEntry("Model", attraction.model));
@@ -480,20 +495,19 @@ class _DetailsPageState extends State<DetailsPage> {
         Uri partnerUri = Uri.parse(attraction.attractionLink);
         partnerURL = partnerUri.host;
 
-
-        Widget partnerButton = Padding(padding: const EdgeInsets.symmetric(horizontal: 8.0), child: InterfaceButton(
-          text: "Learn More Information",
-          subtext: "via $partnerURL",
-          color: Theme
-              .of(context)
-              .primaryColor,
-          textColor: Colors.white,
-          onPressed: () async {
-            if (await canLaunch(attraction.attractionLink)) {
-              launch(attraction.attractionLink);
-            }
-          },
-        ));
+        Widget partnerButton = Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: InterfaceButton(
+              text: "Learn More Information",
+              subtext: "via $partnerURL",
+              color: Theme.of(context).primaryColor,
+              textColor: Colors.white,
+              onPressed: () async {
+                if (await canLaunch(attraction.attractionLink)) {
+                  launch(attraction.attractionLink);
+                }
+              },
+            ));
         details.add(partnerButton);
       }
 

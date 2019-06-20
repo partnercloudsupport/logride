@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/auth_manager.dart';
@@ -7,9 +8,12 @@ import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/parks_manager.dart';
 import 'package:log_ride/data/webfetcher.dart';
 import 'package:log_ride/ui/dialogs/park_search.dart';
+import 'package:log_ride/ui/submission/submit_attraction_page.dart';
+import 'package:log_ride/ui/submission/submit_park_page.dart';
 import 'package:log_ride/ui/ui2/navigation/nav_bar.dart';
 import 'package:log_ride/ui/ui2/navigation/tab_navigation.dart';
 import 'package:log_ride/ui/ui2/pages/parks_home.dart';
+import 'package:log_ride/widgets/shared/styled_dialog.dart';
 
 enum Tabs { NEWS, STATS, MY_PARKS, LISTS, SETTINGS }
 
@@ -28,6 +32,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
 
   GlobalKey<ParksHomeState> parksHomeKey = GlobalKey<ParksHomeState>();
+
+  FirebaseAnalytics analytics = FirebaseAnalytics();
 
   Map<Tabs, GlobalKey<NavigatorState>> navigatorKeys = {
     Tabs.NEWS: GlobalKey<NavigatorState>(),
@@ -50,6 +56,37 @@ class _HomeState extends State<Home> {
 
   ParksHomeFocus _parksHomeFocus = ParksHomeFocus(true);
 
+  void _handleNewParkSubmission() async {
+    dynamic result = await Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
+      return SubmitParkPage();
+    }));
+
+    if (result == null) return;
+
+    BluehostPark newPark = result as BluehostPark;
+    int response = await _webFetcher.submitParkData(newPark, username: userName, uid: widget.uid);
+
+    if(response == 200){
+      analytics.logEvent(name: "new_park_sugggested");
+      showDialog(context: context, builder:(BuildContext context) {
+        return StyledDialog(
+          title: "Park Under Review",
+          body: "Thanks for submitting! Your park is now under review.",
+          actionText: "Ok",
+        );
+      });
+    } else {
+      showDialog(context: context, builder:(BuildContext context) {
+        return StyledDialog(
+          title: "Error during Submission",
+          body: "Something happened during the park submission process. Error: $response",
+          actionText: "Ok",
+        );
+      });
+    }
+  }
+
+
   /// Pushes the parks search page to the top of the navigator stack
   void _handleParkAdditionUI() {
     Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
@@ -59,7 +96,7 @@ class _HomeState extends State<Home> {
         // and a single-park add. A single-park add will want to add the park, then immediately open the park.
         // a multi-park add just adds the park to the list and does not open it.
         tapBack: (BluehostPark p, bool open) => open ? _handleChainParkAdd(p.id) : _handleAddIDCallback(p.id),
-        suggestPark: () => print("Suggestion"), // TODO: Proper suggestion
+        suggestPark: _handleNewParkSubmission, // TODO: Proper suggestion
       );
     }));
   }
@@ -144,7 +181,13 @@ class _HomeState extends State<Home> {
     // We don't want to rebuild if we're already on that page, but...
     if(_pageIndex == index){
       // ... we DO want to open up the park addition page if we're already home
-      if(index == homeIndex) _handleParkAdditionUI();
+      if(index == homeIndex) {
+        if(_parksHomeFocus.value == true){
+          _handleParkAdditionUI();
+        } else {
+          navigatorKeys[Tabs.values[_pageIndex]].currentState.maybePop();
+        }
+      }
       return;
     }
 

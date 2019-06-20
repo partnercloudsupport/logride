@@ -60,7 +60,7 @@ class _FirebaseAttractionListViewState
   bool _delayOver = false;
 
   // This allows us to hide the search entry until the user pulls down to access it.
-  ScrollController controller = ScrollController(initialScrollOffset: 71.0);
+  ScrollController controller = ScrollController(initialScrollOffset: 67.0);
 
   FirebaseList _attractionList;
   FirebaseList _ignoreList;
@@ -206,7 +206,8 @@ class _FirebaseAttractionListViewState
         if (key == "Seasonal") {
           // We don't have to check to see if the attraction is seasonal or not because if it is in
           // this list, we can be certain that it is.
-          if (widget.parentPark.showSeasonal || filter.value.isNotEmpty ||
+          if (widget.parentPark.showSeasonal ||
+              filter.value.isNotEmpty ||
               (target?.numberOfTimesRidden ?? 0) >= 1) {
             numToDisplay++;
             displayList.add(attr);
@@ -215,7 +216,9 @@ class _FirebaseAttractionListViewState
         }
 
         if (key == "Defunct") {
-          if (widget.parentPark.showDefunct || !widget.parentParkData.active || filter.value.isNotEmpty ||
+          if (widget.parentPark.showDefunct ||
+              !widget.parentParkData.active ||
+              filter.value.isNotEmpty ||
               (target?.numberOfTimesRidden ?? 0) >= 1) {
             numToDisplay++;
             displayList.add(attr);
@@ -309,6 +312,11 @@ class _FirebaseAttractionListViewState
         itemCount: _builtDisplayList.length + 1,
         itemBuilder: _entryBuilder,
         controller: controller,
+        //physics: ClampingScrollPhysics(),
+        //physics: AlwaysScrollableScrollPhysics(),
+        physics: BouncingScrollPhysics(),
+        shrinkWrap: true,
+        padding: const EdgeInsets.all(0.0),
       );
     } else {
       return Center(child: CircularProgressIndicator());

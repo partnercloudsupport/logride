@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/auth_manager.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
@@ -64,8 +65,9 @@ class ParksHomeState extends State<ParksHome> {
         db: widget.db,
         userName: widget.username,
         serverParkData: serverPark,
-        submissionCallback: (a, n) =>
-            print("$a, $n"), //TODO: Get submissionCallback working
+        submissionCallback: (park, isNew) => _handleAttractionSubmission(
+          park, serverPark, isNew
+        ),
       );
     }));
     widget.parksHomeFocus.value = true;
@@ -106,6 +108,10 @@ class ParksHomeState extends State<ParksHome> {
           widget.parksManager.removeParkFromUserData(park.parkID);
         }
     }
+  }
+
+  void _handleAttractionSubmission(BluehostAttraction attraction, BluehostPark parent, bool isNewPark){
+    print("Made it!");
   }
 
   @override
