@@ -33,9 +33,11 @@ class SlideInRoute extends PageRouteBuilder {
                 break;
             }
 
+
             SlideTransition contentTransition = SlideTransition(
               position: Tween<Offset>(begin: start, end: Offset.zero)
-                  .animate(animation),
+                  .animate(
+                  CurvedAnimation(parent: animation, curve: Curves.easeOutExpo)),
               child: child,
             );
 
