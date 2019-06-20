@@ -191,8 +191,15 @@ class _AnimatedProgressBarManagerState extends State<AnimatedProgressBarManager>
     if (widget.totalCount != 0.0)
       targetRatio = widget.riddenCount / widget.totalCount;
 
+    double startingRatio = 0.0;
+    if(widget.oldRatio == null){
+      startingRatio = targetRatio;
+    } else {
+      startingRatio = widget.oldRatio;
+    }
+
     animation =
-        Tween(begin: widget.oldRatio, end: targetRatio).animate(controller);
+        Tween(begin: startingRatio, end: targetRatio).animate(controller);
     controller.forward();
   }
 
