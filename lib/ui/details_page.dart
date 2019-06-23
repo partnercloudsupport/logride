@@ -394,9 +394,22 @@ class _DetailsPageState extends State<DetailsPage> {
       if (park.previousNames != "")
         details
             .add(_furtherDetailsTextEntry("Former Names", park.previousNames));
-      if (park.website != "")
-        details.add(_furtherDetailsEntry(
-            "Website", _urlTextButton(context, "Park Website", park.website)));
+      if (park.website != "") {
+        Uri parkUri = Uri.parse(park.website);
+
+        Widget siteButton = Padding(padding: const EdgeInsets.symmetric(horizontal: 8.0), child: InterfaceButton(
+          text: "Visit Park Website",
+          subtext: "via ${parkUri.host}",
+          color: Theme.of(context).primaryColor,
+          textColor: Colors.white,
+          onPressed: () async {
+            if(await canLaunch(park.website)){
+              launch(park.website);
+            }
+          },
+        ));
+        details.add(siteButton);
+      }
       return details;
     }
 

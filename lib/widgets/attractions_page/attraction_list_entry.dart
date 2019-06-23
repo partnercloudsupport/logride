@@ -140,17 +140,45 @@ class AttractionListState extends State<AttractionListEntry> {
           ignored ? _buildIncludeSlideAction() : _buildIgnoreSlideAction();
     }
 
+    Widget decrementAction;
+    if(widget.userData.numberOfTimesRidden >= 1){
+      decrementAction = _buildDecrementAction();
+    }
+
+    if(slideAction == null){
+      if(decrementAction != null){
+        built = Slidable(
+          delegate: SlidableDrawerDelegate(),
+          actionExtentRatio: 0.25,
+          child: built,
+          secondaryActions: <Widget>[decrementAction],
+          controller: widget.slidableController,
+        );
+      }
+    } else {
+      if(decrementAction != null){
+        built = Slidable(
+          delegate: SlidableDrawerDelegate(),
+          actionExtentRatio: 0.25,
+          child: built,
+          actions: <Widget>[slideAction],
+          secondaryActions: <Widget>[decrementAction],
+          controller: widget.slidableController,
+        );
+      } else {
+        built = Slidable(
+          delegate: SlidableDrawerDelegate(),
+          actionExtentRatio: 0.25,
+          child: built,
+          actions: <Widget>[slideAction],
+          controller: widget.slidableController,
+        );
+      }
+    }
+
     // This is kinda ugly, but if there's no action that happens on slide,
     // we simply don't make the row a slidable row.
-    return slideAction == null
-        ? built
-        : Slidable(
-            delegate: SlidableDrawerDelegate(),
-            actionExtentRatio: 0.25,
-            child: built,
-            actions: <Widget>[slideAction],
-            controller: widget.slidableController,
-          );
+    return built;
   }
 
   Widget _buildIgnoreSlideAction() {
@@ -170,6 +198,15 @@ class AttractionListState extends State<AttractionListEntry> {
       caption: "Include",
       onTap: () =>
           widget.ignoreCallback(widget.attractionData, widget.userData.ignored),
+    );
+  }
+
+  Widget _buildDecrementAction() {
+    return IconSlideAction(
+      icon: FontAwesomeIcons.minus,
+      color: Colors.red,
+      caption: "Decrement",
+      onTap: () => widget.experienceHandler(ExperienceAction.REMOVE, widget.userData),
     );
   }
 
