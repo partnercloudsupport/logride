@@ -310,7 +310,24 @@ class _UserConfirmationPage extends StatelessWidget {
         ),
         InterfaceButton(
           text: "Submit",
-          onPressed: () => Navigator.of(context).pop(true),
+          onPressed: () async {
+            dynamic result = await showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return StyledDialog(
+                  title: "Image Rights Notice",
+                  body: "All images submitted must be uploaded with permission of the copyright owner. By continuing, you affirm that you hold the rights to use this image.",
+                  action: () => Navigator.of(context).pop(true),
+                  actionText: "Confirm",
+                  additionalAction: FlatButton(onPressed: () => Navigator.of(context).pop(false), child: Text("Deny")),
+                );
+              }
+            );
+
+            if(result == null) return;
+            if(result == true) Navigator.of(context).pop(true);
+            if(result == false) Navigator.of(context).pop(false);
+          },
           color: Theme.of(context).primaryColor,
           textColor: Colors.white,
         ),
