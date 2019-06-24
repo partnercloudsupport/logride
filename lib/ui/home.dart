@@ -258,7 +258,8 @@ class _HomePageState extends State<HomePage> {
 
     _webFetcher = WebFetcher();
     _parksManager = ParksManager(db: widget.db, wf: _webFetcher);
-    initialized = _parksManager.init();
+    //initialized = _parksManager.init();
+    initialized = _parksManager.asyncInit();
 
     initialized.then((_) {
       _checkInManager = CheckInManager(
@@ -352,11 +353,12 @@ class _HomePageState extends State<HomePage> {
           size: 38,
         ),
         onPressed: () {
-          if (!_parksManager.searchInitialized) {
+          /*
+          if (false) {
             print(
                 "Search hasn't been initialized yet. Preventing user from viewing search page.");
             return;
-          }
+          }*/
 
           Navigator.push(
               context,
@@ -426,7 +428,7 @@ class _HomePageState extends State<HomePage> {
                             dialogStyle: true,
                             widget: StatsPage(
                               db: widget.db,
-                              serverParks: _parksManager.allParksInfo,
+                              pm: _parksManager,
                             ))),
                     child: _buildMenuIcon(Entypo.getIconData("pie-chart")))
               ],

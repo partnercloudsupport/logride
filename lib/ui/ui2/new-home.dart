@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -11,6 +13,7 @@ import 'package:log_ride/data/parks_manager.dart';
 import 'package:log_ride/data/webfetcher.dart';
 import 'package:log_ride/ui/dialogs/park_search.dart';
 import 'package:log_ride/ui/loading_page.dart';
+import 'package:log_ride/ui/stats_page.dart';
 import 'package:log_ride/ui/submission/submit_attraction_page.dart';
 import 'package:log_ride/ui/submission/submit_park_page.dart';
 import 'package:log_ride/ui/ui2/navigation/nav_bar.dart';
@@ -54,14 +57,17 @@ class _HomeState extends State<Home> {
   WebFetcher _webFetcher;
   ParksManager _parksManager;
   Future<bool> initialized;
+  StreamSubscription subscription;
   CheckInManager _checkInManager;
   String userName;
 
   ParksHomeFocus _parksHomeFocus = ParksHomeFocus(true);
 
-  Future<bool> dataLoaded = Future<bool>.value(false);
+  bool dataLoaded = false;
 
   bool _needsBasePadding = true;
+
+  Stopwatch stopwatch = Stopwatch();
 
   void _handleNewParkSubmission() async {
     dynamic result = await Navigator.of(context)
@@ -135,29 +141,61 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-    dataLoaded = _dataInit();
+
+    stopwatch.start();
+
+    _preInit();
 
     KeyboardVisibilityNotification().addNewListener(onChange: (bool visible) {
-      setState((){
+      setState(() {
         _needsBasePadding = !visible;
       });
     });
+
     super.initState();
   }
 
-  Future<bool> _dataInit() async {
+  void _preInit() {
     widget.db.storeUserID(widget.uid);
 
     _webFetcher = WebFetcher();
     _parksManager = ParksManager(db: widget.db, wf: _webFetcher);
-    initialized = _parksManager.init();
+    _parksManager.init();
+    subscription =
+        _parksManager.parksManagerStream.listen(_parksManagerListener);
 
-    initialized.then((_) {
-      _checkInManager = CheckInManager(
-          db: widget.db,
-          serverParks: _parksManager.allParksInfo,
-          addPark: _handleAddIDCallback);
-    });
+    return;
+  }
+
+  void _parksManagerListener(ParksManagerEvent event) {
+    switch (event.type) {
+      case ParksManagerEventType.INITIALIZED:
+        print("Initialized");
+        subscription.cancel();
+        break;
+      case ParksManagerEventType.PARKS_FETCHED:
+        print("Parks have been fetched.");
+        break;
+      case ParksManagerEventType.ATTRACTIONS_FETCHED:
+        print("Attractions have been fetched");
+        _dataInit();
+        break;
+      case ParksManagerEventType.INITIALIZING:
+        print("Initializing of Park Manager has begun");
+        break;
+      case ParksManagerEventType.ERROR:
+        print("Parks Manager has had an error in initialization");
+        break;
+      case ParksManagerEventType.UNINITIALIZED:
+        break;
+    }
+  }
+
+  Future<bool> _dataInit() async {
+    _checkInManager = CheckInManager(
+        db: widget.db,
+        serverParks: _parksManager.allParksInfo,
+        addPark: _handleAddIDCallback);
 
     await widget.auth.getCurrentUserName().then((name) {
       print(name);
@@ -170,7 +208,10 @@ class _HomeState extends State<Home> {
 
     rootWidgets = <Tabs, Widget>{
       Tabs.NEWS: Center(child: Text("News")),
-      Tabs.STATS: Center(child: Text("Stats")),
+      Tabs.STATS: StatsPage(
+        db: widget.db,
+        pm: _parksManager,
+      ),
       Tabs.MY_PARKS: ParksHome(
         uid: widget.uid,
         auth: widget.auth,
@@ -186,6 +227,13 @@ class _HomeState extends State<Home> {
     };
 
     _parksHomeFocus.addListener(_handleHomeFocusChanged);
+
+    setState((){
+      dataLoaded = true;
+    });
+
+    print("Boot took ${stopwatch.elapsed} seconds");
+    stopwatch.stop();
 
     return true;
   }
@@ -221,55 +269,53 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     // Capturing back keys and sending them to the appropriate navigators...
-    return FutureBuilder<bool>(
-      future: dataLoaded,
-      builder: (BuildContext context, AsyncSnapshot<bool> snap) {
-        if (!snap.hasData || !snap.data) return LoadingPage();
-        return WillPopScope(
-            onWillPop: () async => !await navigatorKeys[Tabs.values[_pageIndex]]
-                .currentState
-                .maybePop(),
-            child: Scaffold(
-                backgroundColor: Colors.white,
-                resizeToAvoidBottomInset: false,
-                body: Stack(
-                  children: <Widget>[
-                    Padding(
-                        padding: (_needsBasePadding) ? EdgeInsets.only(bottom: 54.0) : EdgeInsets.zero,
-                        child: Stack(
-                          children: <Widget>[
-                            _buildOffstageNavigator(Tabs.NEWS),
-                            _buildOffstageNavigator(Tabs.STATS),
-                            _buildOffstageNavigator(Tabs.MY_PARKS),
-                            _buildOffstageNavigator(Tabs.LISTS),
-                            _buildOffstageNavigator(Tabs.SETTINGS),
-                          ],
-                        )),
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: ContextNavBar(
-                        menuTap: _onMenuBarItemTapped,
-                        homeIndex: homeIndex,
-                        index: _pageIndex,
-                        homeFocus: _parksHomeFocus.value,
-                        items: [
-                          ContextNavBarItem(
-                              label: "News",
-                              iconData: FontAwesomeIcons.solidNewspaper),
-                          ContextNavBarItem(
-                              label: "Stats",
-                              iconData: FontAwesomeIcons.chartPie),
-                          ContextNavBarItem(
-                              label: "Lists", iconData: FontAwesomeIcons.list),
-                          ContextNavBarItem(
-                              label: "Settings", iconData: FontAwesomeIcons.cog)
-                        ],
-                      ),
-                    )
-                  ],
-                )));
-      },
-    );
+
+    if (!dataLoaded) return LoadingPage();
+
+    return WillPopScope(
+        onWillPop: () async => !await navigatorKeys[Tabs.values[_pageIndex]]
+            .currentState
+            .maybePop(),
+        child: Scaffold(
+            backgroundColor: Colors.white,
+            resizeToAvoidBottomInset: false,
+            body: Stack(
+              children: <Widget>[
+                Padding(
+                    padding: (_needsBasePadding)
+                        ? EdgeInsets.only(bottom: 54.0)
+                        : EdgeInsets.zero,
+                    child: Stack(
+                      children: <Widget>[
+                        _buildOffstageNavigator(Tabs.NEWS),
+                        _buildOffstageNavigator(Tabs.STATS),
+                        _buildOffstageNavigator(Tabs.MY_PARKS),
+                        _buildOffstageNavigator(Tabs.LISTS),
+                        _buildOffstageNavigator(Tabs.SETTINGS),
+                      ],
+                    )),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: ContextNavBar(
+                    menuTap: _onMenuBarItemTapped,
+                    homeIndex: homeIndex,
+                    index: _pageIndex,
+                    homeFocus: _parksHomeFocus.value,
+                    items: [
+                      ContextNavBarItem(
+                          label: "News",
+                          iconData: FontAwesomeIcons.solidNewspaper),
+                      ContextNavBarItem(
+                          label: "Stats", iconData: FontAwesomeIcons.chartPie),
+                      ContextNavBarItem(
+                          label: "Lists", iconData: FontAwesomeIcons.list),
+                      ContextNavBarItem(
+                          label: "Settings", iconData: FontAwesomeIcons.cog)
+                    ],
+                  ),
+                )
+              ],
+            )));
   }
 
   Widget _buildOffstageNavigator(Tabs tab) {
@@ -281,6 +327,4 @@ class _HomeState extends State<Home> {
       ),
     );
   }
-
-
 }

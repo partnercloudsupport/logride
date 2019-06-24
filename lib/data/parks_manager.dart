@@ -15,10 +15,16 @@ class ParksManager {
   List<BluehostPark> allParksInfo;
   Map<int, String> attractionTypes;
 
-  bool searchInitialized = false;
+  ParksManagerStream _streamController = ParksManagerStream();
+  Stream<ParksManagerEvent> parksManagerStream;
+
+  void init() {
+    parksManagerStream = _streamController.stream;
+    asyncInit();
+  }
 
   /// init returns true once all web data has been fetched for parks
-  Future<bool> init() async {
+  Future<bool> asyncInit() async {
     // Things to do:
     // Get allParks from bluehost
     allParksInfo = await wf.getAllParkData();
@@ -30,17 +36,21 @@ class ParksManager {
     // Go through and set-up the allParksInfo to match the user database.
     // The 'filled' tag is used in the all-parks-search to show the user they
     // have that park.
+    List<Future<bool>> parkFutures = <Future<bool>>[];
     db.getEntryAtPath(path: DatabasePath.PARKS, key: "").then((snap) async {
       if (snap == null) {
         print("User has no data currently. Returning.");
-        searchInitialized = true;
+        _streamController
+            .add(ParksManagerEvent(ParksManagerEventType.INITIALIZED));
         return;
       }
+
       Map<dynamic, dynamic> values = jsonDecode(jsonEncode(snap));
       for (int i = 0; i < values.keys.length; i++) {
         int entryID = num.tryParse(values.keys.elementAt(i));
-        if(entryID == null) {
-          print("CATASTROPHIC ERROR: Key value at index $i for adding user's attractions is not a number");
+        if (entryID == null) {
+          print(
+              "ERROR: Key value at index $i for adding user's attractions is not a number");
           continue;
         }
         BluehostPark targetPark = getBluehostParkByID(allParksInfo, entryID);
@@ -48,18 +58,30 @@ class ParksManager {
         // This part appears to take the longest. I'm going to let it run async
         // And just prevent the user from viewing the attraction page until
         // the attractions != null
-        wf
+        parkFutures.add(wf
             .getAllAttractionData(
-                parkID: targetPark.id, rideTypes: attractionTypes, allParks: allParksInfo)
+                parkID: targetPark.id,
+                rideTypes: attractionTypes,
+                allParks: allParksInfo)
             .then((list) {
           targetPark.attractions = list;
-        });
+          print("Park Loaded, id: ${targetPark.id}");
+          return true;
+        }));
         targetPark.filled = true;
       }
-      searchInitialized = true;
+
+      Stream joinedStream = Stream.fromFutures(parkFutures);
+      joinedStream.listen((d) {}, onDone: () {
+        _streamController
+            .add(ParksManagerEvent(ParksManagerEventType.ATTRACTIONS_FETCHED));
+        _streamController
+            .add(ParksManagerEvent(ParksManagerEventType.INITIALIZED));
+      });
     });
 
-    print("ParksManager has been initialized");
+    _streamController
+        .add(ParksManagerEvent(ParksManagerEventType.PARKS_FETCHED));
     return true;
   }
 
@@ -74,7 +96,9 @@ class ParksManager {
     // Get our targeted park, calculate ride
     BluehostPark targetPark = getBluehostParkByID(allParksInfo, targetParkID);
     targetPark.attractions = await wf.getAllAttractionData(
-        parkID: targetParkID, rideTypes: attractionTypes, allParks: allParksInfo);
+        parkID: targetParkID,
+        rideTypes: attractionTypes,
+        allParks: allParksInfo);
 
     print("We are adding ${targetPark.parkName} to our user");
 
@@ -90,7 +114,8 @@ class ParksManager {
 
     print("Park added successfully");
 
-    FirebaseAnalytics().logEvent(name: "add_new_park", parameters: {"parkName": translated.name});
+    FirebaseAnalytics().logEvent(
+        name: "add_new_park", parameters: {"parkName": translated.name});
 
     return true;
   }
@@ -101,7 +126,8 @@ class ParksManager {
     // And remove the 'filled' tag from the appropriate bluehost park
     getBluehostParkByID(allParksInfo, targetID).filled = false;
     // And remove the attraction data for the user's parks
-    db.removeEntryFromPath(path: DatabasePath.ATTRACTIONS, key: targetID.toString());
+    db.removeEntryFromPath(
+        path: DatabasePath.ATTRACTIONS, key: targetID.toString());
     // And remove ignored data for the user's parks
     db.removeEntryFromPath(path: DatabasePath.IGNORE, key: targetID.toString());
   }
@@ -149,4 +175,34 @@ class ParksManager {
         key: targetFBPark.parkID.toString(),
         payload: targetFBPark.toMap());
   }
+}
+
+enum ParksManagerEventType {
+  UNINITIALIZED,
+  INITIALIZING,
+  PARKS_FETCHED,
+  ATTRACTIONS_FETCHED,
+  INITIALIZED,
+  ERROR
+}
+
+class ParksManagerEvent {
+  ParksManagerEvent(this.type);
+  ParksManagerEventType type;
+}
+
+class ParksManagerStream {
+  StreamController<ParksManagerEvent> _streamController;
+
+  ParksManagerStream() {
+    _streamController = StreamController.broadcast();
+  }
+
+  void dispose() {
+    _streamController.close();
+  }
+
+  void add(ParksManagerEvent event) => _streamController.add(event);
+
+  Stream get stream => _streamController.stream;
 }

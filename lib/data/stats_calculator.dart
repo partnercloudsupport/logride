@@ -184,20 +184,32 @@ class StatsCalculator {
     // Since we're calculating user stats fresh each time, we don't have to wait for the old values to load
     UserStats stats = UserStats();
 
+    print("Beginning Stats Count");
+
     // Base step: get user parks
     List<FirebasePark> userParks = List<FirebasePark>();
     dynamic rawResponse =
         await db.getEntryAtPath(path: DatabasePath.PARKS, key: "");
 
+    print(rawResponse);
+
 
     List entries = Map.from(rawResponse).values.toList();
 
+    print("Got ${entries.length} park entries");
+
     entries.forEach((e) {
       FirebasePark park = FirebasePark.fromMap(Map.from(e));
-      userParks.add(park);
+      if(park != null) {
+        userParks.add(park);
+      }
     });
 
+    print("Added ${userParks.length} parks to the userParks list");
+
     List<String> countryLabelList = List<String>();
+
+    print("Beginning to calculate park stats.");
 
     // Base Step: Calculate Park Stats
     for (int i = 0; i < userParks.length; i++) {
@@ -241,13 +253,16 @@ class StatsCalculator {
               .from(rawResponse)
               .values
               .toList();
+          print(attractionEntries);
         } catch (e) {
+          print(e);
           List temp = List.from(rawResponse);
           temp.forEach((i) {
             if(i != null){
               attractionEntries.add(i);
             }
           });
+          print("OOpsed with map, result with list: $temp, $attractionEntries");
         }
 
         attractionEntries.forEach((data) {
@@ -257,8 +272,6 @@ class StatsCalculator {
         continue;
       }
     }
-
-    print("Tada!");
 
     stats.countries = countryLabelList.length;
 
@@ -313,7 +326,7 @@ class StatsCalculator {
       stats.topAttractions = sortedAttractions;
     }
 
-    print(stats.parksCompleted);
+    print("Statistics has been calculated, displaying results.");
 
     _setServerStats(stats);
 

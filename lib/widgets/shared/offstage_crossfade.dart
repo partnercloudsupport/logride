@@ -33,9 +33,9 @@ class _OffstageCrossFadeState extends State<OffstageCrossFade>
     super.initState();
 
     _controller = AnimationController(
-        duration: const Duration(milliseconds: 100), vsync: this);
+        duration: Duration(milliseconds: 200), vsync: this);
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(_controller);
+    _scaleAnimation = Tween<double>(begin: 0.95, end: 1.0).animate(_controller);
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed ||
           status == AnimationStatus.dismissed) _animationComplete();
