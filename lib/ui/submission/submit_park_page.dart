@@ -22,7 +22,8 @@ class _SubmitParkPageState extends State<SubmitParkPage> {
     "Zoo",
     "Kiddie Park",
     "Family Entertainment Center",
-    "Resort & Casino"
+    "Resort & Casino",
+    "Water Park"
   ];
 
   List<DropdownMenuItem<String>> _parkTypesItems =
