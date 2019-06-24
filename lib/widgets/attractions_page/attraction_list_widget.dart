@@ -283,10 +283,7 @@ class _AttractionsListViewState extends State<AttractionsListView> {
   @override
   Widget build(BuildContext context) {
     _buildPreparedList();
-    return ClipRRect(
-        borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(15), bottomRight: Radius.circular(15)),
-        child: FirebaseAttractionListView(
+    return FirebaseAttractionListView(
           parentPark: widget.parentPark,
           parentParkData: getBluehostParkByID(widget.pm.allParksInfo, widget.parentPark.parkID),
           headedList: headedList,
@@ -303,6 +300,6 @@ class _AttractionsListViewState extends State<AttractionsListView> {
           countHandler: _updateCountHandler,
           dateHandler: _dateUpdateHandler,
           db: widget.db,
-        ));
+        );
   }
 }

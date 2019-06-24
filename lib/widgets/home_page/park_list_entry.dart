@@ -74,7 +74,7 @@ class ParkListEntry extends StatelessWidget {
     }
 
     return Slidable(
-      delegate: SlidableDrawerDelegate(),
+      actionPane: SlidableDrawerActionPane(),
       actionExtentRatio: 0.25,
       child: InkWell(
         child: Container(

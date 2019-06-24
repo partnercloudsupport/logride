@@ -106,7 +106,13 @@ class ContextNavBar extends StatelessWidget {
         aspectRatio: 1.0,
         child: Stack(
           children: <Widget>[
-            display,
+            AnimatedSwitcher(
+              child: display,
+              duration: const Duration(milliseconds: 100),
+              transitionBuilder: (Widget child, Animation<double> animation){
+                return ScaleTransition(scale: animation, child: child);
+              },
+            ),
             SizedBox.expand(
               child: MaterialButton(
                 onPressed: () => menuTap(homeIndex),

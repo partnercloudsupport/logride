@@ -17,7 +17,7 @@ class FirebaseParkListView extends StatefulWidget {
       this.parkTapCallback,
       this.sliderActionCallback,
       this.filter,
-      this.bottomPadding = false,
+      this.bottomEntryPadding = false,
       this.shrinkWrap = false,
       this.physics});
 
@@ -30,7 +30,7 @@ class FirebaseParkListView extends StatefulWidget {
 
   final ParksFilter filter;
 
-  final bool bottomPadding;
+  final bool bottomEntryPadding;
   final bool shrinkWrap;
 
   final ScrollPhysics physics;
@@ -221,7 +221,7 @@ class _FirebaseParkListViewState extends State<FirebaseParkListView> {
         parkData: _builtList[index],
         slidableController: _slidableController,
       );
-      if (index + 1 == _builtList.length && widget.bottomPadding) {
+      if (index + 1 == _builtList.length && widget.bottomEntryPadding) {
         builtWidget = Padding(
           padding: const EdgeInsets.only(bottom: 60),
           child: builtWidget,

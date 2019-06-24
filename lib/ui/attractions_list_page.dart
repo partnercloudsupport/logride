@@ -62,8 +62,7 @@ class _AttractionsPageState extends State<AttractionsPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        resizeToAvoidBottomPadding: false,
-        resizeToAvoidBottomInset: false,
+        resizeToAvoidBottomInset: true,
         backgroundColor: Colors.transparent,
         body: StreamBuilder<Event>(
             stream: _parkStream,
@@ -89,6 +88,7 @@ class _AttractionsPageState extends State<AttractionsPage>
 
                 return CustomScrollView(
                     controller: _scrollController,
+                    physics: NeverScrollableScrollPhysics(),
                     slivers: <Widget>[
                       _buildTitleBar(context, parkData),
                       SliverFillRemaining(

@@ -42,7 +42,7 @@ class ParkListView extends StatelessWidget {
       parkTapCallback: onTap,
       sliderActionCallback: sliderActionCallback,
       filter: filter,
-      bottomPadding: bottomPadding,
+      bottomEntryPadding: bottomPadding,
     );
 
     Widget searchWidget;

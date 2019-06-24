@@ -3,6 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/color_constants.dart';
 import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/park_structures.dart';
@@ -61,6 +62,7 @@ class _FirebaseAttractionListViewState
 
   // This allows us to hide the search entry until the user pulls down to access it.
   ScrollController controller = ScrollController(initialScrollOffset: 67.0);
+  TextEditingController _searchController = TextEditingController();
 
   FirebaseList _attractionList;
   FirebaseList _ignoreList;
@@ -241,6 +243,7 @@ class _FirebaseAttractionListViewState
     if (index == 0) {
       // We need to return our text field
       return TextField(
+        controller: _searchController,
         onChanged: (value) {
           if (mounted) {
             setState(() {
@@ -253,7 +256,16 @@ class _FirebaseAttractionListViewState
         decoration: InputDecoration(
           labelText: "Search",
           hintText: "Search",
-          prefixIcon: Icon(Icons.search),
+          prefixIcon: Icon(FontAwesomeIcons.search),
+          suffixIcon: IconButton(icon: Icon(FontAwesomeIcons.times), onPressed: () {
+            if(mounted) {
+              setState(() {
+                filter.value = "";
+                _searchController.clear();
+                FocusScope.of(context).requestFocus(FocusNode());
+              });
+            }
+          },)
         ),
       );
     } else {

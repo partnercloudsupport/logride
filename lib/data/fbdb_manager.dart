@@ -47,7 +47,7 @@ class DatabaseManager implements BaseDB {
   String _savedID;
 
   void init() {
-    _firebaseDatabase.setPersistenceEnabled(true);
+    //_firebaseDatabase.setPersistenceEnabled(true);
   }
 
   void storeUserID(String userID) {

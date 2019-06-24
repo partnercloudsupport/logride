@@ -148,7 +148,7 @@ class AttractionListState extends State<AttractionListEntry> {
     if(slideAction == null){
       if(decrementAction != null){
         built = Slidable(
-          delegate: SlidableDrawerDelegate(),
+          actionPane: SlidableDrawerActionPane(),
           actionExtentRatio: 0.25,
           child: built,
           secondaryActions: <Widget>[decrementAction],
@@ -158,7 +158,7 @@ class AttractionListState extends State<AttractionListEntry> {
     } else {
       if(decrementAction != null){
         built = Slidable(
-          delegate: SlidableDrawerDelegate(),
+          actionPane: SlidableDrawerActionPane(),
           actionExtentRatio: 0.25,
           child: built,
           actions: <Widget>[slideAction],
@@ -167,7 +167,7 @@ class AttractionListState extends State<AttractionListEntry> {
         );
       } else {
         built = Slidable(
-          delegate: SlidableDrawerDelegate(),
+          actionPane: SlidableDrawerActionPane(),
           actionExtentRatio: 0.25,
           child: built,
           actions: <Widget>[slideAction],

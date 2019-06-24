@@ -295,7 +295,7 @@ class _ScorecardEntry extends StatelessWidget {
 
     return Slidable(
       controller: slidableController,
-      delegate: SlidableDrawerDelegate(),
+      actionPane: SlidableDrawerActionPane(),
       actionExtentRatio: 0.25,
       secondaryActions: [
         IconSlideAction(

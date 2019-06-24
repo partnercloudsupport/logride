@@ -1,18 +1,22 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:log_ride/data/auth_manager.dart';
 import 'package:log_ride/data/check_in_manager.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
+import 'package:log_ride/data/loading_strings.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/parks_manager.dart';
 import 'package:log_ride/data/webfetcher.dart';
 import 'package:log_ride/ui/dialogs/park_search.dart';
+import 'package:log_ride/ui/loading_page.dart';
 import 'package:log_ride/ui/submission/submit_attraction_page.dart';
 import 'package:log_ride/ui/submission/submit_park_page.dart';
 import 'package:log_ride/ui/ui2/navigation/nav_bar.dart';
 import 'package:log_ride/ui/ui2/navigation/tab_navigation.dart';
 import 'package:log_ride/ui/ui2/pages/parks_home.dart';
+import 'package:log_ride/widgets/shared/offstage_crossfade.dart';
 import 'package:log_ride/widgets/shared/styled_dialog.dart';
 
 enum Tabs { NEWS, STATS, MY_PARKS, LISTS, SETTINGS }
@@ -30,7 +34,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-
   GlobalKey<ParksHomeState> parksHomeKey = GlobalKey<ParksHomeState>();
 
   FirebaseAnalytics analytics = FirebaseAnalytics();
@@ -56,46 +59,58 @@ class _HomeState extends State<Home> {
 
   ParksHomeFocus _parksHomeFocus = ParksHomeFocus(true);
 
+  Future<bool> dataLoaded = Future<bool>.value(false);
+
+  bool _needsBasePadding = true;
+
   void _handleNewParkSubmission() async {
-    dynamic result = await Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
+    dynamic result = await Navigator.of(context)
+        .push(MaterialPageRoute(builder: (BuildContext context) {
       return SubmitParkPage();
     }));
 
     if (result == null) return;
 
     BluehostPark newPark = result as BluehostPark;
-    int response = await _webFetcher.submitParkData(newPark, username: userName, uid: widget.uid);
+    int response = await _webFetcher.submitParkData(newPark,
+        username: userName, uid: widget.uid);
 
-    if(response == 200){
+    if (response == 200) {
       analytics.logEvent(name: "new_park_sugggested");
-      showDialog(context: context, builder:(BuildContext context) {
-        return StyledDialog(
-          title: "Park Under Review",
-          body: "Thanks for submitting! Your park is now under review.",
-          actionText: "Ok",
-        );
-      });
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return StyledDialog(
+              title: "Park Under Review",
+              body: "Thanks for submitting! Your park is now under review.",
+              actionText: "Ok",
+            );
+          });
     } else {
-      showDialog(context: context, builder:(BuildContext context) {
-        return StyledDialog(
-          title: "Error during Submission",
-          body: "Something happened during the park submission process. Error: $response",
-          actionText: "Ok",
-        );
-      });
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return StyledDialog(
+              title: "Error during Submission",
+              body:
+                  "Something happened during the park submission process. Error: $response",
+              actionText: "Ok",
+            );
+          });
     }
   }
 
-
   /// Pushes the parks search page to the top of the navigator stack
   void _handleParkAdditionUI() {
-    Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) {
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (BuildContext context) {
       return AllParkSearchPage(
         allParks: _parksManager.allParksInfo,
         // There's two cases with which this'll be called: A multi-park add (long tap, then single taps)
         // and a single-park add. A single-park add will want to add the park, then immediately open the park.
         // a multi-park add just adds the park to the list and does not open it.
-        tapBack: (BluehostPark p, bool open) => open ? _handleChainParkAdd(p.id) : _handleAddIDCallback(p.id),
+        tapBack: (BluehostPark p, bool open) =>
+            open ? _handleChainParkAdd(p.id) : _handleAddIDCallback(p.id),
         suggestPark: _handleNewParkSubmission, // TODO: Proper suggestion
       );
     }));
@@ -114,14 +129,44 @@ class _HomeState extends State<Home> {
     parksHomeKey.currentState.openParkWithID(parkID);
   }
 
-  void _handleHomeFocusChanged(){
-    setState((){});
+  void _handleHomeFocusChanged() {
+    setState(() {});
   }
 
   @override
   void initState() {
+    dataLoaded = _dataInit();
 
-    _dataInit();
+    KeyboardVisibilityNotification().addNewListener(onChange: (bool visible) {
+      setState((){
+        _needsBasePadding = !visible;
+      });
+    });
+    super.initState();
+  }
+
+  Future<bool> _dataInit() async {
+    widget.db.storeUserID(widget.uid);
+
+    _webFetcher = WebFetcher();
+    _parksManager = ParksManager(db: widget.db, wf: _webFetcher);
+    initialized = _parksManager.init();
+
+    initialized.then((_) {
+      _checkInManager = CheckInManager(
+          db: widget.db,
+          serverParks: _parksManager.allParksInfo,
+          addPark: _handleAddIDCallback);
+    });
+
+    await widget.auth.getCurrentUserName().then((name) {
+      print(name);
+      userName = name;
+    });
+
+    await widget.auth.getCurrentUserEmail().then((email) {
+      email = email;
+    });
 
     rootWidgets = <Tabs, Widget>{
       Tabs.NEWS: Center(child: Text("News")),
@@ -141,31 +186,8 @@ class _HomeState extends State<Home> {
     };
 
     _parksHomeFocus.addListener(_handleHomeFocusChanged);
-    
-    super.initState();
-  }
 
-  void _dataInit() {
-    widget.db.storeUserID(widget.uid);
-
-    _webFetcher = WebFetcher();
-    _parksManager = ParksManager(db: widget.db, wf: _webFetcher);
-    initialized = _parksManager.init();
-
-    initialized.then((_) {
-      _checkInManager = CheckInManager(
-          db: widget.db,
-          serverParks: _parksManager.allParksInfo,
-          addPark: _handleAddIDCallback);
-    });
-
-    widget.auth.getCurrentUserName().then((name) {
-      userName = name;
-    });
-
-    widget.auth.getCurrentUserEmail().then((email) {
-      email = email;
-    });
+    return true;
   }
 
   void _onMenuBarItemTapped(int index) {
@@ -179,10 +201,10 @@ class _HomeState extends State<Home> {
     }
 
     // We don't want to rebuild if we're already on that page, but...
-    if(_pageIndex == index){
+    if (_pageIndex == index) {
       // ... we DO want to open up the park addition page if we're already home
-      if(index == homeIndex) {
-        if(_parksHomeFocus.value == true){
+      if (index == homeIndex) {
+        if (_parksHomeFocus.value == true) {
           _handleParkAdditionUI();
         } else {
           navigatorKeys[Tabs.values[_pageIndex]].currentState.maybePop();
@@ -199,56 +221,66 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     // Capturing back keys and sending them to the appropriate navigators...
-    return WillPopScope(
-      onWillPop: () async =>
-          !await navigatorKeys[Tabs.values[_pageIndex]].currentState.maybePop(),
-      child: Scaffold(
-          backgroundColor: Colors.white,
-          body: Stack(
-            children: <Widget>[
-              Padding(
-                  padding: const EdgeInsets.only(bottom: 54.0),
-                  child: Stack(
-                    children: <Widget>[
-                      _buildOffstageNavigator(Tabs.NEWS),
-                      _buildOffstageNavigator(Tabs.STATS),
-                      _buildOffstageNavigator(Tabs.MY_PARKS),
-                      _buildOffstageNavigator(Tabs.LISTS),
-                      _buildOffstageNavigator(Tabs.SETTINGS),
-                    ],
-                  )),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: ContextNavBar(
-                  menuTap: _onMenuBarItemTapped,
-                  homeIndex: homeIndex,
-                  index: _pageIndex,
-                  homeFocus: _parksHomeFocus.value,
-                  items: [
-                    ContextNavBarItem(
-                        label: "News",
-                        iconData: FontAwesomeIcons.solidNewspaper),
-                    ContextNavBarItem(
-                        label: "Stats", iconData: FontAwesomeIcons.chartPie),
-                    ContextNavBarItem(
-                        label: "Lists", iconData: FontAwesomeIcons.list),
-                    ContextNavBarItem(
-                        label: "Settings", iconData: FontAwesomeIcons.cog)
+    return FutureBuilder<bool>(
+      future: dataLoaded,
+      builder: (BuildContext context, AsyncSnapshot<bool> snap) {
+        if (!snap.hasData || !snap.data) return LoadingPage();
+        return WillPopScope(
+            onWillPop: () async => !await navigatorKeys[Tabs.values[_pageIndex]]
+                .currentState
+                .maybePop(),
+            child: Scaffold(
+                backgroundColor: Colors.white,
+                resizeToAvoidBottomInset: false,
+                body: Stack(
+                  children: <Widget>[
+                    Padding(
+                        padding: (_needsBasePadding) ? EdgeInsets.only(bottom: 54.0) : EdgeInsets.zero,
+                        child: Stack(
+                          children: <Widget>[
+                            _buildOffstageNavigator(Tabs.NEWS),
+                            _buildOffstageNavigator(Tabs.STATS),
+                            _buildOffstageNavigator(Tabs.MY_PARKS),
+                            _buildOffstageNavigator(Tabs.LISTS),
+                            _buildOffstageNavigator(Tabs.SETTINGS),
+                          ],
+                        )),
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: ContextNavBar(
+                        menuTap: _onMenuBarItemTapped,
+                        homeIndex: homeIndex,
+                        index: _pageIndex,
+                        homeFocus: _parksHomeFocus.value,
+                        items: [
+                          ContextNavBarItem(
+                              label: "News",
+                              iconData: FontAwesomeIcons.solidNewspaper),
+                          ContextNavBarItem(
+                              label: "Stats",
+                              iconData: FontAwesomeIcons.chartPie),
+                          ContextNavBarItem(
+                              label: "Lists", iconData: FontAwesomeIcons.list),
+                          ContextNavBarItem(
+                              label: "Settings", iconData: FontAwesomeIcons.cog)
+                        ],
+                      ),
+                    )
                   ],
-                ),
-              )
-            ],
-          )),
+                )));
+      },
     );
   }
 
   Widget _buildOffstageNavigator(Tabs tab) {
-    return Offstage(
-      offstage: Tabs.values[_pageIndex] != tab,
+    return OffstageCrossFade(
+      offStageState: Tabs.values[_pageIndex] != tab,
       child: TabNavigator(
         navigatorKey: navigatorKeys[tab],
         rootWidget: rootWidgets[tab],
       ),
     );
   }
+
+
 }

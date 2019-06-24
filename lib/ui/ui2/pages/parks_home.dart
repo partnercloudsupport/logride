@@ -1,5 +1,8 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:log_ride/animations/slide_in_transition.dart';
 import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/auth_manager.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
@@ -7,6 +10,7 @@ import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/parks_manager.dart';
 import 'package:log_ride/data/webfetcher.dart';
 import 'package:log_ride/ui/attractions_list_page.dart';
+import 'package:log_ride/ui/submission/submit_attraction_page.dart';
 import 'package:log_ride/widgets/home_page/park_list_entry.dart';
 import 'package:log_ride/widgets/home_page/parks_list_advanced.dart';
 import 'package:log_ride/widgets/shared/styled_dialog.dart';
@@ -16,16 +20,16 @@ class ParksHomeFocus extends ValueNotifier<bool> {
 }
 
 class ParksHome extends StatefulWidget {
-  ParksHome({
-    Key key,
-    this.auth,
-    this.db,
-    this.uid,
-    this.webFetcher,
-    this.parksManager,
-    this.username,
-    this.parksHomeFocus
-  }) : super(key: key);
+  ParksHome(
+      {Key key,
+      this.auth,
+      this.db,
+      this.uid,
+      this.webFetcher,
+      this.parksManager,
+      this.username,
+      this.parksHomeFocus})
+      : super(key: key);
 
   final BaseAuth auth;
   final BaseDB db;
@@ -40,6 +44,7 @@ class ParksHome extends StatefulWidget {
 }
 
 class ParksHomeState extends State<ParksHome> {
+  FirebaseAnalytics analytics = FirebaseAnalytics();
 
   void parkEntryTap(FirebasePark park) {
     if (park == null) {
@@ -54,20 +59,21 @@ class ParksHomeState extends State<ParksHome> {
   }
 
   void openParkWithID(int id) async {
-    BluehostPark serverPark = getBluehostParkByID(widget.parksManager.allParksInfo, id);
-    if(serverPark.attractions == null || serverPark == null) {
+    BluehostPark serverPark =
+        getBluehostParkByID(widget.parksManager.allParksInfo, id);
+    if (serverPark.attractions == null || serverPark == null) {
       return;
     }
     widget.parksHomeFocus.value = false;
-    await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) {
+    await Navigator.push(context,
+        MaterialPageRoute(builder: (BuildContext context) {
       return AttractionsPage(
         pm: widget.parksManager,
         db: widget.db,
         userName: widget.username,
         serverParkData: serverPark,
-        submissionCallback: (park, isNew) => _handleAttractionSubmission(
-          park, serverPark, isNew
-        ),
+        submissionCallback: (park, isNew) =>
+            _handleAttractionSubmission(park, serverPark, isNew),
       );
     }));
     widget.parksHomeFocus.value = true;
@@ -110,13 +116,63 @@ class ParksHomeState extends State<ParksHome> {
     }
   }
 
-  void _handleAttractionSubmission(BluehostAttraction attraction, BluehostPark parent, bool isNewPark){
-    print("Made it!");
+  void _handleAttractionSubmission(BluehostAttraction attraction,
+      BluehostPark parent, bool isNewAttraction) async {
+    isNewAttraction ? print("New Attraction") : print("Modified Attraction");
+
+    dynamic result = await Navigator.push(
+        context,
+        SlideInRoute(
+            widget: SubmitAttractionPage(
+                attractionTypes: widget.parksManager.attractionTypes,
+                existingData: isNewAttraction
+                    ? attraction
+                    : BluehostAttraction.copy(attraction),
+                parentPark: parent),
+            dialogStyle: true,
+            direction: SlideInDirection.RIGHT));
+
+    if (result == null) return;
+
+    print(widget.username);
+
+    BluehostAttraction newAttraction = result as BluehostAttraction;
+    int response = await widget.webFetcher.submitAttractionData(
+        newAttraction, parent,
+        username: widget.username,
+        uid: widget.uid,
+        isNewAttraction: isNewAttraction);
+
+    if (response == 200) {
+      analytics.logEvent(name: "new_attraction_suggested");
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return StyledDialog(
+              title: "Attraction Under Review",
+              body:
+                  "Thanks for submitting! Your attraction is now under review.",
+              actionText: "Ok",
+            );
+          });
+    } else {
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return StyledDialog(
+              title: "Error during submission",
+              body:
+                  "Something happened during the submission process. Error $response.",
+              actionText: "Ok",
+            );
+          });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
@@ -133,27 +189,36 @@ class ParksHomeState extends State<ParksHome> {
                   onPressed: () {
                     showSearch(
                       context: context,
-                      delegate: CustomSearchDelegate(),
+                      delegate: CustomSearchDelegate(
+                          sliderActionTap: slidableActionTap,
+                          parkTap: parkEntryTap,
+                          favsQuery: widget.db.getFilteredQuery(
+                              path: DatabasePath.PARKS,
+                              key: "favorite",
+                              value: true),
+                          parksQuery: widget.db.getQueryForUser(
+                              path: DatabasePath.PARKS, key: "")),
                     );
                   },
                 )
               ],
               //expandedHeight: 100.0,
               floating: true,
-              pinned: false,
+              pinned: true,
               snap: false),
           SliverList(
               delegate: SliverChildListDelegate([
             FirebaseParkListView(
-                filter: ParksFilter(""),
-                parkTapCallback: parkEntryTap,
-                sliderActionCallback: slidableActionTap,
-                favsQuery: widget.db.getFilteredQuery(
-                    path: DatabasePath.PARKS, key: "favorite", value: true),
-                allParksQuery: widget.db
-                    .getQueryForUser(path: DatabasePath.PARKS, key: ""),
-                shrinkWrap: true,
-                physics: ClampingScrollPhysics())
+              filter: ParksFilter(""),
+              parkTapCallback: parkEntryTap,
+              sliderActionCallback: slidableActionTap,
+              favsQuery: widget.db.getFilteredQuery(
+                  path: DatabasePath.PARKS, key: "favorite", value: true),
+              allParksQuery:
+                  widget.db.getQueryForUser(path: DatabasePath.PARKS, key: ""),
+              shrinkWrap: true,
+              physics: ClampingScrollPhysics(),
+            )
           ]))
         ],
       ),
@@ -162,6 +227,11 @@ class ParksHomeState extends State<ParksHome> {
 }
 
 class CustomSearchDelegate extends SearchDelegate {
+  CustomSearchDelegate(
+      {this.parksQuery, this.favsQuery, this.parkTap, this.sliderActionTap});
+  final Query parksQuery, favsQuery;
+  final Function parkTap, sliderActionTap;
+
   @override
   List<Widget> buildActions(BuildContext context) {
     return [
@@ -186,11 +256,26 @@ class CustomSearchDelegate extends SearchDelegate {
 
   @override
   Widget buildResults(BuildContext context) {
-    return Text("Results");
+    return _buildContent(context);
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    return Text("Suggestions");
+    return _buildContent(context);
+  }
+
+  Widget _buildContent(BuildContext context) {
+    return FirebaseParkListView(
+      filter: ParksFilter(query),
+      parkTapCallback: (FirebasePark park) {
+        close(context, null);
+        parkTap(park);
+      },
+      sliderActionCallback: sliderActionTap,
+      favsQuery: favsQuery,
+      allParksQuery: parksQuery,
+      shrinkWrap: true,
+      physics: ClampingScrollPhysics(),
+    );
   }
 }
