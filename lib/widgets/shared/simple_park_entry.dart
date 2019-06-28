@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:flutter/material.dart';
 import 'package:log_ride/data/park_structures.dart';
 
-class GenericListEntry extends StatefulWidget{
-  GenericListEntry({this.park, this.onTap, this.longTap, this.fillable = true});
+class SimpleParkEntry extends StatefulWidget {
+  SimpleParkEntry({this.park, this.onTap, this.longTap, this.fillable = true});
 
   final BluehostPark park;
   final Function(BluehostPark) onTap;
@@ -11,15 +11,14 @@ class GenericListEntry extends StatefulWidget{
   final bool fillable;
 
   @override
-  _GenericListState createState() => _GenericListState();
+  _SimpleParkEntryState createState() => _SimpleParkEntryState();
 }
 
-class _GenericListState extends State<GenericListEntry> {
-
+class _SimpleParkEntryState extends State<SimpleParkEntry> {
   @override
   Widget build(BuildContext context) {
     Widget statusWidget;
-    if(widget.park.filled && widget.fillable){
+    if (widget.park.filled && widget.fillable) {
       // Park is already in the user's list
       statusWidget = Padding(
         padding: const EdgeInsets.only(right: 16.0),
@@ -28,9 +27,8 @@ class _GenericListState extends State<GenericListEntry> {
           width: 12.0,
           child: DecoratedBox(
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Theme.of(context).accentColor
-          )),
+                  shape: BoxShape.circle,
+                  color: Theme.of(context).accentColor)),
         ),
       );
     } else {
@@ -65,13 +63,13 @@ class _GenericListState extends State<GenericListEntry> {
               statusWidget
             ],
           )),
-      onTap: (){
+      onTap: () {
         widget.onTap(widget.park);
-        setState((){
+        setState(() {
           widget.park.filled = true;
         });
       },
-      onLongPress: (){
+      onLongPress: () {
         widget.longTap(widget.park);
         setState(() {
           widget.park.filled = true;

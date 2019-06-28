@@ -1,18 +1,15 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:firebase_database/firebase_database.dart';
-import 'package:log_ride/animations/slide_in_transition.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/widgets/home_page/park_list_entry.dart';
 import 'package:log_ride/widgets/home_page/parks_list_advanced.dart';
-import 'package:log_ride/ui/dialogs/user_parks_search.dart';
 
 class ParkListView extends StatelessWidget {
   ParkListView(
       {this.parksData,
-        this.favsData,
-      this.showSearch = false,
+      this.favsData,
       this.slidableController,
       this.sliderActionCallback,
       this.onTap,
@@ -21,7 +18,6 @@ class ParkListView extends StatelessWidget {
 
   final SlidableController slidableController;
 
-  final bool showSearch;
   final bool bottomPadding;
   final Query parksData;
   final Query favsData;
@@ -44,28 +40,6 @@ class ParkListView extends StatelessWidget {
       filter: filter,
       bottomEntryPadding: bottomPadding,
     );
-
-    Widget searchWidget;
-    if (showSearch) {
-      searchWidget = IconButton(
-          icon: Icon(Icons.search),
-          onPressed: () {
-            Navigator.push(
-                context,
-                SlideInRoute(
-                    dialogStyle: true,
-                    direction: SlideInDirection.UP,
-                    widget: UserParksSearchPage(
-                      entryCallback: onTap,
-                      slidableController: slidableController,
-                      parksQuery: parksData,
-                      favsQuery: favsData,
-                      sliderActionCallback: sliderActionCallback,
-                    )));
-          });
-    } else {
-      searchWidget = Container();
-    }
 
     String headerText = "My Parks";
 
@@ -90,8 +64,7 @@ class ParkListView extends StatelessWidget {
                       //arrowWidget
                     ],
                   ),
-                ),
-                searchWidget
+                )
               ],
             ),
           ),

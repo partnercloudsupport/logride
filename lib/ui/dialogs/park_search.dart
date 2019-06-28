@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/search_comparators.dart';
-import 'package:log_ride/widgets/shared/generic_list_entry.dart';
+import 'package:log_ride/widgets/shared/simple_park_entry.dart';
 
 class AllParkSearchPage extends StatefulWidget {
   AllParkSearchPage({this.allParks, this.tapBack, this.suggestPark});
@@ -107,7 +107,7 @@ class _AllParkSearchPageState extends State<AllParkSearchPage> {
               placeholder.parkCity =
                   "To add it to our database, please suggest it here";
 
-              return GenericListEntry(
+              return SimpleParkEntry(
                 park: placeholder,
                 onTap: (b) => suggestPark(),
                 longTap: (b) => suggestPark(),
@@ -115,7 +115,7 @@ class _AllParkSearchPageState extends State<AllParkSearchPage> {
               );
             } else {
               if (isBluehostParkInSearch(workingList[index], search)) {
-                return GenericListEntry(
+                return SimpleParkEntry(
                   park: workingList[index],
                   onTap: _handleShortEntryTap,
                   longTap: _handleLongEntryTap,
