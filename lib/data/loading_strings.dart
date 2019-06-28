@@ -14,7 +14,6 @@ class LoadingStrings{
     "Standing in Line",
     "Inflating Balloons",
     "Cleaning 3D Glasses",
-    "Santizing a Code V",
     "Installing Show Control",
     "Paging Operations",
     "Strobing the Yeti",
