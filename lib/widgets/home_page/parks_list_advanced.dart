@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_list.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/search_comparators.dart';
 import 'package:log_ride/widgets/home_page/park_list_entry.dart';
@@ -43,8 +44,10 @@ class _FirebaseParkListViewState extends State<FirebaseParkListView> {
   final GlobalKey<AnimatedListState> _animatedListKey =
       GlobalKey<AnimatedListState>();
   final SlidableController _slidableController = SlidableController();
+  final ScrollController _scrollController = ScrollController();
+
   String _emptyHint =
-      "You haven't checked into any parks! Tap the \"+\" button to add a park";
+      "You don't have any parks! Tap the \"+\" button below to add your first park";
 
   List<FirebasePark> _builtList;
   List<FirebasePark> _favesForAnimation = List<FirebasePark>();
@@ -58,14 +61,37 @@ class _FirebaseParkListViewState extends State<FirebaseParkListView> {
 
   void _onParkAdded(int index, DataSnapshot snap) {
     if (!_allLoaded) return;
-    if (mounted) setState(() {});
+
+    _buildList();
+    print(_builtList);
+
+    FirebasePark park = FirebasePark.fromMap(Map.from(snap.value));
+    int testIndex = getFirebaseParkIndex(_builtList, park.parkID);
+    print("Adding park ${park.name} at index $testIndex");
+
+    // Sometimes _allLoaded triggers when there's no animated key state. Returning.
+    if(_animatedListKey.currentState == null) return;
+
+    _animatedListKey.currentState.insertItem(testIndex);
   }
 
   void _onParkRemoved(int index, DataSnapshot snap) {
-    if (mounted) setState(() {});
+    FirebasePark park = FirebasePark.fromMap(Map.from(snap.value));
+
+    int removalIndex = getFirebaseParkIndex(_builtList, park.parkID);
+    print("Attempting to remove park ${park.name} at index: $removalIndex");
+    _animatedListKey.currentState.removeItem(removalIndex,
+        (BuildContext context, Animation<double> anim) {
+      return _entryBuilder(context, removalIndex, anim, overridePark: park);
+    });
+
+    _buildList();
+
+    if (_builtList.length == 0) _allLoaded = false;
   }
 
   void _onParkChanged(int index, DataSnapshot snap) {
+    _buildList();
     if (mounted) setState(() {});
   }
 
@@ -82,10 +108,10 @@ class _FirebaseParkListViewState extends State<FirebaseParkListView> {
     FirebasePark park = FirebasePark.fromMap(Map.from(snap.value));
 
     park.inFavorites = true;
-    _favesForAnimation.add(park);
-    _favesForAnimation.sort((a, b) => a.name.compareTo(b.name));
 
-    int position = _favesForAnimation.indexOf(park);
+    _buildList();
+
+    int position = getFirebaseParkIndex(_builtList, park.parkID);
 
     _animatedListKey.currentState.insertItem(position);
   }
@@ -94,10 +120,7 @@ class _FirebaseParkListViewState extends State<FirebaseParkListView> {
     FirebasePark toRemove = FirebasePark.fromMap(Map.from(snap.value));
     toRemove.inFavorites = true;
 
-    print(_favesForAnimation);
-    int position = getFirebaseParkIndex(_favesForAnimation, toRemove.parkID);
-    _favesForAnimation.removeAt(position);
-    print(_favesForAnimation);
+    int position = getFirebaseParkIndex(_builtList, toRemove.parkID);
 
     _animatedListKey.currentState.removeItem(position,
         (BuildContext context, Animation<double> animation) {
@@ -118,6 +141,7 @@ class _FirebaseParkListViewState extends State<FirebaseParkListView> {
   }
 
   void _filterUpdated() {
+    _scrollController.jumpTo(0.0);
     if (mounted) setState(() {});
   }
 
@@ -235,41 +259,53 @@ class _FirebaseParkListViewState extends State<FirebaseParkListView> {
 
   @override
   Widget build(BuildContext context) {
+    // Only display content if our content is actually loaded
+    Widget content = Container();
+    if (!_allLoaded || !_favsLoaded) {
+      print("User's data hasn't loaded yet, spinning");
+      content = Center(child: CircularProgressIndicator());
+    }
+
     if (_allLoaded && _favsLoaded) {
-      _buildList();
+      print("User's data has been recieved");
+      if (_builtList == null) _buildList();
+
       if (_builtList.length == 0) {
-        return Padding(
-            padding: EdgeInsets.only(top: 12.0, left: 8.0, right: 8.0),
+        print("User has no data, displaying a welcome / tutorial page");
+        content = Padding(
+            padding: EdgeInsets.all(12.0),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 Text(
                   _emptyHint,
                   style: Theme.of(context).textTheme.title,
                   textAlign: TextAlign.center,
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 52.0),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Image.asset("assets/swoosh.png"),
-                    ),
-                  ),
+                Icon(
+                  FontAwesomeIcons.arrowDown,
+                  color: Theme.of(context).primaryColor,
+                  size: 60,
                 )
               ],
             ));
+      } else {
+        print("User's data has been loaded, displaying");
+        content = AnimatedList(
+          key: _animatedListKey,
+          initialItemCount: _builtList.length,
+          controller: _scrollController,
+          itemBuilder: _entryBuilder,
+          physics: widget.physics,
+          padding: const EdgeInsets.only(top: 8.0),
+        );
       }
-      return AnimatedList(
-        key: _animatedListKey,
-        initialItemCount: _builtList.length,
-        itemBuilder: _entryBuilder,
-        shrinkWrap: widget.shrinkWrap,
-        physics: widget.physics,
-        padding: const EdgeInsets.only(top: 8.0),
-      );
-    } else {
-      return Center(child: CircularProgressIndicator());
     }
+
+    return AnimatedSwitcher(
+      child: content,
+      duration: const Duration(milliseconds: 500),
+    );
   }
 
   @override

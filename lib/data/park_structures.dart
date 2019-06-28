@@ -244,6 +244,7 @@ FirebasePark getFirebasePark(
 /// Returns -1 if it cannot be found.
 int getFirebaseParkIndex(List<FirebasePark> listToSearch, num idToSearchFor) {
   for (int i = 0; i < listToSearch.length; i++){
+    if(listToSearch[i] == null) continue;
     if(listToSearch[i].parkID == idToSearchFor){
       return i;
     }

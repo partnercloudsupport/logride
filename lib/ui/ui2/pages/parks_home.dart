@@ -2,7 +2,6 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:log_ride/animations/slide_in_transition.dart';
 import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/auth_manager.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
@@ -120,17 +119,16 @@ class ParksHomeState extends State<ParksHome> {
       BluehostPark parent, bool isNewAttraction) async {
     isNewAttraction ? print("New Attraction") : print("Modified Attraction");
 
-    dynamic result = await Navigator.push(
-        context,
-        SlideInRoute(
-            widget: SubmitAttractionPage(
-                attractionTypes: widget.parksManager.attractionTypes,
-                existingData: isNewAttraction
-                    ? attraction
-                    : BluehostAttraction.copy(attraction),
-                parentPark: parent),
-            dialogStyle: true,
-            direction: SlideInDirection.RIGHT));
+    dynamic result = await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return SubmitAttractionPage(
+              attractionTypes: widget.parksManager.attractionTypes,
+              existingData: isNewAttraction
+                  ? attraction
+                  : BluehostAttraction.copy(attraction),
+              parentPark: parent);
+        });
 
     if (result == null) return;
 
@@ -172,65 +170,55 @@ class ParksHomeState extends State<ParksHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: CustomScrollView(
-        slivers: <Widget>[
-          SliverAppBar(
-              title: Text(
-                "My Parks",
-                style: Theme.of(context)
-                    .textTheme
-                    .headline
-                    .apply(color: Colors.white),
-              ),
-              actions: <Widget>[
-                IconButton(
-                  icon: Icon(FontAwesomeIcons.search),
-                  onPressed: () {
-                    showSearch(
-                      context: context,
-                      delegate: CustomSearchDelegate(
-                          sliderActionTap: slidableActionTap,
-                          parkTap: parkEntryTap,
-                          favsQuery: widget.db.getFilteredQuery(
-                              path: DatabasePath.PARKS,
-                              key: "favorite",
-                              value: true),
-                          parksQuery: widget.db.getQueryForUser(
-                              path: DatabasePath.PARKS, key: "")),
-                    );
-                  },
-                )
-              ],
-              //expandedHeight: 100.0,
-              floating: true,
-              pinned: true,
-              snap: false),
-          SliverList(
-              delegate: SliverChildListDelegate([
-            FirebaseParkListView(
-              filter: ParksFilter(""),
-              parkTapCallback: parkEntryTap,
-              sliderActionCallback: slidableActionTap,
-              favsQuery: widget.db.getFilteredQuery(
-                  path: DatabasePath.PARKS, key: "favorite", value: true),
-              allParksQuery:
-                  widget.db.getQueryForUser(path: DatabasePath.PARKS, key: ""),
-              shrinkWrap: true,
-              physics: ClampingScrollPhysics(),
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(
+          title: Text(
+            "My Parks",
+            style:
+                Theme.of(context).textTheme.headline.apply(color: Colors.white),
+          ),
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(FontAwesomeIcons.search),
+              onPressed: () {
+                showSearch(
+                  context: context,
+                  delegate: CustomSearchDelegate(
+                      sliderActionTap: slidableActionTap,
+                      parkTap: parkEntryTap,
+                      favsQuery: widget.db.getFilteredQuery(
+                          path: DatabasePath.PARKS,
+                          key: "favorite",
+                          value: true),
+                      parksQuery: widget.db
+                          .getQueryForUser(path: DatabasePath.PARKS, key: "")),
+                );
+              },
             )
-          ]))
-        ],
-      ),
-    );
+          ],
+        ),
+        body: FirebaseParkListView(
+          filter: ParksFilter(""),
+          parkTapCallback: parkEntryTap,
+          sliderActionCallback: slidableActionTap,
+          favsQuery: widget.db.getFilteredQuery(
+              path: DatabasePath.PARKS, key: "favorite", value: true),
+          allParksQuery:
+              widget.db.getQueryForUser(path: DatabasePath.PARKS, key: ""),
+          shrinkWrap: false,
+          physics: ClampingScrollPhysics(),
+        ));
   }
 }
 
 class CustomSearchDelegate extends SearchDelegate {
   CustomSearchDelegate(
       {this.parksQuery, this.favsQuery, this.parkTap, this.sliderActionTap});
+
   final Query parksQuery, favsQuery;
   final Function parkTap, sliderActionTap;
+
+  Widget contentWidget;
 
   @override
   List<Widget> buildActions(BuildContext context) {

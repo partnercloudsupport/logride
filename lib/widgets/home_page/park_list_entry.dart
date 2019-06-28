@@ -74,6 +74,7 @@ class ParkListEntry extends StatelessWidget {
     }
 
     return Slidable(
+      key: ValueKey(parkData.parkID),
       actionPane: SlidableDrawerActionPane(),
       actionExtentRatio: 0.25,
       child: InkWell(
