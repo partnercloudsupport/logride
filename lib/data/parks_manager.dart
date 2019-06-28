@@ -40,6 +40,8 @@ class ParksManager {
     db.getEntryAtPath(path: DatabasePath.PARKS, key: "").then((snap) async {
       if (snap == null) {
         print("User has no data currently. Returning.");
+        _streamController.add(ParksManagerEvent(ParksManagerEventType.PARKS_FETCHED));
+        _streamController.add(ParksManagerEvent(ParksManagerEventType.ATTRACTIONS_FETCHED));
         _streamController
             .add(ParksManagerEvent(ParksManagerEventType.INITIALIZED));
         return;

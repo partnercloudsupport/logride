@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:collection';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:latlong/latlong.dart';
@@ -51,8 +50,6 @@ class _StatsPageState extends State<StatsPage>
 
     _tabController = TabController(length: 2, vsync: this);
 
-    FirebaseAnalytics().logEvent(name: "view_stats", parameters: null);
-
     super.initState();
   }
 
@@ -65,25 +62,26 @@ class _StatsPageState extends State<StatsPage>
     super.didChangeDependencies();
   }
 
-  void _refreshCalculation() async {
-
+  Future<void> _refreshCalculation() async {
     _calculationState = CalculationState.REQUESTING_CALCULATION;
     Future<UserStats> newCalculation = calculator.countStats();
     setState(() {
       _calculationState = CalculationState.CALCULATING;
     });
 
-    newCalculation.then((UserStats value) {
+    await newCalculation.then((UserStats value) {
       setState(() {
         userData = value;
         _calculationState = CalculationState.CALCULATED;
       });
+      return;
     }, onError: (e) {
       setState(() {
         _calculationState = CalculationState.ERROR_CALCULATING;
       });
       Toast.show("Error Calculating Statistics", context,
           duration: Toast.LENGTH_SHORT);
+      return;
     });
   }
 
@@ -107,6 +105,7 @@ class _StatsPageState extends State<StatsPage>
       }
 
       body = GestureDetector(
+          behavior: HitTestBehavior.opaque,
           child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -120,7 +119,6 @@ class _StatsPageState extends State<StatsPage>
         controller: _tabController,
         physics: PageScrollPhysics(),
         key: ValueKey(userData.hashCode),
-        //physics: NeverScrollableScrollPhysics(),
         children: <Widget>[
           _buildParksPage(context, userData),
           _buildAttractionsPage(context, userData)
@@ -176,48 +174,53 @@ class _StatsPageState extends State<StatsPage>
   Widget _buildParksPage(BuildContext context, UserStats stats) {
     return Container(
       width: MediaQuery.of(context).size.width,
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.only(left: 12.0, right: 12.0, top: 16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              //_PageHeader(text: "PARKS STATS"),
-              _SidedProgressBar(
-                left: stats.parksCompleted,
-                right: stats.totalParks,
-                leftText: "Completed",
-                rightText: "Saved",
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Divider(
-                  height: 8.0,
-                  color: Theme.of(context).primaryColor,
+      child: RefreshIndicator(
+        onRefresh: _refreshCalculation,
+        displacement: 20.0,
+        child: SingleChildScrollView(
+          physics: AlwaysScrollableScrollPhysics(),
+          child: Padding(
+            padding: const EdgeInsets.only(left: 12.0, right: 12.0, top: 16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                //_PageHeader(text: "PARKS STATS"),
+                _SidedProgressBar(
+                  left: stats.parksCompleted,
+                  right: stats.totalParks,
+                  leftText: "Completed",
+                  rightText: "Saved",
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: _TopParkScores(
-                  scores: stats.topParks,
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Divider(
+                    height: 8.0,
+                    color: Theme.of(context).primaryColor,
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Divider(
-                  height: 8.0,
-                  color: Theme.of(context).primaryColor,
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: _TopParkScores(
+                    scores: stats.topParks,
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12.0),
-                child: _CountriesBox(
-                  countries: stats.countries,
-                  mapData: stats.parkLocations,
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Divider(
+                    height: 8.0,
+                    color: Theme.of(context).primaryColor,
+                  ),
                 ),
-              )
-            ],
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: _CountriesBox(
+                    countries: stats.countries,
+                    mapData: stats.parkLocations,
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       ),
@@ -227,50 +230,55 @@ class _StatsPageState extends State<StatsPage>
   Widget _buildAttractionsPage(BuildContext context, UserStats stats) {
     return Container(
       width: MediaQuery.of(context).size.width,
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-          child: Column(
-            children: <Widget>[
-              //_PageHeader(text: "ATTRACTION STATS"),
-              _HeaderStat(
-                  stat: stats.totalAttractionsChecked,
-                  text: "CHECKED ATTRACTIONS"),
-              _SummedProgressBar(
-                left: stats.activeAttractionsChecked,
-                right: stats.extinctAttractionsChecked,
-                leftText: "Active",
-                rightText: "Defunct",
-                shimmer: false,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Divider(
-                  height: 8.0,
-                  color: Theme.of(context).primaryColor,
+      child: RefreshIndicator(
+        onRefresh: _refreshCalculation,
+        displacement: 20.0,
+        child: SingleChildScrollView(
+          physics: AlwaysScrollableScrollPhysics(),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: Column(
+              children: <Widget>[
+                //_PageHeader(text: "ATTRACTION STATS"),
+                _HeaderStat(
+                    stat: stats.totalAttractionsChecked,
+                    text: "CHECKED ATTRACTIONS"),
+                _SummedProgressBar(
+                  left: stats.activeAttractionsChecked,
+                  right: stats.extinctAttractionsChecked,
+                  leftText: "Active",
+                  rightText: "Defunct",
+                  shimmer: false,
                 ),
-              ),
-              _HeaderStat(
-                  stat: stats.totalExperiences, text: "TOTAL EXPERIENCES"),
-              _TopAttractionScores(
-                scores: stats.topAttractions,
-              ),
-              // Bottom padding is used so the user doesn't see it butting up right against the bottom
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Divider(
-                  height: 8.0,
-                  color: Theme.of(context).primaryColor,
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Divider(
+                    height: 8.0,
+                    color: Theme.of(context).primaryColor,
+                  ),
                 ),
-              ),
-              _StatlessHeader(
-                text: "ATTRACTIONS OVERVIEW",
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: AttractionStats(stats: stats),
-              )
-            ],
+                _HeaderStat(
+                    stat: stats.totalExperiences, text: "TOTAL EXPERIENCES"),
+                _TopAttractionScores(
+                  scores: stats.topAttractions,
+                ),
+                // Bottom padding is used so the user doesn't see it butting up right against the bottom
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Divider(
+                    height: 8.0,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+                _StatlessHeader(
+                  text: "ATTRACTIONS OVERVIEW",
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: AttractionStats(stats: stats),
+                )
+              ],
+            ),
           ),
         ),
       ),
@@ -364,11 +372,61 @@ class _TopScores extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+    Widget scoresDisplay = Container();
+    List<Widget> scoresDisplayList = List<Widget>();
+
+    if (scores.length <= 0) {
+      scoresDisplay = Row(
         children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Text("No $unit"),
+          ),
+        ],
+      );
+    } else {
+      scoresDisplayList = List<Widget>.generate(scores.length, (index) {
+        // Build a row widget for each entry, append that to the column
+        String key = scores.keys.elementAt(index);
+        int score = scores[key];
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4.0),
+          child: Row(
+              textBaseline: TextBaseline.alphabetic,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: Text(
+                    "${index + 1}.",
+                    style: entryStyle,
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    key,
+                    style: entryStyle,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Text(
+                    "$score $unit",
+                    textAlign: TextAlign.right,
+                    style: entryStyle,
+                    maxLines: 1,
+                  ),
+                )
+              ]),
+        );
+      });
+    }
+
+    return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
           Row(
             children: <Widget>[
               Text(
@@ -378,45 +436,11 @@ class _TopScores extends StatelessWidget {
               ),
             ],
           ),
-        ]..addAll(List<Widget>.generate(scores.length, (index) {
-            // Build a row widget for each entry, append that to the column
-            String key = scores.keys.elementAt(index);
-            int score = scores[key];
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4.0),
-              child: Row(
-                  textBaseline: TextBaseline.alphabetic,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: Text(
-                        "${index + 1}.",
-                        style: entryStyle,
-                      ),
-                    ),
-                    Expanded(
-                      child: Text(
-                        key,
-                        style: entryStyle,
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: Text(
-                        "$score $unit",
-                        textAlign: TextAlign.right,
-                        style: entryStyle,
-                        maxLines: 1,
-                      ),
-                    )
-                  ]),
-            );
-          })),
-      ),
-    );
+          if (scoresDisplayList.length > 0)
+            ...scoresDisplayList
+          else
+            scoresDisplay
+        ]));
   }
 }
 
@@ -673,21 +697,13 @@ class __SummedProgressBarState extends State<_SummedProgressBar> {
   }
 }
 
-class _CountriesBox extends StatefulWidget {
+class _CountriesBox extends StatelessWidget {
   _CountriesBox({this.mapData, this.countries});
 
   final Map<List<String>, LatLng> mapData;
   final num countries;
-
-  @override
-  __CountriesBoxState createState() => __CountriesBoxState();
-}
-
-class __CountriesBoxState extends State<_CountriesBox>
-    with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
@@ -696,7 +712,7 @@ class __CountriesBoxState extends State<_CountriesBox>
           crossAxisAlignment: CrossAxisAlignment.baseline,
           children: <Widget>[
             Text(
-              widget.countries.toString(),
+              countries.toString(),
               style: TextStyle(
                   fontSize: 32, textBaseline: TextBaseline.alphabetic),
             ),
@@ -723,18 +739,14 @@ class __CountriesBoxState extends State<_CountriesBox>
             borderRadius: BorderRadius.circular(15.0),
             child: Container(
                 height: 200,
-                child:
-                    /*TranslatedMapEntry(
-                markers: widget.mapData,
-                generateCenter: true,)*/
-                    Container() // TODO: FIX BEFORE RELEASE
-                ),
+                child: TranslatedMapEntry(
+                  center: LatLng(0, 0),
+                  markers: mapData,
+                  generateCenter: (mapData.length > 0),
+                )),
           ),
         ),
       ],
     );
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }

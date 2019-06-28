@@ -117,7 +117,7 @@ class _HomeState extends State<Home> {
         // a multi-park add just adds the park to the list and does not open it.
         tapBack: (BluehostPark p, bool open) =>
             open ? _handleChainParkAdd(p.id) : _handleAddIDCallback(p.id),
-        suggestPark: _handleNewParkSubmission, // TODO: Proper suggestion
+        suggestPark: _handleNewParkSubmission,
       );
     }));
   }
@@ -141,7 +141,6 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-
     stopwatch.start();
 
     _preInit();
@@ -228,7 +227,7 @@ class _HomeState extends State<Home> {
 
     _parksHomeFocus.addListener(_handleHomeFocusChanged);
 
-    setState((){
+    setState(() {
       dataLoaded = true;
     });
 
@@ -261,6 +260,21 @@ class _HomeState extends State<Home> {
       return;
     }
 
+    // Trigger whatever analytics are set up for said page
+    switch (Tabs.values[index]) {
+      case Tabs.NEWS:
+        break;
+      case Tabs.STATS:
+        analytics.logEvent(name: "view_stats", parameters: null);
+        break;
+      case Tabs.MY_PARKS:
+        break;
+      case Tabs.LISTS:
+        break;
+      case Tabs.SETTINGS:
+        break;
+    }
+
     setState(() {
       _pageIndex = index;
     });
@@ -270,52 +284,64 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     // Capturing back keys and sending them to the appropriate navigators...
 
-    if (!dataLoaded) return LoadingPage();
+    Widget page = Container();
 
-    return WillPopScope(
-        onWillPop: () async => !await navigatorKeys[Tabs.values[_pageIndex]]
-            .currentState
-            .maybePop(),
-        child: Scaffold(
-            backgroundColor: Colors.white,
-            resizeToAvoidBottomInset: false,
-            body: Stack(
-              children: <Widget>[
-                Padding(
-                    padding: (_needsBasePadding)
-                        ? EdgeInsets.only(bottom: 54.0)
-                        : EdgeInsets.zero,
-                    child: Stack(
-                      children: <Widget>[
-                        _buildOffstageNavigator(Tabs.NEWS),
-                        _buildOffstageNavigator(Tabs.STATS),
-                        _buildOffstageNavigator(Tabs.MY_PARKS),
-                        _buildOffstageNavigator(Tabs.LISTS),
-                        _buildOffstageNavigator(Tabs.SETTINGS),
+    if (!dataLoaded) {
+      page = LoadingPage();
+    } else {
+      page = WillPopScope(
+          onWillPop: () async => !await navigatorKeys[Tabs.values[_pageIndex]]
+              .currentState
+              .maybePop(),
+          child: Scaffold(
+              backgroundColor: Colors.white,
+              resizeToAvoidBottomInset: false,
+              body: Stack(
+                children: <Widget>[
+                  Padding(
+                      padding: (_needsBasePadding)
+                          ? EdgeInsets.only(bottom: 54.0)
+                          : EdgeInsets.zero,
+                      child: Stack(
+                        children: <Widget>[
+                          _buildOffstageNavigator(Tabs.NEWS),
+                          _buildOffstageNavigator(Tabs.STATS),
+                          _buildOffstageNavigator(Tabs.MY_PARKS),
+                          _buildOffstageNavigator(Tabs.LISTS),
+                          _buildOffstageNavigator(Tabs.SETTINGS),
+                        ],
+                      )),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: ContextNavBar(
+                      menuTap: _onMenuBarItemTapped,
+                      homeIndex: homeIndex,
+                      index: _pageIndex,
+                      homeFocus: _parksHomeFocus.value,
+                      items: [
+                        ContextNavBarItem(
+                            label: "News",
+                            iconData: FontAwesomeIcons.solidNewspaper),
+                        ContextNavBarItem(
+                            label: "Stats",
+                            iconData: FontAwesomeIcons.chartPie),
+                        ContextNavBarItem(
+                            label: "Lists", iconData: FontAwesomeIcons.list),
+                        ContextNavBarItem(
+                            label: "Settings", iconData: FontAwesomeIcons.cog)
                       ],
-                    )),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: ContextNavBar(
-                    menuTap: _onMenuBarItemTapped,
-                    homeIndex: homeIndex,
-                    index: _pageIndex,
-                    homeFocus: _parksHomeFocus.value,
-                    items: [
-                      ContextNavBarItem(
-                          label: "News",
-                          iconData: FontAwesomeIcons.solidNewspaper),
-                      ContextNavBarItem(
-                          label: "Stats", iconData: FontAwesomeIcons.chartPie),
-                      ContextNavBarItem(
-                          label: "Lists", iconData: FontAwesomeIcons.list),
-                      ContextNavBarItem(
-                          label: "Settings", iconData: FontAwesomeIcons.cog)
-                    ],
-                  ),
-                )
-              ],
-            )));
+                    ),
+                  )
+                ],
+              )));
+    }
+
+
+    // Animated switcher allows for a smooth transition between the loading page and the home page
+    return AnimatedSwitcher(
+      child: page,
+      duration: const Duration(seconds: 1),
+    );
   }
 
   Widget _buildOffstageNavigator(Tabs tab) {

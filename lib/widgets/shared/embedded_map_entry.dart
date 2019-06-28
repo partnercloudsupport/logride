@@ -102,7 +102,7 @@ class TranslatedMapEntry extends StatelessWidget {
 
     LatLng generatedCenter;
 
-    if(generateCenter) {
+    if(generateCenter && markers.length > 0) {
       generatedCenter = calculateCenter(markers.values.toList());
     } else {
       generatedCenter = LatLng(center.latitude, center.longitude);

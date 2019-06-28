@@ -191,6 +191,11 @@ class StatsCalculator {
     dynamic rawResponse =
         await db.getEntryAtPath(path: DatabasePath.PARKS, key: "");
 
+    // User doesn't have any park data to analyze, return the bare UserStats object
+    if(rawResponse == null){
+      return stats;
+    }
+
     print(rawResponse);
 
 
