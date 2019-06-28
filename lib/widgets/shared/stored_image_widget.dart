@@ -7,10 +7,10 @@ import 'package:log_ride/ui/submission/submit_attraction_photo.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:log_ride/widgets/shared/hero_network_image.dart';
 import 'package:log_ride/widgets/shared/back_button.dart';
-import 'package:log_ride/widgets/shared/not_implemented_dialog.dart';
 
 class FirebaseAttractionImage extends StatefulWidget {
-  FirebaseAttractionImage({this.attractionData, this.userName, this.parkName, this.overlay});
+  FirebaseAttractionImage(
+      {this.attractionData, this.userName, this.parkName, this.overlay});
 
   final BluehostAttraction attractionData;
   final String userName;
@@ -51,13 +51,16 @@ class _FirebaseAttractionImageState extends State<FirebaseAttractionImage> {
         builder: (BuildContext context, AsyncSnapshot<String> url) {
           // If the page 404's, we don't have a URL, and we don't have an image on our firebase.
           // FirebaseStorage spews an error into the console, and I can't seem to prevent it. but it's ok.
-          if (!url.hasData || url.hasError || widget.attractionData.photoArtist == "") {
+          if (!url.hasData ||
+              url.hasError ||
+              widget.attractionData.photoArtist == "") {
             return GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () => showDialog(
                   context: context,
                   builder: (ctx) {
-                    return SubmitAttractionPhoto(widget.attractionData, widget.userName, widget.parkName);
+                    return SubmitAttractionPhoto(widget.attractionData,
+                        widget.userName, widget.parkName);
                   }),
               child: Container(
                 constraints: BoxConstraints.expand(),
@@ -118,35 +121,35 @@ class _FirebaseAttractionImageState extends State<FirebaseAttractionImage> {
   }
 
   void _onImageTap(String url) {
-    Navigator.of(context).push(MaterialPageRoute<void>(
-        maintainState: true,
+    showDialog(
+        context: context,
         builder: (BuildContext context) {
           return Scaffold(
               body: Stack(children: [
-            PhotoView(
-              imageProvider: NetworkImage(url),
-              heroTag: url,
-              transitionOnUserGestures: true,
-              gaplessPlayback: true,
-              maxScale: PhotoViewComputedScale.covered * 5.0,
-              minScale: PhotoViewComputedScale.contained * 1.0,
-            ),
-            RoundBackButton(),
-            SafeArea(
-              child: (widget.overlay != null)
-                  ? Container(
-                      constraints: BoxConstraints.expand(),
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                          constraints: BoxConstraints.expand(height: 20),
-                          color: Color.fromRGBO(0, 0, 0, 0.75),
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 20.0),
-                            child: widget.overlay,
-                          )))
-                  : Container(),
-            )
-          ]));
-        }));
+                PhotoView(
+                  imageProvider: NetworkImage(url),
+                  heroTag: url,
+                  transitionOnUserGestures: true,
+                  gaplessPlayback: true,
+                  maxScale: PhotoViewComputedScale.covered * 5.0,
+                  minScale: PhotoViewComputedScale.contained * 1.0,
+                ),
+                RoundBackButton(),
+                SafeArea(
+                  child: (widget.overlay != null)
+                      ? Container(
+                          constraints: BoxConstraints.expand(),
+                          alignment: Alignment.bottomCenter,
+                          child: Container(
+                              constraints: BoxConstraints.expand(height: 20),
+                              color: Color.fromRGBO(0, 0, 0, 0.75),
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 20.0),
+                                child: widget.overlay,
+                              )))
+                      : Container(),
+                )
+              ]));
+        });
   }
 }
