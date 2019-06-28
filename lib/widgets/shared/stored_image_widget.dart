@@ -51,7 +51,7 @@ class _FirebaseAttractionImageState extends State<FirebaseAttractionImage> {
         builder: (BuildContext context, AsyncSnapshot<String> url) {
           // If the page 404's, we don't have a URL, and we don't have an image on our firebase.
           // FirebaseStorage spews an error into the console, and I can't seem to prevent it. but it's ok.
-          if (!url.hasData || url.hasError) {
+          if (!url.hasData || url.hasError || widget.attractionData.photoArtist == "") {
             return GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () => showDialog(

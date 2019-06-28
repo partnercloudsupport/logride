@@ -49,6 +49,8 @@ class _DetailsPageState extends State<DetailsPage> {
   DateTime firstRide;
   DateTime lastRide;
 
+  ScrollController scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
@@ -76,7 +78,13 @@ class _DetailsPageState extends State<DetailsPage> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       resizeToAvoidBottomPadding: false,
-      body: _buildDetailsCard(context),
+      body: Dismissible(
+          key: Key('key'),
+          direction: DismissDirection.down,
+          onDismissed: (d) {
+            Navigator.of(context).pop();
+          },
+          child: _buildDetailsCard(context)),
     );
   }
 
@@ -127,15 +135,17 @@ class _DetailsPageState extends State<DetailsPage> {
 
                   Expanded(
                     child: ListView(
+                      physics: ClampingScrollPhysics(),
+                      controller: scrollController,
                       children: <Widget>[
                         // Map Section is built only if map details are passed.
                         mapWidget,
                         mediaWidget,
                         // Status Section
                         statusRow,
+                        ...furtherDetails,
+                        ...userDetails,
                       ]
-                        ..addAll(furtherDetails)
-                        ..addAll(userDetails),
                     ),
                   ),
                 ],
@@ -412,17 +422,19 @@ class _DetailsPageState extends State<DetailsPage> {
       if (park.website != "") {
         Uri parkUri = Uri.parse(park.website);
 
-        Widget siteButton = Padding(padding: const EdgeInsets.symmetric(horizontal: 8.0), child: InterfaceButton(
-          text: "Visit Park Website",
-          subtext: "via ${parkUri.host}",
-          color: Theme.of(context).primaryColor,
-          textColor: Colors.white,
-          onPressed: () async {
-            if(await canLaunch(park.website)){
-              launch(park.website);
-            }
-          },
-        ));
+        Widget siteButton = Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: InterfaceButton(
+              text: "Visit Park Website",
+              subtext: "via ${parkUri.host}",
+              color: Theme.of(context).primaryColor,
+              textColor: Colors.white,
+              onPressed: () async {
+                if (await canLaunch(park.website)) {
+                  launch(park.website);
+                }
+              },
+            ));
         details.add(siteButton);
       }
       return details;
@@ -593,20 +605,6 @@ class _DetailsPageState extends State<DetailsPage> {
             ),
           ),
         ]));
-  }
-
-  Widget _urlTextButton(BuildContext context, String text, String url) {
-    return InkWell(
-      onTap: () async {
-        if (await canLaunch(url)) {
-          await launch(url);
-        }
-      },
-      child: Text(
-        text,
-        style: TextStyle(color: Theme.of(context).primaryColor),
-      ),
-    );
   }
 
   List<Widget> _buildUserDetails(BuildContext context) {
