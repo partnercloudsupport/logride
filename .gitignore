@@ -28,6 +28,12 @@
 .pub/
 build/
 
+
+**/android/app/**/google-services.json
+**/android/key.properties
+
+**/lib/data/public_key.dart
+
 # Android related
 **/android/**/gradle-wrapper.jar
 **/android/.gradle
@@ -71,6 +77,3 @@ build/
 !**/ios/**/default.pbxuser
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
-
-android/app/google-services.json
-android/key.properties
