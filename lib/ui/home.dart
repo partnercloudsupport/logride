@@ -7,19 +7,19 @@ import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:log_ride/data/auth_manager.dart';
 import 'package:log_ride/data/check_in_manager.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
-import 'package:log_ride/data/loading_strings.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/parks_manager.dart';
 import 'package:log_ride/data/webfetcher.dart';
 import 'package:log_ride/ui/dialogs/park_search.dart';
 import 'package:log_ride/ui/loading_page.dart';
-import 'package:log_ride/ui/stats_page.dart';
-import 'package:log_ride/ui/submission/submit_attraction_page.dart';
+import 'package:log_ride/ui/pages/lists.dart';
+import 'package:log_ride/ui/pages/news_page.dart';
+import 'package:log_ride/ui/pages/parks_home.dart';
+import 'package:log_ride/ui/pages/stats_page.dart';
 import 'package:log_ride/ui/submission/submit_park_page.dart';
-import 'package:log_ride/ui/ui2/navigation/nav_bar.dart';
-import 'package:log_ride/ui/ui2/navigation/tab_navigation.dart';
-import 'package:log_ride/ui/ui2/pages/parks_home.dart';
-import 'package:log_ride/widgets/shared/offstage_crossfade.dart';
+import 'package:log_ride/widgets/navigation/nav_bar.dart';
+import 'package:log_ride/widgets/navigation/offstage_crossfade.dart';
+import 'package:log_ride/widgets/navigation/tab_navigation.dart';
 import 'package:log_ride/widgets/shared/styled_dialog.dart';
 
 enum Tabs { NEWS, STATS, MY_PARKS, LISTS, SETTINGS }
@@ -167,25 +167,29 @@ class _HomeState extends State<Home> {
   }
 
   void _parksManagerListener(ParksManagerEvent event) {
-    switch (event.type) {
-      case ParksManagerEventType.INITIALIZED:
+    switch (event) {
+      case ParksManagerEvent.INITIALIZED:
         print("Initialized");
         subscription.cancel();
         break;
-      case ParksManagerEventType.PARKS_FETCHED:
+      case ParksManagerEvent.PARKS_FETCHED:
         print("Parks have been fetched.");
         break;
-      case ParksManagerEventType.ATTRACTIONS_FETCHED:
+      case ParksManagerEvent.ATTRACTIONS_FETCHED:
         print("Attractions have been fetched");
         _dataInit();
         break;
-      case ParksManagerEventType.INITIALIZING:
+      case ParksManagerEvent.INITIALIZING:
         print("Initializing of Park Manager has begun");
         break;
-      case ParksManagerEventType.ERROR:
+      case ParksManagerEvent.ERROR:
         print("Parks Manager has had an error in initialization");
         break;
-      case ParksManagerEventType.UNINITIALIZED:
+      case ParksManagerEvent.UNINITIALIZED:
+        break;
+      case ParksManagerEvent.MANUFACTURERS_FETCHED:
+        break;
+      case ParksManagerEvent.MODELS_FETCHED:
         break;
     }
   }
@@ -335,7 +339,6 @@ class _HomeState extends State<Home> {
                 ],
               )));
     }
-
 
     // Animated switcher allows for a smooth transition between the loading page and the home page
     return AnimatedSwitcher(

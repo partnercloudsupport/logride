@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:log_ride/data/auth_manager.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/ui/auth_page.dart';
-import 'package:log_ride/ui/ui2/new-home.dart';
+import 'package:log_ride/ui/home.dart';
 
 enum AuthStatus { notLoggedIn, loggedIn, notDetermined }
 
