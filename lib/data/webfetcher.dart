@@ -240,6 +240,58 @@ class WebFetcher {
         .post(_serverURLS[SubmissionType.IMAGE], body: json.encode(body))
         .then((response) => response.statusCode);
   }
+
+  /*
+  Future<List<BluehostNews>> getNews(bool activeOnly) async {
+    String args = activeOnly ? "?showOnlyActive=1" : "";
+
+    final response = await http.get(_serverURLS[WebLocation.NEWS] + args);
+
+    if (response.statusCode == 200) {
+      List<dynamic> decoded = jsonDecode(response.body);
+      for (int i = 0; i < decoded.length; i++) {}
+    }
+  }*/
+
+  Future<List<Manufacturer>> getAllManufacturers() async {
+    final List<Manufacturer> manufacturers = List<Manufacturer>();
+
+    http.Response response =
+        await http.get(_serverURLS[WebLocation.MANUFACTURERS]);
+
+    if (response.statusCode == 200) {
+      List<dynamic> decoded = jsonDecode(response.body);
+      decoded.forEach((m) {
+        Manufacturer manufacturer = Manufacturer.fromJson(m);
+        if (manufacturer == null)
+          return; // Something happened with the parsing of data, skip it
+        _fixBluehostManufacturerText(manufacturer);
+        manufacturers.add(manufacturer);
+      });
+    }
+
+    return manufacturers;
+  }
+
+  /// Returns all models belonging to a specific manufacturer ID
+  Future<List<Model>> getAllModels(int manufacturerID) async {
+    final List<Model> models = List<Model>();
+
+    http.Response response = await http
+        .get(_serverURLS[WebLocation.MODELS] + manufacturerID.toString());
+
+    if (response.statusCode == 200) {
+      List<dynamic> decoded = jsonDecode(response.body);
+
+      decoded.forEach((m) {
+        Model model = Model.fromJson(m);
+        if (model == null) return; // Issue with model decoding
+        models.add(model);
+      });
+    }
+
+    return models;
+  }
 }
 
 String rosettaStoneDecode(String input,

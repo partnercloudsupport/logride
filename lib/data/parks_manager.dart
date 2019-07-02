@@ -184,7 +184,11 @@ class ParksManager {
   }
 
   Future<List<Manufacturer>> initManufacturers() async {
-    return await wf.getAllManufacturers();
+    List<Manufacturer> manufacturers = await wf.getAllManufacturers();
+    manufacturers.sort((a, b) {
+      return a.name.compareTo(b.name);
+    });
+    return manufacturers;
   }
 
   Future<List<Model>> getModels(int manufacturerID) async {
@@ -199,6 +203,8 @@ class ParksManager {
             "Error occured while attempting to retrieve all models for manufacturer $manufacturerID");
         return List<Model>();
       }
+
+      downloaded.sort((a, b) => a.name.compareTo(b.name));
 
       models[manufacturerID] = downloaded;
       return downloaded;

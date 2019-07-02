@@ -123,11 +123,12 @@ class ParksHomeState extends State<ParksHome> {
         context: context,
         builder: (BuildContext context) {
           return SubmitAttractionPage(
-              attractionTypes: widget.parksManager.attractionTypes,
-              existingData: isNewAttraction
-                  ? attraction
-                  : BluehostAttraction.copy(attraction),
-              parentPark: parent);
+            existingData: isNewAttraction
+                ? attraction
+                : BluehostAttraction.copy(attraction),
+            parentPark: parent,
+            pm: widget.parksManager,
+          );
         });
 
     if (result == null) return;
