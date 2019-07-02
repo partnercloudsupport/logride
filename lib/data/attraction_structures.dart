@@ -49,6 +49,7 @@ class BluehostAttraction {
   bool seasonal = false;
   bool scoreCard = false;
   String manufacturer;
+  int manufacturerID;
   List<String> additionalContributors;
   List<String> formerNames;
   String model;
@@ -133,6 +134,7 @@ class BluehostAttraction {
     newAttraction.seasonal = (json["Seasonal"] == "1");
     newAttraction.scoreCard = (json["ScoreCard"] == "1");
     newAttraction.manufacturer = json["Manufacturer"];
+    newAttraction.manufacturerID = num.parse(json["manufacturer_id"]);
 
     // Add line breaks to additional contributors
     String formattedAdditionalContributors = json["additionalContributors"];
@@ -206,6 +208,7 @@ class BluehostAttraction {
     newAttraction.seasonal = attr.seasonal;
     newAttraction.scoreCard = attr.scoreCard;
     newAttraction.manufacturer = attr.manufacturer;
+    newAttraction.manufacturerID = attr.manufacturerID;
 
     newAttraction.additionalContributors = attr.additionalContributors;
     newAttraction.formerNames = attr.formerNames;

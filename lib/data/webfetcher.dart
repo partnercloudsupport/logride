@@ -1,20 +1,26 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:intl/intl.dart';
-import 'package:http/http.dart' as http;
-import 'package:log_ride/data/park_structures.dart';
-import 'package:log_ride/data/attraction_structures.dart';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+import 'package:log_ride/data/attraction_structures.dart';
+import 'package:log_ride/data/manufacturer_structures.dart';
+import 'package:log_ride/data/model_structures.dart';
+import 'package:log_ride/data/park_structures.dart';
 
 enum WebLocation {
   ALL_PARKS,
   PARK_ATTRACTIONS,
   SPECIFIC_ATTRACTION,
   ATTRACTION_TYPES,
-  SUBMISSION_LOG
+  SUBMISSION_LOG,
+  NEWS,
+  MANUFACTURERS,
+  MODELS,
 }
 
-enum SubmissionType { ATTRACTION_NEW, ATTRACTION_MODIFY, PARK, IMAGE }
+enum SubmissionType { ATTRACTION_NEW, PARK, IMAGE }
 
 const _VERSION_URL = "Version1.2.1";
 
@@ -23,21 +29,25 @@ class WebFetcher {
 
   final Map _serverURLS = {
     WebLocation.ALL_PARKS:
-        "http://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/parksdbservice.php",
+        "https://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/parksdbservice.php",
     WebLocation.PARK_ATTRACTIONS:
-        "http://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/attractiondbservice.php?parkid=",
+        "https://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/attractiondbservice.php?parkid=",
     WebLocation.SPECIFIC_ATTRACTION:
-        "http://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/getAttractionDetails.php?rideID=",
+        "https://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/getAttractionDetails.php?rideID=",
     WebLocation.ATTRACTION_TYPES:
-        "http://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/attractionTypes.php",
+        "https://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/attractionTypes.php",
+    WebLocation.NEWS:
+        "https://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/newsfeedDownload.php",
+    WebLocation.MANUFACTURERS:
+        "https://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/manufacturerDownload.php",
+    WebLocation.MODELS:
+        "https://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/modelDownload.php?manID=",
     SubmissionType.ATTRACTION_NEW:
         "https://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/usersuggestservice.php",
-    SubmissionType.ATTRACTION_MODIFY:
-        "https://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/modifyAttracion.php",
     SubmissionType.IMAGE:
-        "http://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/submitPhotoUpload.php",
+        "https://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/submitPhotoUpload.php",
     SubmissionType.PARK:
-        "http://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/suggestParkUploadtoApprove.php",
+        "https://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/suggestParkUploadtoApprove.php",
   };
 
   Future<List<BluehostPark>> getAllParkData() async {
@@ -75,7 +85,7 @@ class WebFetcher {
       for (int i = 0; i < decoded.length; i++) {
         BluehostAttraction newAttraction =
             BluehostAttraction.fromJson(decoded[i]);
-        _fixBluehostText(newAttraction);
+        _fixBluehostAttractionText(newAttraction);
 
         // Get our type label, or leave it blank if it doesn't exist
         newAttraction.typeLabel = rideTypes[newAttraction.rideType] ?? "";
@@ -99,7 +109,7 @@ class WebFetcher {
     if (response.statusCode == 200) {
       BluehostAttraction createdAttraction =
           BluehostAttraction.fromJson(jsonDecode(response.body));
-      _fixBluehostText(createdAttraction);
+      _fixBluehostAttractionText(createdAttraction);
       return BluehostAttraction.fromJson(jsonDecode(response.body));
     }
 
@@ -245,11 +255,19 @@ String rosettaStoneDecode(String input,
 /// These characters were swapped by the original app during the submission process, which used
 /// GET requests. These alternate characters were stored in the database. Now we
 /// must filter them out for the text to be readable.
-void _fixBluehostText(BluehostAttraction toFix) {
+void _fixBluehostAttractionText(BluehostAttraction toFix) {
   if (toFix.attractionName != null)
     toFix.attractionName = rosettaStoneDecode(toFix.attractionName);
   if (toFix.manufacturer != null)
     toFix.manufacturer =
         rosettaStoneDecode(toFix.manufacturer, insertSpaces: false);
+  return;
+}
+
+void _fixBluehostManufacturerText(Manufacturer toFix) {
+  if (toFix.name != null) toFix.name = rosettaStoneDecode(toFix.name);
+  if (toFix.country != null) toFix.country = rosettaStoneDecode(toFix.country);
+  if (toFix.altName != null) toFix.altName = rosettaStoneDecode(toFix.altName);
+  if (toFix.notes != null) toFix.notes = rosettaStoneDecode(toFix.notes);
   return;
 }

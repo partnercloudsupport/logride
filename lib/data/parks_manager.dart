@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
+import 'package:log_ride/data/manufacturer_structures.dart';
+import 'package:log_ride/data/model_structures.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/webfetcher.dart';
 
@@ -14,6 +17,8 @@ class ParksManager {
 
   List<BluehostPark> allParksInfo;
   Map<int, String> attractionTypes;
+  List<Manufacturer> manufacturers;
+  Map<int, List<Model>> models;
 
   ParksManagerStream _streamController = ParksManagerStream();
   Stream<ParksManagerEvent> parksManagerStream;
@@ -25,6 +30,8 @@ class ParksManager {
 
   /// init returns true once all web data has been fetched for parks
   Future<bool> asyncInit() async {
+    manufacturers = await initManufacturers();
+
     // Things to do:
     // Get allParks from bluehost
     allParksInfo = await wf.getAllParkData();
@@ -40,12 +47,13 @@ class ParksManager {
     db.getEntryAtPath(path: DatabasePath.PARKS, key: "").then((snap) async {
       if (snap == null) {
         print("User has no data currently. Returning.");
-        _streamController.add(ParksManagerEvent(ParksManagerEventType.PARKS_FETCHED));
-        _streamController.add(ParksManagerEvent(ParksManagerEventType.ATTRACTIONS_FETCHED));
-        _streamController
-            .add(ParksManagerEvent(ParksManagerEventType.INITIALIZED));
+        _streamController.add(ParksManagerEvent.PARKS_FETCHED);
+        _streamController.add(ParksManagerEvent.ATTRACTIONS_FETCHED);
+        _streamController.add(ParksManagerEvent.INITIALIZED);
         return;
       }
+
+      print("Got Parks");
 
       Map<dynamic, dynamic> values = jsonDecode(jsonEncode(snap));
       for (int i = 0; i < values.keys.length; i++) {
@@ -75,15 +83,12 @@ class ParksManager {
 
       Stream joinedStream = Stream.fromFutures(parkFutures);
       joinedStream.listen((d) {}, onDone: () {
-        _streamController
-            .add(ParksManagerEvent(ParksManagerEventType.ATTRACTIONS_FETCHED));
-        _streamController
-            .add(ParksManagerEvent(ParksManagerEventType.INITIALIZED));
+        _streamController.add(ParksManagerEvent.ATTRACTIONS_FETCHED);
+        _streamController.add(ParksManagerEvent.INITIALIZED);
       });
     });
 
-    _streamController
-        .add(ParksManagerEvent(ParksManagerEventType.PARKS_FETCHED));
+    _streamController.add(ParksManagerEvent.PARKS_FETCHED);
     return true;
   }
 
@@ -177,20 +182,39 @@ class ParksManager {
         key: targetFBPark.parkID.toString(),
         payload: targetFBPark.toMap());
   }
+
+  Future<List<Manufacturer>> initManufacturers() async {
+    return await wf.getAllManufacturers();
+  }
+
+  Future<List<Model>> getModels(int manufacturerID) async {
+    if (models != null && models.containsKey(manufacturerID)) {
+      return models[manufacturerID];
+    } else {
+      models = Map<int, List<Model>>();
+
+      List<Model> downloaded = await wf.getAllModels(manufacturerID);
+      if (downloaded == null) {
+        print(
+            "Error occured while attempting to retrieve all models for manufacturer $manufacturerID");
+        return List<Model>();
+      }
+
+      models[manufacturerID] = downloaded;
+      return downloaded;
+    }
+  }
 }
 
-enum ParksManagerEventType {
+enum ParksManagerEvent {
   UNINITIALIZED,
   INITIALIZING,
   PARKS_FETCHED,
   ATTRACTIONS_FETCHED,
+  MANUFACTURERS_FETCHED,
+  MODELS_FETCHED,
   INITIALIZED,
   ERROR
-}
-
-class ParksManagerEvent {
-  ParksManagerEvent(this.type);
-  ParksManagerEventType type;
 }
 
 class ParksManagerStream {
