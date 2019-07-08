@@ -40,6 +40,7 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
 
   AttractionStatus _attractionStatus;
 
+  Future<bool> _initModels;
   List<Model> _possibleModels;
 
   @override
@@ -73,7 +74,23 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
       dropDownTypes.add(DropdownMenuItem<int>(child: Text(label), value: val));
     });
 
+    _initModels = _asyncInitModels();
+
     super.initState();
+  }
+
+  Future<bool> _asyncInitModels() async {
+    // Null manufacturers mean it's not set-up properly. -1 ID means it has a custom manufacturer
+    // Custom Manufacturers are given a blank list of possible models. Users can enter their own model
+    // names in the normal dialog box
+    if (_data.manufacturerID != null && _data.manufacturerID != -1) {
+      List<Model> models = await widget.pm.getModels(_data.manufacturerID);
+      _possibleModels =
+          (models == null) ? List<Model>() : List<Model>.from(models);
+    } else {
+      _possibleModels = List<Model>();
+    }
+    return true;
   }
 
   @override
@@ -322,14 +339,46 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
   }
 
   List<Widget> _buildFactsAndStats(BuildContext context) {
+    Manufacturer initialManufacturer =
+        (_data.manufacturerID != null && _data.manufacturerID != -1)
+            ? getManufacturerById(widget.pm.manufacturers, _data.manufacturerID)
+            : null;
+    if (initialManufacturer == null && _data.manufacturer != "") {
+      // Some attractions have manufacturer labels but no manufacturer ID - in this case, we create a "fake" manufacturer
+      initialManufacturer = Manufacturer(id: null, name: _data.manufacturer);
+    }
+
+    Model initialModel = (_data.modelID != null && _possibleModels != null)
+        ? getModelByID(_possibleModels, _data.modelID)
+        : null;
+    if (initialModel == null && _data.model != "") {
+      // Some attractions have models that aren't registered in our database - handle these as custom manufacturers
+      initialModel = Model(id: null, name: _data.model);
+    }
+
     return <Widget>[
       ManufacturerPickerFormField(
         widget.pm.manufacturers,
-        initialValue:
-            getManufacturerById(widget.pm.manufacturers, _data.manufacturerID),
+        initialValue: initialManufacturer,
         onSaved: (d) {
           _data.manufacturer = d.name;
           _data.manufacturerID = d.id;
+        },
+        onUpdate: (m) async {
+          if (m == null) {
+            setState(() {
+              _possibleModels = List<Model>();
+            });
+            return;
+          }
+
+          if (m.id != _data.manufacturerID) {
+            List<Model> models = await widget.pm.getModels(m.id);
+            setState(() {
+              _possibleModels =
+                  (models == null) ? List<Model>() : List<Model>.from(models);
+            });
+          }
         },
       ),
       StringListField(
@@ -343,17 +392,27 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
         emptyText:
             "Tap the button below to add a Contributing Organization to the list.",
       ),
-      TextFormField(
-        initialValue: _data.model,
-        textCapitalization: TextCapitalization.words,
-        decoration: submissionDecoration(
-          hintText: "Model",
-          labelText: "Model",
-        ),
-        onSaved: (value) {
-          _data.model = value;
-        },
-      ),
+      FutureBuilder(
+          future: _initModels,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return ModelPickerFormField(
+                _possibleModels,
+                initialValue: initialModel,
+                onSaved: (d) {
+                  _data.modelID = d.id;
+                  _data.model = d.name;
+                },
+              );
+            } else {
+              return TextFormField(
+                initialValue: _data.model,
+                decoration: submissionDecoration(
+                  labelText: "Model",
+                ),
+              );
+            }
+          }),
       TextFormField(
         initialValue: (_data.height != null && _data.height != 0.0)
             ? _data.height.toString()

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:log_ride/data/attraction_structures.dart';
+import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/parks_manager.dart';
-import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/scorecard_structures.dart';
 import 'package:log_ride/ui/dialogs/single_value_dialog.dart';
 import 'package:log_ride/widgets/attractions_page/experience_button.dart';
@@ -17,7 +17,8 @@ class AttractionsListView extends StatefulWidget {
       this.pm,
       this.slidableController,
       this.parentPark,
-      this.submissionCallback, this.userName});
+      this.submissionCallback,
+      this.userName});
 
   final List<BluehostAttraction> sourceAttractions;
   final BaseDB db;
@@ -56,7 +57,9 @@ class _AttractionsListViewState extends State<AttractionsListView> {
     }
 
     int attractionComparator(BluehostAttraction b1, BluehostAttraction b2) {
-      return b1.attractionName.compareTo(b2.attractionName);
+      return b1.attractionName
+          .toLowerCase()
+          .compareTo(b2.attractionName.toLowerCase());
     }
 
     activeList.sort(attractionComparator);
@@ -222,7 +225,6 @@ class _AttractionsListViewState extends State<AttractionsListView> {
                     FirebaseAttraction.fromMap(Map.from(transaction.value));
               }
 
-
               // If we're not using the incrementor, we'll be setting the number of time ridden to zero
               if (!widget.parentPark.incrementorEnabled) {
                 attraction.numberOfTimesRidden = 0;
@@ -284,22 +286,22 @@ class _AttractionsListViewState extends State<AttractionsListView> {
   Widget build(BuildContext context) {
     _buildPreparedList();
     return FirebaseAttractionListView(
-          parentPark: widget.parentPark,
-          parentParkData: getBluehostParkByID(widget.pm.allParksInfo, widget.parentPark.parkID),
-          headedList: headedList,
-          userName: widget.userName,
-          attractionQuery: widget.db.getQueryForUser(
-              path: DatabasePath.ATTRACTIONS,
-              key: widget.parentPark.parkID.toString()),
-          ignoreQuery: widget.db.getQueryForUser(
-              path: DatabasePath.IGNORE,
-              key: widget.parentPark.parkID.toString()),
-          experienceHandler: _experienceCallbackHandler,
-          ignoreCallback: _ignoreCallbackHandler,
-          submissionCallback: widget.submissionCallback,
-          countHandler: _updateCountHandler,
-          dateHandler: _dateUpdateHandler,
-          db: widget.db,
-        );
+      parentPark: widget.parentPark,
+      parentParkData:
+          getBluehostParkByID(widget.pm.allParksInfo, widget.parentPark.parkID),
+      headedList: headedList,
+      userName: widget.userName,
+      attractionQuery: widget.db.getQueryForUser(
+          path: DatabasePath.ATTRACTIONS,
+          key: widget.parentPark.parkID.toString()),
+      ignoreQuery: widget.db.getQueryForUser(
+          path: DatabasePath.IGNORE, key: widget.parentPark.parkID.toString()),
+      experienceHandler: _experienceCallbackHandler,
+      ignoreCallback: _ignoreCallbackHandler,
+      submissionCallback: widget.submissionCallback,
+      countHandler: _updateCountHandler,
+      dateHandler: _dateUpdateHandler,
+      db: widget.db,
+    );
   }
 }

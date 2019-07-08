@@ -20,7 +20,7 @@ class Model {
   DateTime dateTimeLastUpdated;
 
   Model(
-      {this.id,
+      {this.id = -1,
       this.manufacturerId,
       this.manufacturer,
       this.name,
@@ -75,4 +75,12 @@ class Model {
         DateFormat(DATE_FORMAT_STRING).format(this.dateTimeLastUpdated);
     return data;
   }
+}
+
+Model getModelByID(List<Model> toSearch, int id) {
+  for (int i = 0; i < toSearch.length; i++) {
+    if (toSearch[i] == null) continue;
+    if (toSearch[i].id == id) return toSearch[i];
+  }
+  return null;
 }

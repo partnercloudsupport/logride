@@ -17,7 +17,7 @@ class Manufacturer {
   DateTime dateTimeLastUpdated;
 
   Manufacturer(
-      {this.id,
+      {this.id = -1,
       this.name,
       this.altName,
       this.active,
@@ -73,4 +73,14 @@ Manufacturer getManufacturerById(List<Manufacturer> toSearch, int id) {
     if (toSearch[i].id == id) return toSearch[i];
   }
   return null;
+}
+
+/// Returns the index of the first [Manufacturer] with the given ID in [toSearch]
+/// Returns -1 if no matching manufacturers are found
+int getIndexOfManufacturerById(List<Manufacturer> toSearch, int id) {
+  for (int i = 0; i < toSearch.length; i++) {
+    if (toSearch[i] == null) continue;
+    if (toSearch[i].id == id) return i;
+  }
+  return -1;
 }

@@ -1,6 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:log_ride/data/manufacturer_structures.dart';
+import 'package:log_ride/data/model_structures.dart';
 import 'package:log_ride/widgets/dialogs/generic_list_picker.dart';
 import 'package:log_ride/widgets/forms/submission_decoration.dart';
 
@@ -137,6 +138,45 @@ class ManufacturerPickerFormField extends StatelessWidget {
       },
       pickerBuilder: (BuildContext context, List<Manufacturer> list) {
         return ManufacturerPicker(manufacturers: list);
+      },
+    );
+  }
+}
+
+class ModelPickerFormField extends StatelessWidget {
+  ModelPickerFormField(this.list,
+      {this.onSaved,
+      this.onUpdate,
+      this.validator,
+      this.initialValue,
+      this.enabled = true});
+
+  final List<Model> list;
+  final Function(Model m) onSaved;
+  final Function(Model m) onUpdate;
+  final Function validator;
+  final Model initialValue;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    return GenericListPickerFormField<Model>(
+      list,
+      onSaved: (Model value) {
+        if (onSaved != null) onSaved(value);
+      },
+      onUpdate: (Model value) {
+        if (onUpdate != null) onUpdate(value);
+      },
+      validator: validator,
+      initialValue: initialValue,
+      enabled: enabled,
+      label: "Model",
+      valueBuilder: (BuildContext context, Model entry) {
+        return entry.name;
+      },
+      pickerBuilder: (BuildContext context, List<Model> list) {
+        return ModelPicker(models: list);
       },
     );
   }

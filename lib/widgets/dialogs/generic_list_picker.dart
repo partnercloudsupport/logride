@@ -3,12 +3,16 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/manufacturer_structures.dart';
 import 'package:log_ride/data/model_structures.dart';
 import 'package:log_ride/data/search_comparators.dart';
+import 'package:log_ride/ui/dialogs/single_value_dialog.dart';
 
 class GenericListPicker<T> extends StatefulWidget {
   GenericListPicker(this.toPickFrom,
       {this.itemBuilder,
       this.searchLabel = "Search",
-      this.emptyString = "No Items in List"});
+      this.emptyString = "No Items in List",
+      this.allowCustomSubmit = false,
+      this.customLabel = "Custom Item...",
+      this.customItemCallback});
 
   /// Generic list composed of entries in the list that is being picked from
   final List<T> toPickFrom;
@@ -22,6 +26,16 @@ class GenericListPicker<T> extends StatefulWidget {
 
   /// Displayed when the list contains no items
   final String emptyString;
+
+  /// Determines whether or not users can submit their own entries / items. Defaults to false
+  final bool allowCustomSubmit;
+
+  /// The label used on the custom submit list item. Defaults to "Custom Item..."
+  final String customLabel;
+
+  /// Callback given when the custom item is tapped. The list picker will close after the
+  /// callback returns
+  final Future<T> Function() customItemCallback;
 
   @override
   _GenericListPickerState createState() => _GenericListPickerState();
@@ -89,15 +103,24 @@ class _GenericListPickerState extends State<GenericListPicker> {
                         // Content
                         Expanded(
                           child: (widget.toPickFrom.length == 0)
-                              ? Center(child: Text(widget.emptyString))
+                              ? (widget.allowCustomSubmit)
+                                  ? SingleChildScrollView(
+                                      child: _buildSuggestTile(context))
+                                  : Center(child: Text(widget.emptyString))
                               : ListView.builder(
-                                  itemCount: widget.toPickFrom.length,
+                                  itemCount: widget.toPickFrom.length + 1,
                                   physics: ClampingScrollPhysics(),
                                   controller: _scrollController,
                                   itemBuilder:
                                       (BuildContext context, int index) {
-                                    return widget.itemBuilder(context, index,
-                                        widget.toPickFrom[index], filter);
+                                    if (index < widget.toPickFrom.length) {
+                                      return widget.itemBuilder(context, index,
+                                          widget.toPickFrom[index], filter);
+                                    } else if (widget.allowCustomSubmit) {
+                                      return _buildSuggestTile(context);
+                                    } else {
+                                      return Container();
+                                    }
                                   }),
                         )
                       ],
@@ -132,6 +155,20 @@ class _GenericListPickerState extends State<GenericListPicker> {
       ),
     );
   }
+
+  Widget _buildSuggestTile(BuildContext context) {
+    return ListTile(
+      title: Text(widget.customLabel),
+      onTap: () async {
+        if (widget.customItemCallback != null) {
+          dynamic result = await widget.customItemCallback();
+          _close(result: result);
+        } else {
+          _close();
+        }
+      },
+    );
+  }
 }
 
 class ManufacturerPicker extends StatelessWidget {
@@ -156,6 +193,24 @@ class ManufacturerPicker extends StatelessWidget {
         } else {
           return Container();
         }
+      },
+      allowCustomSubmit: true,
+      customLabel: "Suggest Manufacturer...",
+      customItemCallback: () async {
+        dynamic manName = await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return SingleValueDialog(
+                type: SingleValueDialogType.TEXT,
+                title: "Manufacturer Name",
+                hintText: "ex: Intamin",
+                submitText: "Submit",
+              );
+            });
+
+        if (manName == null || manName == "") return null;
+
+        return Manufacturer(name: manName);
       },
     );
   }
@@ -183,6 +238,24 @@ class ModelPicker extends StatelessWidget {
         } else {
           return Container();
         }
+      },
+      allowCustomSubmit: true,
+      customLabel: "Suggest Model...",
+      customItemCallback: () async {
+        dynamic modName = await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return SingleValueDialog(
+                type: SingleValueDialogType.TEXT,
+                title: "Model Name",
+                hintText: "ex: Omnimover",
+                submitText: "Submit",
+              );
+            });
+
+        if (modName == null || modName == "") return null;
+
+        return Model(name: modName);
       },
     );
   }

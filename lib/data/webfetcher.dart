@@ -68,6 +68,9 @@ class WebFetcher {
       }
     }
 
+    data.sort(
+        (a, b) => a.parkName.toLowerCase().compareTo(b.parkName.toLowerCase()));
+
     return data;
   }
 
@@ -98,6 +101,10 @@ class WebFetcher {
         data.add(newAttraction);
       }
     }
+
+    data.sort((a, b) => a.attractionName
+        .toLowerCase()
+        .compareTo(b.attractionName.toLowerCase()));
 
     return data;
   }
@@ -159,9 +166,9 @@ class WebFetcher {
       "active": activeStatus,
       "seasonal": attr.seasonal ? 1 : 0,
       "manufacturer": attr.manufacturer ?? "",
-
-      /// TODO: Implement Manufacturer ID
-      "manID": 0,
+      "manID": (attr.manufacturerID != null)
+          ? (attr.manufacturerID < 0) ? 0 : attr.manufacturerID
+          : 0,
       "notes": attr.notes ?? "",
       "modify": isNewAttraction ? 0 : 1,
       "scoreCard": attr.scoreCard ? 1 : 0,
@@ -171,7 +178,8 @@ class WebFetcher {
           ? ""
           : attr.additionalContributors.join(";"),
       "model": attr.model ?? "",
-      "model_id": 0, // TODO: Implement Model ID
+      "model_id":
+          (attr.modelID != null) ? (attr.modelID < 0) ? 0 : attr.modelID : 0,
       "inversions": attr.inversions ?? 0,
       "height": attr.height ?? 0,
       "maxSpeed": attr.maxSpeed ?? 0,
@@ -270,6 +278,9 @@ class WebFetcher {
       });
     }
 
+    manufacturers
+        .sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+
     return manufacturers;
   }
 
@@ -289,6 +300,8 @@ class WebFetcher {
         models.add(model);
       });
     }
+
+    models.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
 
     return models;
   }

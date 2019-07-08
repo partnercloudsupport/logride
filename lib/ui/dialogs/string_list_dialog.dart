@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:reorderables/reorderables.dart';
-import 'package:toast/toast.dart';
-import 'package:log_ride/widgets/forms/submission_decoration.dart';
-import 'package:log_ride/widgets/shared/styled_dialog.dart';
 import 'package:log_ride/ui/dialogs/single_value_dialog.dart';
 import 'package:log_ride/widgets/dialogs/dialog_frame.dart';
+import 'package:log_ride/widgets/forms/submission_decoration.dart';
 import 'package:log_ride/widgets/shared/interface_button.dart';
+import 'package:log_ride/widgets/shared/styled_dialog.dart';
+import 'package:reorderables/reorderables.dart';
+import 'package:toast/toast.dart';
 
 class StringListDialogPage extends StatefulWidget {
   StringListDialogPage(
@@ -108,7 +108,7 @@ class _StringListDialogPageState extends State<StringListDialogPage> {
 
   @override
   void initState() {
-    if(widget.initialString != null) {
+    if (widget.initialString != null) {
       entries = List.from(widget.initialString);
     } else {
       entries = List<String>();
@@ -185,7 +185,9 @@ class _SingleStringEntry extends StatelessWidget {
       children: <Widget>[
         GestureDetector(
           behavior: HitTestBehavior.translucent,
-          onTap: () => Toast.show("Press and hold an item to re-order the list", context, duration: Toast.LENGTH_LONG, gravity: Toast.CENTER),
+          onTap: () => Toast.show(
+              "Press and hold an item to re-order the list", context,
+              duration: Toast.LENGTH_LONG, gravity: Toast.CENTER),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Row(
@@ -202,8 +204,8 @@ class _SingleStringEntry extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                     style: Theme.of(context).textTheme.body1.apply(
-                      fontSizeDelta: 6,
-                    ),
+                          fontSizeDelta: 6,
+                        ),
                   ),
                 ),
                 IconButton(icon: Icon(Icons.delete), onPressed: delete)
@@ -275,7 +277,7 @@ class StringListField extends StatelessWidget {
                     );
                   });
 
-              if(result == null) return;
+              if (result == null) return;
 
               if (result as List<String> != state.value) {
                 state.didChange(result as List<String>);
@@ -293,8 +295,8 @@ class StringListField extends StatelessWidget {
                         color: enabled ? Colors.grey[700] : Colors.grey[500]),
                   ),
                   Text(
-                      (state.value != null)
-                      // The ${(state.value.length ==1)} bit is for quick and dirty plurality tidiness.
+                      (state.value != null && state.value.length > 0)
+                          // The ${(state.value.length ==1)} bit is for quick and dirty plurality tidiness.
                           ? "${state.value.length} ${(unit ?? "item").toLowerCase()}${(state.value.length == 1) ? "" : "s"}"
                           : "",
                       style: Theme.of(context).textTheme.title.apply(
