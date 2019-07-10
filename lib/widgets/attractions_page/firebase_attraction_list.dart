@@ -1,16 +1,17 @@
 import 'dart:async';
+
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:log_ride/data/color_constants.dart';
 import 'package:log_ride/data/attraction_structures.dart';
+import 'package:log_ride/data/color_constants.dart';
+import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/search_comparators.dart';
 import 'package:log_ride/widgets/attractions_page/attraction_list_entry.dart';
 import 'package:log_ride/widgets/attractions_page/experience_button.dart';
-import 'package:log_ride/data/fbdb_manager.dart';
 
 class AttractionFilter extends ValueNotifier<String> {
   AttractionFilter(String value) : super(value);
@@ -194,6 +195,10 @@ class _FirebaseAttractionListViewState
 
       // We've got certain logic for each header. Let's do this.
       attractions.forEach((BluehostAttraction attr) {
+        if (!isBluehostAttractionInSearch(attr, filter.value)) {
+          return;
+        }
+
         // All active entries are always displayed. No fancy logic required here.
         if (key == "Active") {
           numToDisplay++;
@@ -254,19 +259,21 @@ class _FirebaseAttractionListViewState
           }
         },
         decoration: InputDecoration(
-          labelText: "Search",
-          hintText: "Search",
-          prefixIcon: Icon(FontAwesomeIcons.search),
-          suffixIcon: IconButton(icon: Icon(FontAwesomeIcons.times), onPressed: () {
-            if(mounted) {
-              setState(() {
-                filter.value = "";
-                _searchController.clear();
-                FocusScope.of(context).requestFocus(FocusNode());
-              });
-            }
-          },)
-        ),
+            labelText: "Search",
+            hintText: "Search",
+            prefixIcon: Icon(FontAwesomeIcons.search),
+            suffixIcon: IconButton(
+              icon: Icon(FontAwesomeIcons.times),
+              onPressed: () {
+                if (mounted) {
+                  setState(() {
+                    filter.value = "";
+                    _searchController.clear();
+                    FocusScope.of(context).requestFocus(FocusNode());
+                  });
+                }
+              },
+            )),
       );
     } else {
       index--;

@@ -220,6 +220,7 @@ class _HomeState extends State<Home> {
         auth: widget.auth,
         db: widget.db,
         parksManager: _parksManager,
+        ciManager: _checkInManager,
         username: userName,
         webFetcher: _webFetcher,
         key: parksHomeKey,

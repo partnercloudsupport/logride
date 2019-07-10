@@ -1,9 +1,9 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong/latlong.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
+import 'package:log_ride/data/park_structures.dart';
 
 const double _CHECK_IN_RANGE = 1609;
 
@@ -15,14 +15,17 @@ class CheckInManager {
   final Function(int parkID) addPark;
 
   var geolocator = Geolocator();
-  var locationOptions =
-      LocationOptions(accuracy: LocationAccuracy.high, distanceFilter: 15, timeInterval: 60000); // Wait one minute between check-in thing
+  var locationOptions = LocationOptions(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 15,
+      timeInterval: 1000); // Wait one minute between check-in thing
 
   CheckInManager({this.db, this.serverParks, this.addPark}) {
     geolocator.getPositionStream(locationOptions).listen(_positionUpdate);
   }
 
   void _positionUpdate(Position position) async {
+    print("position update");
     // Get the user's position...
     LatLng userPosition = _positionToLatLng(position);
     Map<BluehostPark, double> closestParks = Map<BluehostPark, double>();
@@ -115,7 +118,9 @@ class CheckInManager {
     });
 
     listenable.value.checkedInToday = true;
-    FirebaseAnalytics().logEvent(name: "check_into_park", parameters: {"parkName": listenable.value.park.parkName});
+    FirebaseAnalytics().logEvent(
+        name: "check_into_park",
+        parameters: {"parkName": listenable.value.park.parkName});
   }
 }
 

@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/auth_manager.dart';
+import 'package:log_ride/data/check_in_manager.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/parks_manager.dart';
 import 'package:log_ride/data/webfetcher.dart';
 import 'package:log_ride/ui/attractions_list_page.dart';
 import 'package:log_ride/ui/submission/submit_attraction_page.dart';
+import 'package:log_ride/widgets/home_page/check_in_widget.dart';
 import 'package:log_ride/widgets/home_page/park_list_entry.dart';
 import 'package:log_ride/widgets/home_page/parks_list_advanced.dart';
 import 'package:log_ride/widgets/shared/styled_dialog.dart';
@@ -25,6 +27,7 @@ class ParksHome extends StatefulWidget {
       this.db,
       this.uid,
       this.webFetcher,
+      this.ciManager,
       this.parksManager,
       this.username,
       this.parksHomeFocus})
@@ -34,6 +37,7 @@ class ParksHome extends StatefulWidget {
   final BaseDB db;
   final ParksManager parksManager;
   final WebFetcher webFetcher;
+  final CheckInManager ciManager;
   final String uid;
   final String username;
   final ParksHomeFocus parksHomeFocus;
@@ -198,16 +202,27 @@ class ParksHomeState extends State<ParksHome> {
             )
           ],
         ),
-        body: FirebaseParkListView(
-          filter: ParksFilter(""),
-          parkTapCallback: parkEntryTap,
-          sliderActionCallback: slidableActionTap,
-          favsQuery: widget.db.getFilteredQuery(
-              path: DatabasePath.PARKS, key: "favorite", value: true),
-          allParksQuery:
-              widget.db.getQueryForUser(path: DatabasePath.PARKS, key: ""),
-          shrinkWrap: false,
-          physics: ClampingScrollPhysics(),
+        body: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            CheckInWidget(
+              manager: widget.ciManager,
+              onTap: openParkWithID,
+            ),
+            Expanded(
+              child: FirebaseParkListView(
+                filter: ParksFilter(""),
+                parkTapCallback: parkEntryTap,
+                sliderActionCallback: slidableActionTap,
+                favsQuery: widget.db.getFilteredQuery(
+                    path: DatabasePath.PARKS, key: "favorite", value: true),
+                allParksQuery: widget.db
+                    .getQueryForUser(path: DatabasePath.PARKS, key: ""),
+                shrinkWrap: true,
+                physics: ClampingScrollPhysics(),
+              ),
+            ),
+          ],
         ));
   }
 }
