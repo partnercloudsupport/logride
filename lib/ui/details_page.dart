@@ -1,22 +1,22 @@
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:latlong/latlong.dart' as oldLatLng;
-import 'package:log_ride/widgets/shared/interface_button.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
+import 'package:log_ride/ui/dialogs/attraction_scorecard_page.dart';
 import 'package:log_ride/widgets/shared/embedded_map_entry.dart';
+import 'package:log_ride/widgets/shared/interface_button.dart';
+import 'package:log_ride/widgets/shared/photo_credit_text.dart';
 import 'package:log_ride/widgets/shared/side_strike_text.dart';
 import 'package:log_ride/widgets/shared/stored_image_widget.dart';
-import 'package:log_ride/widgets/shared/photo_credit_text.dart';
 import 'package:log_ride/widgets/shared/title_bar_icon.dart';
-import 'package:log_ride/ui/dialogs/attraction_scorecard_page.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 enum _DetailsType { PARK_DETAILS, ATTRACTION_DETAILS }
 
@@ -81,6 +81,7 @@ class _DetailsPageState extends State<DetailsPage> {
       body: Dismissible(
           key: Key('key'),
           direction: DismissDirection.down,
+          resizeDuration: null,
           onDismissed: (d) {
             Navigator.of(context).pop();
           },
@@ -135,18 +136,17 @@ class _DetailsPageState extends State<DetailsPage> {
 
                   Expanded(
                     child: ListView(
-                      physics: ClampingScrollPhysics(),
-                      controller: scrollController,
-                      children: <Widget>[
-                        // Map Section is built only if map details are passed.
-                        mapWidget,
-                        mediaWidget,
-                        // Status Section
-                        statusRow,
-                        ...furtherDetails,
-                        ...userDetails,
-                      ]
-                    ),
+                        physics: ClampingScrollPhysics(),
+                        controller: scrollController,
+                        children: <Widget>[
+                          // Map Section is built only if map details are passed.
+                          mapWidget,
+                          mediaWidget,
+                          // Status Section
+                          statusRow,
+                          ...furtherDetails,
+                          ...userDetails,
+                        ]),
                   ),
                 ],
               ),
