@@ -178,6 +178,8 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
           if (value.isEmpty) {
             return "Please enter the name of the attraction";
           }
+
+          return null;
         },
         onSaved: (value) {
           _data.attractionName = value;
@@ -261,6 +263,8 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
           if ((num.tryParse(value) ?? 0) <= 0) {
             return "Please enter a valid year.";
           }
+
+          return null;
         },
         onSaved: (value) {
           _data.yearOpen = num.tryParse(value);
@@ -274,6 +278,8 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
           if (_attractionStatus == AttractionStatus.UPCOMING && v == null) {
             return "Enter an opening date";
           }
+
+          return null;
         },
         initialValue: _data.openingDay,
         text: (_attractionStatus == AttractionStatus.UPCOMING)
@@ -303,6 +309,8 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
           if ((num.tryParse(value) ?? 0) <= 0) {
             return "Please enter a valid year.";
           }
+
+          return null;
         },
         onSaved: (value) {
           _data.yearClosed = num.tryParse(value);
@@ -361,8 +369,13 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
         widget.pm.manufacturers,
         initialValue: initialManufacturer,
         onSaved: (d) {
-          _data.manufacturer = d.name;
-          _data.manufacturerID = d.id;
+          if(d == null) {
+            _data.manufacturer = "";
+            _data.manufacturerID = 0;
+          } else {
+            _data.manufacturer = d.name;
+            _data.manufacturerID = d.id;
+          }
         },
         onUpdate: (m) async {
           if (m == null) {
@@ -400,8 +413,13 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
                 _possibleModels,
                 initialValue: initialModel,
                 onSaved: (d) {
-                  _data.modelID = d.id;
-                  _data.model = d.name;
+                  if(d == null) {
+                    _data.modelID = 0;
+                    _data.model = "";
+                  } else {
+                    _data.modelID = d.id;
+                    _data.model = d.name;
+                  }
                 },
               );
             } else {
@@ -432,6 +450,8 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
           } else if (parsed <= 0) {
             return "Please enter a positive height";
           }
+
+          return null;
         },
         onSaved: (value) {
           _data.height = num.tryParse(value);
@@ -456,6 +476,8 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
           } else if (parsed <= 0) {
             return "Please enter a positive speed";
           }
+
+          return null;
         },
         onSaved: (value) {
           _data.maxSpeed = num.tryParse(value);
@@ -480,6 +502,8 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
           } else if (parsed <= 0) {
             return "Please enter a positive length";
           }
+
+          return null;
         },
         onSaved: (value) {
           _data.length = num.tryParse(value);
@@ -508,6 +532,8 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
           } else if (parsed <= 0) {
             return "Please enter a positive number of inversions";
           }
+
+          return null;
         },
         onSaved: (value) {
           _data.inversions = num.tryParse(value);
