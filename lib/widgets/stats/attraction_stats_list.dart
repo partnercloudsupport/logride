@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:log_ride/data/stats_calculator.dart';
 import 'package:log_ride/data/color_constants.dart';
+import 'package:log_ride/data/stats_calculator.dart';
 
 enum _AttractionStatsSorting { RIDE_TYPE, EXPERIENCES, CHECK_INS }
 
@@ -94,6 +94,7 @@ class _AttractionStatsState extends State<AttractionStats> {
           // Alphabetical
           return a.type.compareTo(b.type);
       }
+      return a.type.compareTo(b.type);
     });
     return data;
   }

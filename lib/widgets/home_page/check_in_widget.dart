@@ -24,7 +24,6 @@ class CheckInWidget extends StatefulWidget {
 
 class _CheckInWidgetState extends State<CheckInWidget> {
   CheckInData checkInData = CheckInData(null, false);
-  bool _showingDialog = false;
 
   void _checkInStatusChanged() async {
     if (!widget.manager.listenable.value.isEqualTo(checkInData)) {

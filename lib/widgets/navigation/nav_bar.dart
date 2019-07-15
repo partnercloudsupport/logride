@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/color_constants.dart';
 
@@ -81,7 +80,7 @@ class ContextNavBar extends StatelessWidget {
     Widget display = Image.asset("assets/plain.png");
 
     if (index == homeIndex) {
-      if(homeFocus){
+      if (homeFocus) {
         display = Container(
           constraints: BoxConstraints.expand(),
           child: Icon(
@@ -109,7 +108,7 @@ class ContextNavBar extends StatelessWidget {
             AnimatedSwitcher(
               child: display,
               duration: const Duration(milliseconds: 100),
-              transitionBuilder: (Widget child, Animation<double> animation){
+              transitionBuilder: (Widget child, Animation<double> animation) {
                 return ScaleTransition(scale: animation, child: child);
               },
             ),
