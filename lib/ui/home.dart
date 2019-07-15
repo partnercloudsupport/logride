@@ -240,8 +240,11 @@ class _HomeState extends State<Home> {
       dataLoaded = true;
     });
 
-    print("Boot took ${stopwatch.elapsed} seconds");
     stopwatch.stop();
+    print("Boot took ${stopwatch.elapsed} seconds");
+    analytics.logEvent(
+        name: "android_boot_elapsed",
+        parameters: {"milis": stopwatch.elapsed.inMilliseconds});
 
     return true;
   }
@@ -272,15 +275,19 @@ class _HomeState extends State<Home> {
     // Trigger whatever analytics are set up for said page
     switch (Tabs.values[index]) {
       case Tabs.NEWS:
+        analytics.setCurrentScreen(screenName: "News");
         break;
       case Tabs.STATS:
+        analytics.setCurrentScreen(screenName: "Stats");
         analytics.logEvent(name: "view_stats", parameters: null);
         break;
       case Tabs.MY_PARKS:
+        analytics.setCurrentScreen(screenName: "My Parks");
         break;
       case Tabs.LISTS:
         break;
       case Tabs.SETTINGS:
+        analytics.setCurrentScreen(screenName: "Settings");
         break;
     }
 
