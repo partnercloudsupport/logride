@@ -226,8 +226,12 @@ class _HomeState extends State<Home> {
         key: parksHomeKey,
         parksHomeFocus: _parksHomeFocus,
       ),
-      Tabs.LISTS: Center(child: Text("Lists")),
-      Tabs.SETTINGS: Center(child: Text("Settings"))
+      Tabs.LISTS: ListsPage(
+        db: widget.db,
+        pm: _parksManager,
+        wf: _webFetcher,
+      ),
+      Tabs.SETTINGS: SettingsPage(auth: widget.auth, uid: widget.uid)
     };
 
     _parksHomeFocus.addListener(_handleHomeFocusChanged);
@@ -344,7 +348,7 @@ class _HomeState extends State<Home> {
     // Animated switcher allows for a smooth transition between the loading page and the home page
     return AnimatedSwitcher(
       child: page,
-      duration: const Duration(seconds: 1),
+      duration: const Duration(milliseconds: 500),
     );
   }
 
