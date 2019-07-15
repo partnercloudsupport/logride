@@ -1,20 +1,20 @@
 import 'dart:async';
+
+import 'package:auto_size_text/auto_size_text.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:auto_size_text/auto_size_text.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:log_ride/animations/slide_in_transition.dart';
-import 'package:log_ride/ui/details_page.dart';
-import 'package:log_ride/widgets/dialogs/park_settings_dialog.dart';
 import 'package:log_ride/data/color_constants.dart';
-import 'package:log_ride/data/parks_manager.dart';
-import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
-import 'package:log_ride/widgets/shared/progress_bars.dart';
+import 'package:log_ride/data/park_structures.dart';
+import 'package:log_ride/data/parks_manager.dart';
+import 'package:log_ride/ui/details_page.dart';
 import 'package:log_ride/widgets/attractions_page/attraction_list_widget.dart';
-import 'package:log_ride/widgets/shared/title_bar_icon.dart';
+import 'package:log_ride/widgets/dialogs/park_settings_dialog.dart';
+import 'package:log_ride/widgets/shared/progress_bars.dart';
 
 class AttractionsPage extends StatefulWidget {
   AttractionsPage(
@@ -143,8 +143,7 @@ class _AttractionsPageState extends State<AttractionsPage>
         ),
         IconButton(
           icon: Icon(FontAwesomeIcons.cog, color: Colors.white),
-          onPressed: () =>
-              _openSettingsPage(parkData),
+          onPressed: () => _openSettingsPage(parkData),
         ),
       ],
       bottom: PreferredSize(
