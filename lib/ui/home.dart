@@ -285,6 +285,7 @@ class _HomeState extends State<Home> {
         analytics.setCurrentScreen(screenName: "My Parks");
         break;
       case Tabs.LISTS:
+        analytics.setCurrentScreen(screenName: "Lists");
         break;
       case Tabs.SETTINGS:
         analytics.setCurrentScreen(screenName: "Settings");

@@ -1,13 +1,14 @@
 import 'dart:async';
+
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
-
-import 'package:log_ride/widgets/shared/submit_button.dart';
-import 'package:log_ride/widgets/shared/home_icon.dart';
-import 'package:log_ride/widgets/shared/page_controller_slider_bar.dart';
 import 'package:log_ride/data/auth_manager.dart';
 import 'package:log_ride/data/contact_url_constants.dart';
+import 'package:log_ride/widgets/shared/home_icon.dart';
+import 'package:log_ride/widgets/shared/page_controller_slider_bar.dart';
+import 'package:log_ride/widgets/shared/submit_button.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AuthPage extends StatefulWidget {
   AuthPage({this.auth, this.onSignedIn});
@@ -56,6 +57,13 @@ class _AuthPageState extends State<AuthPage>
   Color _leftTextColor = Colors.white;
   Color _rightTextColor = Colors.black;
 
+  @override
+  void initState() {
+    FirebaseAnalytics analytics = FirebaseAnalytics();
+    analytics.setCurrentScreen(screenName: "Auth Page");
+    super.initState();
+  }
+
   void _pageChanged(pageIndex) {
     if (pageIndex == 0) {
       setState(() {
@@ -78,8 +86,7 @@ class _AuthPageState extends State<AuthPage>
         builder: (BuildContext context) {
           return AlertDialog(
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15.0)
-            ),
+                borderRadius: BorderRadius.circular(15.0)),
             title: Text("Invalid Authentication"),
             content: Text(body),
             actions: <Widget>[
@@ -303,6 +310,7 @@ class _AuthPageState extends State<AuthPage>
         body: NotificationListener<OverscrollIndicatorNotification>(
           onNotification: (overScroll) {
             overScroll.disallowGlow();
+            return;
           },
           child: SingleChildScrollView(
             child: Container(
