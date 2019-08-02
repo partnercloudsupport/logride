@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:log_ride/data/color_constants.dart';
-import 'package:log_ride/widgets/shared/progress_bars.dart';
 import 'package:log_ride/data/park_structures.dart';
+import 'package:log_ride/widgets/shared/progress_bars.dart';
 
 enum ParkSlideActionType { faveAdd, faveRemove, delete }
 
@@ -65,7 +65,8 @@ class ParkListEntry extends StatelessWidget {
 
     if (parkData.favorite) {
       headerStar = Icon(Icons.star,
-          color: parkData.inFavorites ? PROGRESS_BAR_GOLD : PROGRESS_BAR_BACKING,
+          color:
+              parkData.inFavorites ? PROGRESS_BAR_GOLD : PROGRESS_BAR_BACKING,
           size: Theme.of(context).textTheme.subhead.fontSize * 1.5);
       headerStar = Padding(
         child: headerStar,
@@ -74,7 +75,7 @@ class ParkListEntry extends StatelessWidget {
     }
 
     return Slidable(
-      delegate: SlidableDrawerDelegate(),
+      actionPane: SlidableDrawerActionPane(),
       actionExtentRatio: 0.25,
       child: InkWell(
         child: Container(

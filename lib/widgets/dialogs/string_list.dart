@@ -50,7 +50,7 @@ class _StringListDialogState extends State<StringListDialog> {
             itemBuilder: (BuildContext context, int index) {
               return Slidable(
                 controller: _slidableController,
-                delegate: SlidableDrawerDelegate(),
+                actionPane: SlidableDrawerActionPane(),
                 secondaryActions: <Widget>[
                   IconSlideAction(
                     icon: FontAwesomeIcons.trash,
