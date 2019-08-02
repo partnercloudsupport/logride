@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/animations/slide_in_transition.dart';
 import 'package:log_ride/data/attraction_structures.dart';
-import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
-import 'package:log_ride/widgets/attractions_page/experience_button.dart';
+import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/ui/details_page.dart';
-import 'package:flutter_icons/flutter_icons.dart';
+import 'package:log_ride/widgets/attractions_page/experience_button.dart';
 
 class AttractionListEntry extends StatefulWidget {
   AttractionListEntry(
@@ -141,12 +141,12 @@ class AttractionListState extends State<AttractionListEntry> {
     }
 
     Widget decrementAction;
-    if(widget.userData.numberOfTimesRidden >= 1){
+    if (widget.userData.numberOfTimesRidden >= 1) {
       decrementAction = _buildDecrementAction();
     }
 
-    if(slideAction == null){
-      if(decrementAction != null){
+    if (slideAction == null) {
+      if (decrementAction != null) {
         built = Slidable(
           actionPane: SlidableDrawerActionPane(),
           actionExtentRatio: 0.25,
@@ -156,7 +156,7 @@ class AttractionListState extends State<AttractionListEntry> {
         );
       }
     } else {
-      if(decrementAction != null){
+      if (decrementAction != null) {
         built = Slidable(
           actionPane: SlidableDrawerActionPane(),
           actionExtentRatio: 0.25,
@@ -206,7 +206,8 @@ class AttractionListState extends State<AttractionListEntry> {
       icon: FontAwesomeIcons.minus,
       color: Colors.red,
       caption: "Decrement",
-      onTap: () => widget.experienceHandler(ExperienceAction.REMOVE, widget.userData),
+      onTap: () =>
+          widget.experienceHandler(ExperienceAction.REMOVE, widget.userData),
     );
   }
 
