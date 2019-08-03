@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:log_ride/widgets/dialogs/dialog_frame.dart';
 import 'package:log_ride/widgets/shared/interface_button.dart';
 
 enum SingleValueDialogType { NUMBER, TEXT }
 
 class SingleValueDialog extends StatefulWidget {
-  SingleValueDialog({this.type, this.title, this.submitText, this.hintText, this.initialValue});
+  SingleValueDialog(
+      {this.type,
+      this.title,
+      this.submitText,
+      this.hintText,
+      this.initialValue});
 
   final SingleValueDialogType type;
   final String title;
@@ -22,13 +26,15 @@ class _SingleValueDialogState extends State<SingleValueDialog> {
 
   @override
   void initState() {
-    controller = TextEditingController(text: (widget.initialValue != null) ? widget.initialValue.toString() : "");
+    controller = TextEditingController(
+        text: (widget.initialValue != null)
+            ? widget.initialValue.toString()
+            : "");
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-
     TextInputType type = TextInputType.text;
 
     switch (widget.type) {
@@ -40,41 +46,47 @@ class _SingleValueDialogState extends State<SingleValueDialog> {
         break;
     }
 
-    return DialogFrame(
-      content: <Widget>[
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              hintText: widget.hintText
+    return AlertDialog(
+      title: Text(widget.title),
+      contentPadding: EdgeInsets.symmetric(horizontal: 24.0),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Container(
+            width: MediaQuery.of(context).size.width * 2 / 3,
+            child: TextField(
+              controller: controller,
+              decoration: InputDecoration(hintText: widget.hintText),
+              textCapitalization: TextCapitalization.words,
+              autofocus: true,
+              keyboardType: type,
+              maxLines: 1,
             ),
-            textCapitalization: TextCapitalization.words,
-            autofocus: true,
-            keyboardType: type,
-            maxLines: 1,
           ),
-        ),
-        InterfaceButton(
-          color: Theme.of(context).primaryColor,
-          textColor: Colors.white,
-          text: widget.submitText,
-          onPressed: () {
-            dynamic value;
-            switch (widget.type) {
-              case SingleValueDialogType.NUMBER:
-                value = num.tryParse(controller.text);
-                Navigator.of(context).pop(value);
-                break;
-              case SingleValueDialogType.TEXT:
-                value = controller.text;
-                Navigator.of(context).pop(value as String);
-                break;
-            }
-          },
-        )
-      ],
-      title: widget.title,
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.0),
+            child: InterfaceButton(
+              color: Theme.of(context).primaryColor,
+              textColor: Colors.white,
+              text: widget.submitText,
+              onPressed: () {
+                dynamic value;
+                switch (widget.type) {
+                  case SingleValueDialogType.NUMBER:
+                    value = num.tryParse(controller.text);
+                    Navigator.of(context).pop(value);
+                    break;
+                  case SingleValueDialogType.TEXT:
+                    value = controller.text;
+                    Navigator.of(context).pop(value as String);
+                    break;
+                }
+              },
+            ),
+          )
+        ],
+      ),
     );
   }
 }
