@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:package_info/package_info.dart';
 import 'package:log_ride/data/contact_url_constants.dart';
+import 'package:log_ride/data/user_structure.dart';
+import 'package:log_ride/widgets/shared/back_button.dart';
 import 'package:log_ride/widgets/shared/home_icon.dart';
 import 'package:log_ride/widgets/shared/hyperlink_text.dart';
-import 'package:log_ride/widgets/shared/back_button.dart';
+import 'package:package_info/package_info.dart';
+import 'package:provider/provider.dart';
 
 class AppInfoPage extends StatefulWidget {
   AppInfoPage(
       {this.signOut,
-      this.username,
       this.locationSpoofUpdate,
       this.locationSpoofEnabled = false,
       this.admin = false});
@@ -17,7 +18,6 @@ class AppInfoPage extends StatefulWidget {
   final Function(bool) locationSpoofUpdate;
   final bool admin;
   final bool locationSpoofEnabled;
-  final String username;
 
   @override
   _AppInfoPageState createState() => _AppInfoPageState();
@@ -49,36 +49,35 @@ class _AppInfoPageState extends State<AppInfoPage> {
 
   void _creditsPopUp() {
     showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-
-          title: Text("LogRide Credits"),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              _CreditHeader("App Development"),
-              _CreditEntry("Justin Lawrence (iOS)"),
-              _CreditEntry("Mark Lawrence (iOS)"),
-              _CreditEntry("Thomas Stoeckert (Android)"),
-              _CreditHeader("Park / Attraction Research"),
-              _CreditEntry("Cardin Menkemeller"),
-              _CreditEntry("Daniel Fischman"),
-              _CreditEntry("Mario Brajevich"),
-              _CreditHeader("Social Media"),
-              _CreditEntry("Michael Brenkan")
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("LogRide Credits"),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15.0)),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                _CreditHeader("App Development"),
+                _CreditEntry("Justin Lawrence (iOS)"),
+                _CreditEntry("Mark Lawrence (iOS)"),
+                _CreditEntry("Thomas Stoeckert (Android)"),
+                _CreditHeader("Park / Attraction Research"),
+                _CreditEntry("Cardin Menkemeller"),
+                _CreditEntry("Daniel Fischman"),
+                _CreditEntry("Mario Brajevich"),
+                _CreditHeader("Social Media"),
+                _CreditEntry("Michael Brenkan")
+              ],
+            ),
+            actions: <Widget>[
+              FlatButton(
+                child: Text("Close"),
+                onPressed: () => Navigator.of(context).pop(),
+              )
             ],
-          ),
-          actions: <Widget>[
-            FlatButton(
-              child: Text("Close"),
-              onPressed: () => Navigator.of(context).pop(),
-            )
-          ],
-        );
-      }
-    );
+          );
+        });
   }
 
   @override
@@ -101,8 +100,7 @@ class _AppInfoPageState extends State<AppInfoPage> {
             Switch.adaptive(
                 value: _locationSpoofEnabled,
                 activeColor: Theme.of(context).primaryColor,
-                onChanged: (nValue) =>
-                    _locationSwitchTapped())
+                onChanged: (nValue) => _locationSwitchTapped())
           ],
         ),
       ),
@@ -164,15 +162,17 @@ class _AppInfoPageState extends State<AppInfoPage> {
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: InkWell(
-                            child: Text("Credits", style: linkStyle.apply(decoration: TextDecoration.underline)),
+                            child: Text("Credits",
+                                style: linkStyle.apply(
+                                    decoration: TextDecoration.underline)),
                             onTap: () => _creditsPopUp(),
                           ),
                         ),
                         Padding(
                           padding:
                               const EdgeInsets.only(top: 16.0, bottom: 8.0),
-                          child:
-                              Text("Currently Logged in as ${widget.username}"),
+                          child: Text(
+                              "Currently Logged in as ${Provider.of<LogRideUser>(context).username}"),
                         ),
                         Padding(
                           padding: const EdgeInsets.only(top: 8.0),
@@ -224,7 +224,10 @@ class _CreditHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Text(text, style: TextStyle(fontWeight: FontWeight.bold),),
+      child: Text(
+        text,
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
     );
   }
 }
@@ -234,6 +237,9 @@ class _CreditEntry extends StatelessWidget {
   final String text;
   @override
   Widget build(BuildContext context) {
-    return Text(text, style: TextStyle(fontSize: 16.0),);
+    return Text(
+      text,
+      style: TextStyle(fontSize: 16.0),
+    );
   }
 }

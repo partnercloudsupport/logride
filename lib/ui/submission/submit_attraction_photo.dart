@@ -1,15 +1,16 @@
 import 'dart:async';
 import 'dart:io';
+
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image/image.dart' as Im;
 import 'package:image_picker/image_picker.dart';
 import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/color_constants.dart';
-import 'package:log_ride/data/webfetcher.dart';
 import 'package:log_ride/data/contact_url_constants.dart';
+import 'package:log_ride/data/webfetcher.dart';
 import 'package:log_ride/widgets/dialogs/dialog_frame.dart';
 import 'package:log_ride/widgets/forms/form_header.dart';
 import 'package:log_ride/widgets/shared/interface_button.dart';
@@ -29,11 +30,11 @@ import 'package:url_launcher/url_launcher.dart';
 // Confirm with user
 
 class SubmitAttractionPhoto extends StatefulWidget {
-  SubmitAttractionPhoto(this.attractionData, this.userName, this.parkName);
+  SubmitAttractionPhoto(this.attractionData, this.parkName, this.username);
 
   final BluehostAttraction attractionData;
-  final String userName;
   final String parkName;
+  final String username;
 
   @override
   _SubmitAttractionPhotoState createState() => _SubmitAttractionPhotoState();
@@ -121,7 +122,7 @@ class _SubmitAttractionPhotoState extends State<SubmitAttractionPhoto> {
       int result = await wf.submitAttractionImage(
           rideId: widget.attractionData.attractionID,
           parkId: widget.attractionData.parkID,
-          photoArtist: widget.userName,
+          photoArtist: widget.username,
           rideName: widget.attractionData.attractionName,
           parkName: widget.parkName);
 
@@ -312,21 +313,23 @@ class _UserConfirmationPage extends StatelessWidget {
           text: "Submit",
           onPressed: () async {
             dynamic result = await showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return StyledDialog(
-                  title: "Image Rights Notice",
-                  body: "All images submitted must be uploaded with permission of the copyright owner. By continuing, you affirm that you hold the rights to use this image.",
-                  action: () => Navigator.of(context).pop(true),
-                  actionText: "Confirm",
-                  additionalAction: FlatButton(onPressed: () => Navigator.of(context).pop(false), child: Text("Deny")),
-                );
-              }
-            );
+                context: context,
+                builder: (BuildContext context) {
+                  return StyledDialog(
+                    title: "Image Rights Notice",
+                    body:
+                        "All images submitted must be uploaded with permission of the copyright owner. By continuing, you affirm that you hold the rights to use this image.",
+                    action: () => Navigator.of(context).pop(true),
+                    actionText: "Confirm",
+                    additionalAction: FlatButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        child: Text("Deny")),
+                  );
+                });
 
-            if(result == null) return;
-            if(result == true) Navigator.of(context).pop(true);
-            if(result == false) Navigator.of(context).pop(false);
+            if (result == null) return;
+            if (result == true) Navigator.of(context).pop(true);
+            if (result == false) Navigator.of(context).pop(false);
           },
           color: Theme.of(context).primaryColor,
           textColor: Colors.white,

@@ -9,18 +9,21 @@ import 'package:log_ride/data/check_in_manager.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/parks_manager.dart';
+import 'package:log_ride/data/user_structure.dart';
 import 'package:log_ride/data/webfetcher.dart';
 import 'package:log_ride/ui/dialogs/park_search.dart';
 import 'package:log_ride/ui/loading_page.dart';
 import 'package:log_ride/ui/pages/lists.dart';
 import 'package:log_ride/ui/pages/news_page.dart';
 import 'package:log_ride/ui/pages/parks_home.dart';
+import 'package:log_ride/ui/pages/settings/settings.dart';
 import 'package:log_ride/ui/pages/stats_page.dart';
 import 'package:log_ride/ui/submission/submit_park_page.dart';
 import 'package:log_ride/widgets/navigation/nav_bar.dart';
 import 'package:log_ride/widgets/navigation/offstage_crossfade.dart';
 import 'package:log_ride/widgets/navigation/tab_navigation.dart';
 import 'package:log_ride/widgets/shared/styled_dialog.dart';
+import 'package:provider/provider.dart';
 
 enum Tabs { NEWS, STATS, MY_PARKS, LISTS, SETTINGS }
 
@@ -60,6 +63,7 @@ class _HomeState extends State<Home> {
   StreamSubscription subscription;
   CheckInManager _checkInManager;
   String userName;
+  String userEmail;
 
   ParksHomeFocus _parksHomeFocus = ParksHomeFocus(true);
 
@@ -68,6 +72,8 @@ class _HomeState extends State<Home> {
   bool _needsBasePadding = true;
 
   Stopwatch stopwatch = Stopwatch();
+
+  LogRideUser user;
 
   void _handleNewParkSubmission() async {
     dynamic result = await Navigator.of(context)
@@ -200,28 +206,21 @@ class _HomeState extends State<Home> {
         serverParks: _parksManager.allParksInfo,
         addPark: _handleAddIDCallback);
 
-    await widget.auth.getCurrentUserName().then((name) {
-      print(name);
-      userName = name;
-    });
-
-    await widget.auth.getCurrentUserEmail().then((email) {
-      email = email;
-    });
+    userName = await widget.auth.getCurrentUserName();
+    userEmail = await widget.auth.getCurrentUserEmail();
+    user = LogRideUser(email: userEmail, username: userName, uuid: widget.uid);
 
     rootWidgets = <Tabs, Widget>{
-      Tabs.NEWS: Center(child: Text("News")),
+      Tabs.NEWS: TestNewsPage(),
       Tabs.STATS: StatsPage(
         db: widget.db,
         pm: _parksManager,
       ),
       Tabs.MY_PARKS: ParksHome(
-        uid: widget.uid,
         auth: widget.auth,
         db: widget.db,
         parksManager: _parksManager,
         ciManager: _checkInManager,
-        username: userName,
         webFetcher: _webFetcher,
         key: parksHomeKey,
         parksHomeFocus: _parksHomeFocus,
@@ -231,7 +230,7 @@ class _HomeState extends State<Home> {
         pm: _parksManager,
         wf: _webFetcher,
       ),
-      Tabs.SETTINGS: SettingsPage(auth: widget.auth, uid: widget.uid)
+      Tabs.SETTINGS: SettingsPage(auth: widget.auth)
     };
 
     _parksHomeFocus.addListener(_handleHomeFocusChanged);
@@ -306,51 +305,54 @@ class _HomeState extends State<Home> {
     if (!dataLoaded) {
       page = LoadingPage();
     } else {
-      page = WillPopScope(
-          onWillPop: () async => !await navigatorKeys[Tabs.values[_pageIndex]]
-              .currentState
-              .maybePop(),
-          child: Scaffold(
-              backgroundColor: Colors.white,
-              resizeToAvoidBottomInset: false,
-              body: Stack(
-                children: <Widget>[
-                  Padding(
-                      padding: (_needsBasePadding)
-                          ? EdgeInsets.only(bottom: 54.0)
-                          : EdgeInsets.zero,
-                      child: Stack(
-                        children: <Widget>[
-                          _buildOffstageNavigator(Tabs.NEWS),
-                          _buildOffstageNavigator(Tabs.STATS),
-                          _buildOffstageNavigator(Tabs.MY_PARKS),
-                          _buildOffstageNavigator(Tabs.LISTS),
-                          _buildOffstageNavigator(Tabs.SETTINGS),
+      page = MultiProvider(
+        providers: [Provider<LogRideUser>.value(value: user)],
+        child: WillPopScope(
+            onWillPop: () async => !await navigatorKeys[Tabs.values[_pageIndex]]
+                .currentState
+                .maybePop(),
+            child: Scaffold(
+                backgroundColor: Colors.white,
+                resizeToAvoidBottomInset: false,
+                body: Stack(
+                  children: <Widget>[
+                    Padding(
+                        padding: (_needsBasePadding)
+                            ? EdgeInsets.only(bottom: 54.0)
+                            : EdgeInsets.zero,
+                        child: Stack(
+                          children: <Widget>[
+                            _buildOffstageNavigator(Tabs.NEWS),
+                            _buildOffstageNavigator(Tabs.STATS),
+                            _buildOffstageNavigator(Tabs.MY_PARKS),
+                            _buildOffstageNavigator(Tabs.LISTS),
+                            _buildOffstageNavigator(Tabs.SETTINGS),
+                          ],
+                        )),
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: ContextNavBar(
+                        menuTap: _onMenuBarItemTapped,
+                        homeIndex: homeIndex,
+                        index: _pageIndex,
+                        homeFocus: _parksHomeFocus.value,
+                        items: [
+                          ContextNavBarItem(
+                              label: "News",
+                              iconData: FontAwesomeIcons.solidNewspaper),
+                          ContextNavBarItem(
+                              label: "Stats",
+                              iconData: FontAwesomeIcons.chartPie),
+                          ContextNavBarItem(
+                              label: "Lists", iconData: FontAwesomeIcons.list),
+                          ContextNavBarItem(
+                              label: "Settings", iconData: FontAwesomeIcons.cog)
                         ],
-                      )),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: ContextNavBar(
-                      menuTap: _onMenuBarItemTapped,
-                      homeIndex: homeIndex,
-                      index: _pageIndex,
-                      homeFocus: _parksHomeFocus.value,
-                      items: [
-                        ContextNavBarItem(
-                            label: "News",
-                            iconData: FontAwesomeIcons.solidNewspaper),
-                        ContextNavBarItem(
-                            label: "Stats",
-                            iconData: FontAwesomeIcons.chartPie),
-                        ContextNavBarItem(
-                            label: "Lists", iconData: FontAwesomeIcons.list),
-                        ContextNavBarItem(
-                            label: "Settings", iconData: FontAwesomeIcons.cog)
-                      ],
-                    ),
-                  )
-                ],
-              )));
+                      ),
+                    )
+                  ],
+                ))),
+      );
     }
 
     // Animated switcher allows for a smooth transition between the loading page and the home page

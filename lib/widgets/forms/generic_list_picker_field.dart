@@ -37,8 +37,16 @@ class GenericListPickerFormField<T> extends StatelessWidget {
         enabled: enabled,
         validator: (v) {
           if (validator != null) validator(v);
+          return;
         },
         builder: (FormFieldState<T> state) {
+          String valueLabel = "";
+          if (state.value != null) {
+            if (valueBuilder != null) {
+              valueLabel = valueBuilder(context, state.value);
+            }
+          }
+
           return GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () async {
@@ -72,12 +80,7 @@ class GenericListPickerFormField<T> extends StatelessWidget {
                         color: enabled ? Colors.grey[700] : Colors.grey[350]),
                   ),
                   Expanded(
-                    child: AutoSizeText(
-                        (state.value != null)
-                            ? (valueBuilder != null)
-                                ? valueBuilder(context, state.value)
-                                : state.value.toString()
-                            : "",
+                    child: AutoSizeText(valueLabel,
                         textAlign: TextAlign.right,
                         style: Theme.of(context).textTheme.title.apply(
                             fontWeightDelta: -1,
@@ -134,7 +137,7 @@ class ManufacturerPickerFormField extends StatelessWidget {
       enabled: enabled,
       label: "Manufacturer",
       valueBuilder: (BuildContext context, Manufacturer entry) {
-        return entry.name;
+        return entry?.name ?? "";
       },
       pickerBuilder: (BuildContext context, List<Manufacturer> list) {
         return ManufacturerPicker(manufacturers: list);
@@ -173,7 +176,7 @@ class ModelPickerFormField extends StatelessWidget {
       enabled: enabled,
       label: "Model",
       valueBuilder: (BuildContext context, Model entry) {
-        return entry.name;
+        return entry?.name ?? "";
       },
       pickerBuilder: (BuildContext context, List<Model> list) {
         return ModelPicker(models: list);

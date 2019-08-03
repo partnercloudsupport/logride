@@ -4,9 +4,9 @@ import 'package:log_ride/data/auth_manager.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/ui/dialogs/park_search.dart';
 import 'package:log_ride/ui/landing_page.dart';
+import 'package:preferences/preferences.dart';
 
 class MyApp extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     BaseDB db = DatabaseManager();
@@ -29,14 +29,16 @@ class MyApp extends StatelessWidget {
                     fontSize: 18.0,
                     fontWeight: FontWeight.normal,
                     color: Colors.grey),
-                headline: TextStyle(
-                  fontSize: 26.0,
-                  fontWeight: FontWeight.bold
-                ))),
-      home: LandingPage(auth: Auth(), db: db,));
+                headline:
+                    TextStyle(fontSize: 26.0, fontWeight: FontWeight.bold))),
+        home: LandingPage(
+          auth: Auth(),
+          db: db,
+        ));
   }
 }
 
-void main() {
+void main() async {
+  await PrefService.init(prefix: 'pref_');
   runApp(MyApp());
 }

@@ -30,12 +30,12 @@ class FirebasePark {
     lastDayVisitedTime *= 1000;
     lastDayVisitedTime = lastDayVisitedTime.toInt();
 
-
     FirebasePark newPark = FirebasePark(parkID: data["parkID"]);
     newPark.checkedInToday = data["checkedInToday"] ?? false;
     newPark.favorite = data["favorite"] ?? false;
     newPark.incrementorEnabled = data["incrementorEnabled"] ?? false;
-    newPark.lastDayVisited = DateTime.fromMillisecondsSinceEpoch(lastDayVisitedTime);
+    newPark.lastDayVisited =
+        DateTime.fromMillisecondsSinceEpoch(lastDayVisitedTime);
     newPark.location = data["location"] ?? "";
     newPark.name = data["name"] ?? "";
     newPark.numberOfCheckIns = data["numberOfCheckIns"] ?? 0;
@@ -192,15 +192,16 @@ class BluehostPark {
     newParkData.initials = "";
     newParkData.parkName.split(" ").forEach((String word) {
       // Prevent improper names from crashing the app
-      if(word.length == 0 || word == null){
+      if (word.length == 0 || word == null) {
         return;
       }
       newParkData.initials += word[0];
     });
 
-    newParkData.initials = newParkData.initials.replaceAll(RegExp("[^a-zA-Z]"), "");
+    newParkData.initials =
+        newParkData.initials.replaceAll(RegExp("[^a-zA-Z]"), "");
     // Single letter initials are removed.
-    if(newParkData.initials.length <= 1) {
+    if (newParkData.initials.length <= 1) {
       newParkData.initials = "";
     }
 
@@ -243,9 +244,9 @@ FirebasePark getFirebasePark(
 /// Returns the index of the park that matches the given id.
 /// Returns -1 if it cannot be found.
 int getFirebaseParkIndex(List<FirebasePark> listToSearch, num idToSearchFor) {
-  for (int i = 0; i < listToSearch.length; i++){
-    if(listToSearch[i] == null) continue;
-    if(listToSearch[i].parkID == idToSearchFor){
+  for (int i = 0; i < listToSearch.length; i++) {
+    if (listToSearch[i] == null) continue;
+    if (listToSearch[i].parkID == idToSearchFor) {
       return i;
     }
   }

@@ -351,7 +351,9 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
         (_data.manufacturerID != null && _data.manufacturerID != -1)
             ? getManufacturerById(widget.pm.manufacturers, _data.manufacturerID)
             : null;
-    if (initialManufacturer == null && _data.manufacturer != "") {
+    if (initialManufacturer == null &&
+        _data.manufacturer != "" &&
+        _data.manufacturer != null) {
       // Some attractions have manufacturer labels but no manufacturer ID - in this case, we create a "fake" manufacturer
       initialManufacturer = Manufacturer(id: null, name: _data.manufacturer);
     }
@@ -359,7 +361,8 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
     Model initialModel = (_data.modelID != null && _possibleModels != null)
         ? getModelByID(_possibleModels, _data.modelID)
         : null;
-    if (initialModel == null && _data.model != "") {
+
+    if (initialModel == null && _data.model != "" && _data.model != null) {
       // Some attractions have models that aren't registered in our database - handle these as custom manufacturers
       initialModel = Model(id: null, name: _data.model);
     }
@@ -369,7 +372,7 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
         widget.pm.manufacturers,
         initialValue: initialManufacturer,
         onSaved: (d) {
-          if(d == null) {
+          if (d == null) {
             _data.manufacturer = "";
             _data.manufacturerID = 0;
           } else {
@@ -413,7 +416,7 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
                 _possibleModels,
                 initialValue: initialModel,
                 onSaved: (d) {
-                  if(d == null) {
+                  if (d == null) {
                     _data.modelID = 0;
                     _data.model = "";
                   } else {

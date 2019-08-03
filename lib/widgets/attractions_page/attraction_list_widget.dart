@@ -5,6 +5,7 @@ import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/parks_manager.dart';
 import 'package:log_ride/data/scorecard_structures.dart';
+import 'package:log_ride/data/user_structure.dart';
 import 'package:log_ride/ui/dialogs/single_value_dialog.dart';
 import 'package:log_ride/widgets/attractions_page/experience_button.dart';
 import 'package:log_ride/widgets/attractions_page/firebase_attraction_list.dart';
@@ -17,17 +18,14 @@ class AttractionsListView extends StatefulWidget {
       this.pm,
       this.slidableController,
       this.parentPark,
-      this.submissionCallback,
-      this.userName});
+      this.submissionCallback});
 
   final List<BluehostAttraction> sourceAttractions;
   final BaseDB db;
   final ParksManager pm;
   final FirebasePark parentPark;
   final SlidableController slidableController;
-  final Function(dynamic, bool) submissionCallback;
-
-  final String userName;
+  final Function(dynamic, bool, LogRideUser) submissionCallback;
 
   @override
   _AttractionsListViewState createState() => _AttractionsListViewState();
@@ -290,7 +288,6 @@ class _AttractionsListViewState extends State<AttractionsListView> {
       parentParkData:
           getBluehostParkByID(widget.pm.allParksInfo, widget.parentPark.parkID),
       headedList: headedList,
-      userName: widget.userName,
       attractionQuery: widget.db.getQueryForUser(
           path: DatabasePath.ATTRACTIONS,
           key: widget.parentPark.parkID.toString()),

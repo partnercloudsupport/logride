@@ -71,6 +71,7 @@ class _GenericListPickerState extends State<GenericListPicker> {
       body: Dismissible(
           key: Key('key'),
           direction: DismissDirection.down,
+          resizeDuration: null,
           onDismissed: (_) => _close(),
           child: SafeArea(
             child: Stack(

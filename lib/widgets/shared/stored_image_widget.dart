@@ -1,19 +1,20 @@
 import 'dart:async';
+
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/attraction_structures.dart';
+import 'package:log_ride/data/user_structure.dart';
 import 'package:log_ride/ui/submission/submit_attraction_photo.dart';
-import 'package:photo_view/photo_view.dart';
-import 'package:log_ride/widgets/shared/hero_network_image.dart';
 import 'package:log_ride/widgets/shared/back_button.dart';
+import 'package:log_ride/widgets/shared/hero_network_image.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:provider/provider.dart';
 
 class FirebaseAttractionImage extends StatefulWidget {
-  FirebaseAttractionImage(
-      {this.attractionData, this.userName, this.parkName, this.overlay});
+  FirebaseAttractionImage({this.attractionData, this.parkName, this.overlay});
 
   final BluehostAttraction attractionData;
-  final String userName;
   final String parkName;
   final Widget overlay;
 
@@ -59,8 +60,10 @@ class _FirebaseAttractionImageState extends State<FirebaseAttractionImage> {
               onTap: () => showDialog(
                   context: context,
                   builder: (ctx) {
-                    return SubmitAttractionPhoto(widget.attractionData,
-                        widget.userName, widget.parkName);
+                    return SubmitAttractionPhoto(
+                        widget.attractionData,
+                        widget.parkName,
+                        Provider.of<LogRideUser>(context).username);
                   }),
               child: Container(
                 constraints: BoxConstraints.expand(),
@@ -126,30 +129,30 @@ class _FirebaseAttractionImageState extends State<FirebaseAttractionImage> {
         builder: (BuildContext context) {
           return Scaffold(
               body: Stack(children: [
-                PhotoView(
-                  imageProvider: NetworkImage(url),
-                  heroTag: url,
-                  transitionOnUserGestures: true,
-                  gaplessPlayback: true,
-                  maxScale: PhotoViewComputedScale.covered * 5.0,
-                  minScale: PhotoViewComputedScale.contained * 1.0,
-                ),
-                RoundBackButton(),
-                SafeArea(
-                  child: (widget.overlay != null)
-                      ? Container(
-                          constraints: BoxConstraints.expand(),
-                          alignment: Alignment.bottomCenter,
-                          child: Container(
-                              constraints: BoxConstraints.expand(height: 20),
-                              color: Color.fromRGBO(0, 0, 0, 0.75),
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 20.0),
-                                child: widget.overlay,
-                              )))
-                      : Container(),
-                )
-              ]));
+            PhotoView(
+              imageProvider: NetworkImage(url),
+              heroTag: url,
+              transitionOnUserGestures: true,
+              gaplessPlayback: true,
+              maxScale: PhotoViewComputedScale.covered * 5.0,
+              minScale: PhotoViewComputedScale.contained * 1.0,
+            ),
+            RoundBackButton(),
+            SafeArea(
+              child: (widget.overlay != null)
+                  ? Container(
+                      constraints: BoxConstraints.expand(),
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                          constraints: BoxConstraints.expand(height: 20),
+                          color: Color.fromRGBO(0, 0, 0, 0.75),
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 20.0),
+                            child: widget.overlay,
+                          )))
+                  : Container(),
+            )
+          ]));
         });
   }
 }

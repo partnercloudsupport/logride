@@ -11,24 +11,21 @@ import 'package:log_ride/data/color_constants.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/parks_manager.dart';
+import 'package:log_ride/data/user_structure.dart';
 import 'package:log_ride/ui/details_page.dart';
 import 'package:log_ride/widgets/attractions_page/attraction_list_widget.dart';
 import 'package:log_ride/widgets/dialogs/park_settings_dialog.dart';
 import 'package:log_ride/widgets/shared/progress_bars.dart';
+import 'package:provider/provider.dart';
 
 class AttractionsPage extends StatefulWidget {
   AttractionsPage(
-      {this.pm,
-      this.db,
-      this.serverParkData,
-      this.submissionCallback,
-      this.userName});
+      {this.pm, this.db, this.serverParkData, this.submissionCallback});
 
   final ParksManager pm;
   final BaseDB db;
   final BluehostPark serverParkData;
-  final Function(dynamic, bool) submissionCallback;
-  final String userName;
+  final Function(dynamic, bool, LogRideUser) submissionCallback;
 
   @override
   _AttractionsPageState createState() => _AttractionsPageState();
@@ -99,7 +96,6 @@ class _AttractionsPageState extends State<AttractionsPage>
                                 widget.serverParkData.attractions,
                             parentPark: parkData,
                             slidableController: _slidableController,
-                            userName: widget.userName,
                             pm: widget.pm,
                             db: widget.db,
                             submissionCallback: widget.submissionCallback,
@@ -143,7 +139,7 @@ class _AttractionsPageState extends State<AttractionsPage>
         ),
         IconButton(
           icon: Icon(FontAwesomeIcons.cog, color: Colors.white),
-          onPressed: () => _openSettingsPage(parkData),
+          onPressed: () => _openSettingsPage(context, parkData),
         ),
       ],
       bottom: PreferredSize(
@@ -198,14 +194,16 @@ class _AttractionsPageState extends State<AttractionsPage>
         path: DatabasePath.PARKS);
   }
 
-  void _openSettingsPage(FirebasePark userData) {
+  void _openSettingsPage(BuildContext context, FirebasePark userData) {
+    LogRideUser user = Provider.of<LogRideUser>(context);
+
     showDialog(
         context: context,
         builder: (BuildContext context) {
           return ParkSettingsDialog(
             userData: userData,
             parkData: widget.serverParkData,
-            submissionCallback: widget.submissionCallback,
+            submissionCallback: (d, n) => widget.submissionCallback(d, n, user),
             callback: (cat, dat) => _settingsChangeCallback(cat, dat, userData),
           );
         });

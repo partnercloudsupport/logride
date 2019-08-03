@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_list.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/park_structures.dart';
@@ -70,7 +70,7 @@ class _FirebaseParkListViewState extends State<FirebaseParkListView> {
     print("Adding park ${park.name} at index $testIndex");
 
     // Sometimes _allLoaded triggers when there's no animated key state. Returning.
-    if(_animatedListKey.currentState == null) return;
+    if (_animatedListKey.currentState == null) return;
 
     _animatedListKey.currentState.insertItem(testIndex);
   }

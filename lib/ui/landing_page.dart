@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:log_ride/data/auth_manager.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
+import 'package:log_ride/data/user_structure.dart';
 import 'package:log_ride/ui/auth_page.dart';
 import 'package:log_ride/ui/home.dart';
 
@@ -18,6 +19,7 @@ class LandingPage extends StatefulWidget {
 
 class _LandingPageState extends State<LandingPage> {
   AuthStatus status = AuthStatus.notDetermined;
+  LogRideUser lrUser = LogRideUser();
   String userID = "";
 
   @override
@@ -39,7 +41,9 @@ class _LandingPageState extends State<LandingPage> {
       status = AuthStatus.loggedIn;
       widget.auth.getCurrentUser().then((user) {
         userID = user.uid.toString();
+        lrUser.uuid = userID;
         widget.db.storeUserID(userID);
+        lrUser.email = user.email;
       });
     });
   }

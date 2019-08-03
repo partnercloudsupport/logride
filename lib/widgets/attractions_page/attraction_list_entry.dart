@@ -13,7 +13,6 @@ class AttractionListEntry extends StatefulWidget {
   AttractionListEntry(
       {this.attractionData,
       this.userData,
-      this.userName,
       this.slidableController,
       this.ignoreCallback,
       this.experienceHandler,
@@ -24,7 +23,6 @@ class AttractionListEntry extends StatefulWidget {
 
   final BluehostAttraction attractionData;
   final FirebaseAttraction userData;
-  final String userName;
   final FirebasePark parentPark;
   final SlidableController slidableController;
   final Function(BluehostAttraction, bool) ignoreCallback;
@@ -222,7 +220,6 @@ class AttractionListState extends State<AttractionListEntry> {
               db: widget.db,
               userData: widget.userData,
               parkName: widget.parentPark.name,
-              userName: widget.userName,
               submissionCallback: widget.submissionCallback,
               dateChangeHandler: (first, newTime) =>
                   widget.timeChanged(newTime, widget.userData, first),

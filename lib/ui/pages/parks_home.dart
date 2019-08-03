@@ -8,6 +8,7 @@ import 'package:log_ride/data/check_in_manager.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/parks_manager.dart';
+import 'package:log_ride/data/user_structure.dart';
 import 'package:log_ride/data/webfetcher.dart';
 import 'package:log_ride/ui/attractions_list_page.dart';
 import 'package:log_ride/ui/submission/submit_attraction_page.dart';
@@ -25,11 +26,9 @@ class ParksHome extends StatefulWidget {
       {Key key,
       this.auth,
       this.db,
-      this.uid,
       this.webFetcher,
       this.ciManager,
       this.parksManager,
-      this.username,
       this.parksHomeFocus})
       : super(key: key);
 
@@ -38,8 +37,6 @@ class ParksHome extends StatefulWidget {
   final ParksManager parksManager;
   final WebFetcher webFetcher;
   final CheckInManager ciManager;
-  final String uid;
-  final String username;
   final ParksHomeFocus parksHomeFocus;
 
   @override
@@ -73,10 +70,9 @@ class ParksHomeState extends State<ParksHome> {
       return AttractionsPage(
         pm: widget.parksManager,
         db: widget.db,
-        userName: widget.username,
         serverParkData: serverPark,
-        submissionCallback: (park, isNew) =>
-            _handleAttractionSubmission(park, serverPark, isNew),
+        submissionCallback: (park, isNew, user) =>
+            _handleAttractionSubmission(park, serverPark, isNew, user),
       );
     }));
     widget.parksHomeFocus.value = true;
@@ -120,7 +116,7 @@ class ParksHomeState extends State<ParksHome> {
   }
 
   void _handleAttractionSubmission(BluehostAttraction attraction,
-      BluehostPark parent, bool isNewAttraction) async {
+      BluehostPark parent, bool isNewAttraction, LogRideUser user) async {
     isNewAttraction ? print("New Attraction") : print("Modified Attraction");
 
     dynamic result = await showDialog(
@@ -137,14 +133,12 @@ class ParksHomeState extends State<ParksHome> {
 
     if (result == null) return;
 
-    print(widget.username);
-
     BluehostAttraction newAttraction = result as BluehostAttraction;
     int response = await widget.webFetcher.submitAttractionData(
         newAttraction, parent,
-        username: widget.username,
-        uid: widget.uid,
-        isNewAttraction: isNewAttraction);
+        isNewAttraction: isNewAttraction,
+        username: user.username,
+        uid: user.uuid);
 
     if (response == 200) {
       analytics.logEvent(name: "new_attraction_suggested");

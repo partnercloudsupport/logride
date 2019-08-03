@@ -10,8 +10,10 @@ import 'package:log_ride/data/color_constants.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/search_comparators.dart';
+import 'package:log_ride/data/user_structure.dart';
 import 'package:log_ride/widgets/attractions_page/attraction_list_entry.dart';
 import 'package:log_ride/widgets/attractions_page/experience_button.dart';
+import 'package:provider/provider.dart';
 
 class AttractionFilter extends ValueNotifier<String> {
   AttractionFilter(String value) : super(value);
@@ -24,7 +26,6 @@ class FirebaseAttractionListView extends StatefulWidget {
       this.headedList,
       this.parentPark,
       this.parentParkData,
-      this.userName,
       this.ignoreCallback,
       this.experienceHandler,
       this.countHandler,
@@ -39,14 +40,12 @@ class FirebaseAttractionListView extends StatefulWidget {
   final FirebasePark parentPark;
   final BluehostPark parentParkData;
 
-  final String userName;
-
   final Function(BluehostAttraction target, bool currentState) ignoreCallback;
   final Function(ExperienceAction, FirebaseAttraction) experienceHandler;
   final Function(List<FirebaseAttraction> userData, List<int> ignoreData)
       countHandler;
   final Function(DateTime, FirebaseAttraction, bool) dateHandler;
-  final Function(dynamic, bool) submissionCallback;
+  final Function(dynamic, bool, LogRideUser) submissionCallback;
 
   final BaseDB db;
 
@@ -306,9 +305,9 @@ class _FirebaseAttractionListViewState
         parentPark: widget.parentPark,
         experienceHandler: widget.experienceHandler,
         ignoreCallback: widget.ignoreCallback,
-        userName: widget.userName,
         slidableController: _slidableController,
-        submissionCallback: (b) => widget.submissionCallback(b, false),
+        submissionCallback: (b) => widget.submissionCallback(
+            b, false, Provider.of<LogRideUser>(context)),
         userData: attraction,
         timeChanged: widget.dateHandler,
         db: widget.db,
