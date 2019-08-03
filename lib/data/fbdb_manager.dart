@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:firebase_database/firebase_database.dart';
 
 enum DatabasePath {
@@ -27,7 +28,8 @@ abstract class BaseDB {
   void init();
   Query getSortedQueryForUser({DatabasePath path, String key, String orderBy});
   Query getFilteredQuery({DatabasePath path, String key, dynamic value});
-  Query getSortedFilteredQuery({DatabasePath path, String key, dynamic value, String orderBy});
+  Query getSortedFilteredQuery(
+      {DatabasePath path, String key, dynamic value, String orderBy});
   Query getQueryForUser({DatabasePath path, String key});
   void setEntryAtPath({DatabasePath path, String key, dynamic payload});
   void updateEntryAtPath(
@@ -37,7 +39,10 @@ abstract class BaseDB {
   Future<dynamic> getEntryAtPath({DatabasePath path, String key});
   Stream<Event> getLiveEntryAtPath({DatabasePath path, String key});
   Stream<Event> getLiveChildrenChanges({DatabasePath path, String key});
-  void performTransaction({DatabasePath path, String key, Function(MutableData transaction) transactionHandler});
+  void performTransaction(
+      {DatabasePath path,
+      String key,
+      Function(MutableData transaction) transactionHandler});
   void storeUserID(String userID);
   void clearUserID();
 }
@@ -71,8 +76,13 @@ class DatabaseManager implements BaseDB {
     return _getReference(path).child(_savedID).orderByChild(key).equalTo(value);
   }
 
-  Query getSortedFilteredQuery({DatabasePath path, String key, dynamic value, String orderBy}) {
-    return _getReference(path).child(_savedID).orderByChild(key).equalTo(value).orderByChild(orderBy);
+  Query getSortedFilteredQuery(
+      {DatabasePath path, String key, dynamic value, String orderBy}) {
+    return _getReference(path)
+        .child(_savedID)
+        .orderByChild(key)
+        .equalTo(value)
+        .orderByChild(orderBy);
   }
 
   Query getQueryForUser({DatabasePath path, String key}) {
@@ -120,8 +130,14 @@ class DatabaseManager implements BaseDB {
     return _getReference(path).child(_savedID).child(key).onChildChanged;
   }
 
-  void performTransaction({DatabasePath path, String key, Function(MutableData transaction) transactionHandler}){
-    _getReference(path).child(_savedID).child(key).runTransaction((MutableData transaction) async {
+  void performTransaction(
+      {DatabasePath path,
+      String key,
+      Function(MutableData transaction) transactionHandler}) {
+    _getReference(path)
+        .child(_savedID)
+        .child(key)
+        .runTransaction((MutableData transaction) async {
       return transactionHandler(transaction);
     });
   }

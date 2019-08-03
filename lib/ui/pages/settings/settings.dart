@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:log_ride/data/auth_manager.dart';
 import 'package:log_ride/data/shared_prefs_data.dart';
 import 'package:log_ride/ui/pages/settings/account_settings.dart';
 import 'package:log_ride/widgets/settings/account_tile.dart';
@@ -9,9 +8,9 @@ import 'package:package_info/package_info.dart';
 import 'package:preferences/preferences.dart';
 
 class SettingsPage extends StatefulWidget {
-  SettingsPage({this.auth});
+  SettingsPage({this.onSignedOut});
 
-  final BaseAuth auth;
+  final Function onSignedOut;
 
   @override
   _SettingsPageState createState() => _SettingsPageState();
@@ -45,7 +44,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 AccountTile(
                   onTap: () => Navigator.of(context)
                       .push(MaterialPageRoute(builder: (BuildContext context) {
-                    return AccountSettings();
+                    return AccountSettings(widget.onSignedOut);
                   })),
                 ),
                 SettingsTile(

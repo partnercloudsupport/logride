@@ -230,7 +230,7 @@ class _HomeState extends State<Home> {
         pm: _parksManager,
         wf: _webFetcher,
       ),
-      Tabs.SETTINGS: SettingsPage(auth: widget.auth)
+      Tabs.SETTINGS: SettingsPage(onSignedOut: widget.onSignedOut)
     };
 
     _parksHomeFocus.addListener(_handleHomeFocusChanged);
@@ -306,7 +306,13 @@ class _HomeState extends State<Home> {
       page = LoadingPage();
     } else {
       page = MultiProvider(
-        providers: [Provider<LogRideUser>.value(value: user)],
+        providers: [
+          Provider<LogRideUser>.value(value: user),
+          Provider<BaseDB>.value(value: widget.db),
+          Provider<WebFetcher>.value(value: _webFetcher),
+          Provider<ParksManager>.value(value: _parksManager),
+          Provider<BaseAuth>.value(value: widget.auth)
+        ],
         child: WillPopScope(
             onWillPop: () async => !await navigatorKeys[Tabs.values[_pageIndex]]
                 .currentState
