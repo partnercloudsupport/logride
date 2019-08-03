@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:log_ride/widgets/shared/interface_button.dart';
 
-enum SingleValueDialogType { NUMBER, TEXT }
+enum SingleValueDialogType { NUMBER, TEXT, PASSWORD }
 
 class SingleValueDialog extends StatefulWidget {
   SingleValueDialog(
@@ -24,6 +24,9 @@ class SingleValueDialog extends StatefulWidget {
 class _SingleValueDialogState extends State<SingleValueDialog> {
   TextEditingController controller;
 
+  // Used in password obscuring
+  bool visible = false;
+
   @override
   void initState() {
     controller = TextEditingController(
@@ -31,6 +34,21 @@ class _SingleValueDialogState extends State<SingleValueDialog> {
             ? widget.initialValue.toString()
             : "");
     super.initState();
+  }
+
+  void finish() {
+    dynamic value;
+    switch (widget.type) {
+      case SingleValueDialogType.NUMBER:
+        value = num.tryParse(controller.text);
+        Navigator.of(context).pop(value);
+        break;
+      case SingleValueDialogType.PASSWORD:
+      case SingleValueDialogType.TEXT:
+        value = controller.text;
+        Navigator.of(context).pop(value as String);
+        break;
+    }
   }
 
   @override
@@ -41,6 +59,7 @@ class _SingleValueDialogState extends State<SingleValueDialog> {
       case SingleValueDialogType.NUMBER:
         type = TextInputType.numberWithOptions(signed: false, decimal: false);
         break;
+      case SingleValueDialogType.PASSWORD:
       case SingleValueDialogType.TEXT:
         type = TextInputType.text;
         break;
@@ -56,8 +75,22 @@ class _SingleValueDialogState extends State<SingleValueDialog> {
           Container(
             width: MediaQuery.of(context).size.width * 2 / 3,
             child: TextField(
+              obscureText: (widget.type == SingleValueDialogType.PASSWORD)
+                  ? !visible
+                  : false,
               controller: controller,
-              decoration: InputDecoration(hintText: widget.hintText),
+              onEditingComplete: () => finish(),
+              decoration: InputDecoration(
+                  hintText: widget.hintText,
+                  suffixIcon: (widget.type == SingleValueDialogType.PASSWORD)
+                      ? GestureDetector(
+                          child: Icon(visible
+                              ? Icons.visibility
+                              : Icons.visibility_off),
+                          // Toggle visibility of password on tap
+                          onTap: () => setState(() => visible = !visible),
+                        )
+                      : null),
               textCapitalization: TextCapitalization.words,
               autofocus: true,
               keyboardType: type,
@@ -70,19 +103,7 @@ class _SingleValueDialogState extends State<SingleValueDialog> {
               color: Theme.of(context).primaryColor,
               textColor: Colors.white,
               text: widget.submitText,
-              onPressed: () {
-                dynamic value;
-                switch (widget.type) {
-                  case SingleValueDialogType.NUMBER:
-                    value = num.tryParse(controller.text);
-                    Navigator.of(context).pop(value);
-                    break;
-                  case SingleValueDialogType.TEXT:
-                    value = controller.text;
-                    Navigator.of(context).pop(value as String);
-                    break;
-                }
-              },
+              onPressed: () => finish(),
             ),
           )
         ],
