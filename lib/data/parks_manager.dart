@@ -7,7 +7,9 @@ import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/manufacturer_structures.dart';
 import 'package:log_ride/data/model_structures.dart';
 import 'package:log_ride/data/park_structures.dart';
+import 'package:log_ride/data/shared_prefs_data.dart';
 import 'package:log_ride/data/webfetcher.dart';
+import 'package:preferences/preferences.dart';
 
 class ParksManager {
   ParksManager({this.db, this.wf});
@@ -110,6 +112,16 @@ class ParksManager {
     print("We are adding ${targetPark.parkName} to our user");
 
     FirebasePark translated = targetPark.toNewFirebaseEntry();
+    // Update the park's settings according to the default
+    translated.showSeasonal =
+        PrefService.getBool(preferencesKeyMap[PREFERENCE_KEYS.SHOW_SEASONAL]) ??
+            defaultPreferences[PREFERENCE_KEYS.SHOW_SEASONAL];
+    translated.showDefunct =
+        PrefService.getBool(preferencesKeyMap[PREFERENCE_KEYS.SHOW_DEFUNCT]) ??
+            defaultPreferences[PREFERENCE_KEYS.SHOW_SEASONAL];
+    translated.incrementorEnabled =
+        PrefService.getBool(preferencesKeyMap[PREFERENCE_KEYS.INCREMENT_ON]) ??
+            defaultPreferences[PREFERENCE_KEYS.SHOW_SEASONAL];
 
     translated.updateAttractionCount(targetPark: targetPark);
 

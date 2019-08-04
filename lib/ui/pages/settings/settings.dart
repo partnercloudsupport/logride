@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:log_ride/data/shared_prefs_data.dart';
 import 'package:log_ride/ui/pages/settings/account_settings.dart';
+import 'package:log_ride/ui/pages/settings/park_settings.dart';
 import 'package:log_ride/ui/pages/settings/geolocation_settings.dart';
 import 'package:log_ride/ui/pages/settings/interface_settings.dart';
 import 'package:log_ride/widgets/settings/account_tile.dart';
@@ -64,9 +65,12 @@ class _SettingsPageState extends State<SettingsPage> {
                           GeolocationSettings())),
                 ),
                 SettingsTile(
-                  title: "Default Park Settings",
-                  subtitle: "Change the way newly added parks behave",
+                  title: "Park Settings",
+                  subtitle: "Change the way parks behave",
                   showNavArrow: true,
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                          DefaultParkSettings())),
                 ),
                 SettingsTile(
                   title: "App Info",
@@ -83,26 +87,6 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 /*
 
-              PreferenceTitle("Geolocation Settings"),
-              SwitchPreference(
-                "Enable Geolocation-based Check-in",
-                preferencesKeyMap[PREFERENCE_KEYS.ENABLE_GEOLOCATION],
-                defaultVal: defaultPreferences[PREFERENCE_KEYS.ENABLE_GEOLOCATION],
-                desc:
-                    "Turning this on allows LogRide to let you check-in to the park which you are physically in",
-              ),
-              SliderPreference(
-                "Geolocator Range",
-                preferencesKeyMap[PREFERENCE_KEYS.GEOLOCATOR_RANGE],
-                defaultVal: defaultPreferences[PREFERENCE_KEYS.GEOLOCATOR_RANGE],
-                desc:
-                    "Parks within ${geoRange.toStringAsFixed(0)} ft (${(geoRange / 5820.0).toStringAsFixed(2)} miles) will appear for check-in. Default is $defaultGeo ft",
-                min: 100.0,
-                max: 4096.0,
-                onChange: (double d) {
-                  if (d != geoRange) setState(() => geoRange = d);
-                },
-              ),
               PreferenceTitle("Default Park Settings"),
               SwitchPreference("Experience Tally Mode",
                   preferencesKeyMap[PREFERENCE_KEYS.INCREMENT_ON],

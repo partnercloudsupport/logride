@@ -9,6 +9,7 @@ enum PREFERENCE_KEYS {
   GEOLOCATOR_RANGE,
   USE_METRIC,
   UP_FRONT_ARTICLES,
+  HIDE_IGNORED
 }
 
 Map<PREFERENCE_KEYS, String> preferencesKeyMap = {
@@ -19,7 +20,8 @@ Map<PREFERENCE_KEYS, String> preferencesKeyMap = {
   PREFERENCE_KEYS.ENABLE_GEOLOCATION: "geolocationEnabled",
   PREFERENCE_KEYS.GEOLOCATOR_RANGE: "geolocatorRange",
   PREFERENCE_KEYS.USE_METRIC: "useMetric",
-  PREFERENCE_KEYS.UP_FRONT_ARTICLES: "articleUpFront"
+  PREFERENCE_KEYS.UP_FRONT_ARTICLES: "articleUpFront",
+  PREFERENCE_KEYS.HIDE_IGNORED: "hideIgnored"
 };
 
 Map<PREFERENCE_KEYS, dynamic> defaultPreferences = {
@@ -30,7 +32,8 @@ Map<PREFERENCE_KEYS, dynamic> defaultPreferences = {
   PREFERENCE_KEYS.ENABLE_GEOLOCATION: true,
   PREFERENCE_KEYS.GEOLOCATOR_RANGE: 1609.0,
   PREFERENCE_KEYS.USE_METRIC: false,
-  PREFERENCE_KEYS.UP_FRONT_ARTICLES: false
+  PREFERENCE_KEYS.UP_FRONT_ARTICLES: false,
+  PREFERENCE_KEYS.HIDE_IGNORED: false
 };
 
 dynamic safelyGetPreference(SharedPreferences prefs, PREFERENCE_KEYS key) {

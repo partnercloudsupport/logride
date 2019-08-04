@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:log_ride/data/auth_manager.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
-import 'package:log_ride/ui/dialogs/park_search.dart';
+import 'package:log_ride/data/shared_prefs_data.dart';
 import 'package:log_ride/ui/landing_page.dart';
 import 'package:preferences/preferences.dart';
 
@@ -14,9 +14,6 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
         title: 'LogRide',
-        routes: <String, WidgetBuilder>{
-          "/all_search": (BuildContext context) => AllParkSearchPage(),
-        },
         theme: ThemeData(
             primaryColor: new Color.fromARGB(255, 57, 164, 72),
             accentColor: new Color.fromARGB(255, 57, 164, 72),
@@ -40,5 +37,8 @@ class MyApp extends StatelessWidget {
 
 void main() async {
   await PrefService.init(prefix: 'pref_');
+  PrefService.setDefaultValues(defaultPreferences.map((key, val) {
+    return MapEntry(preferencesKeyMap[key], val);
+  }));
   runApp(MyApp());
 }

@@ -10,9 +10,11 @@ import 'package:log_ride/data/color_constants.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/search_comparators.dart';
+import 'package:log_ride/data/shared_prefs_data.dart';
 import 'package:log_ride/data/user_structure.dart';
 import 'package:log_ride/widgets/attractions_page/attraction_list_entry.dart';
 import 'package:log_ride/widgets/attractions_page/experience_button.dart';
+import 'package:preferences/preferences.dart';
 import 'package:provider/provider.dart';
 
 class AttractionFilter extends ValueNotifier<String> {
@@ -141,6 +143,13 @@ class _FirebaseAttractionListViewState
         });
       }
     });
+
+    PrefService.onNotify(
+        preferencesKeyMap[PREFERENCE_KEYS.HIDE_IGNORED], () => _prefsUpdate());
+  }
+
+  void _prefsUpdate() {
+    setState(() {});
   }
 
   void _filterUpdated() {
@@ -299,6 +308,11 @@ class _FirebaseAttractionListViewState
 
     String search = filter.value;
 
+    // If we're hiding ignored attractions, and this is an ignored attraction, hide it.
+    if (attraction.ignored &&
+        PrefService.getBool(preferencesKeyMap[PREFERENCE_KEYS.HIDE_IGNORED]))
+      return Container();
+
     if (isBluehostAttractionInSearch(target, search)) {
       Widget entry = AttractionListEntry(
         attractionData: target,
@@ -345,6 +359,8 @@ class _FirebaseAttractionListViewState
   void dispose() {
     _ignoreList.clear();
     _attractionList.clear();
+
+    PrefService.onNotifyRemove(preferencesKeyMap[PREFERENCE_KEYS.HIDE_IGNORED]);
 
     super.dispose();
   }
