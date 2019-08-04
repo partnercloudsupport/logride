@@ -49,17 +49,19 @@ abstract class BaseDB {
 
 class DatabaseManager implements BaseDB {
   final FirebaseDatabase _firebaseDatabase = FirebaseDatabase.instance;
-  String _savedID;
+  static String _savedID;
 
   void init() {
     //_firebaseDatabase.setPersistenceEnabled(true);
   }
 
   void storeUserID(String userID) {
-    _savedID = userID ?? null;
+    print("User ID $userID is being stored");
+    _savedID = userID;
   }
 
   void clearUserID() {
+    print("User ID cleared");
     _savedID = null;
   }
 
@@ -73,6 +75,9 @@ class DatabaseManager implements BaseDB {
   }
 
   Query getFilteredQuery({DatabasePath path, String key, dynamic value}) {
+    print(path);
+    print(_getReference(path));
+    print(_savedID);
     return _getReference(path).child(_savedID).orderByChild(key).equalTo(value);
   }
 
