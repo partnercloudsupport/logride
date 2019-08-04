@@ -9,7 +9,7 @@ enum Unit { meter, foot, kph, mph }
 /// Converts the unit from [from] to [to]. Do note that it's pretty simple right now,
 /// and is really just converting [from] to the opposite of it (meters <-> feet)
 /// and (kph <-> mph). If [from] is the same as [to] then it just returns the value
-double displayUnit(num value, Unit from, Unit to) {
+double convertUnit(num value, Unit from, Unit to) {
   if (from == to) return value;
 
   switch (from) {
@@ -26,6 +26,11 @@ double displayUnit(num value, Unit from, Unit to) {
   return value;
 }
 
+/// Returns a double rounded to the degree of precision given.
+double roundUnit(num value, {int precision = 2}) {
+  return num.parse(value.toStringAsFixed(precision));
+}
+
 /// Returns a string built with the value and unit appropriate according to the
 /// USE_METRIC setting. Returns the value if something goes wrong.
 String prefDisplay(num value, Unit base) {
@@ -36,18 +41,18 @@ String prefDisplay(num value, Unit base) {
     case Unit.meter:
       return (usingMetric)
           ? "$value m"
-          : "${displayUnit(value, base, Unit.foot).toStringAsFixed(1)} ft";
+          : "${convertUnit(value, base, Unit.foot).toStringAsFixed(1)} ft";
     case Unit.foot:
       return (usingMetric)
-          ? "${displayUnit(value, base, Unit.meter).toStringAsFixed(1)} m"
+          ? "${convertUnit(value, base, Unit.meter).toStringAsFixed(1)} m"
           : "$value ft";
     case Unit.kph:
       return (usingMetric)
           ? "$value kph"
-          : "${displayUnit(value, base, Unit.mph).toStringAsFixed(1)} mph";
+          : "${convertUnit(value, base, Unit.mph).toStringAsFixed(1)} mph";
     case Unit.mph:
       return (usingMetric)
-          ? "${displayUnit(value, base, Unit.kph).toStringAsFixed(1)} kph"
+          ? "${convertUnit(value, base, Unit.kph).toStringAsFixed(1)} kph"
           : "$value mph";
   }
 

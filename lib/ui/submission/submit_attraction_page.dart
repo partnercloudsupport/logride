@@ -5,6 +5,8 @@ import 'package:log_ride/data/manufacturer_structures.dart';
 import 'package:log_ride/data/model_structures.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/parks_manager.dart';
+import 'package:log_ride/data/shared_prefs_data.dart';
+import 'package:log_ride/data/units.dart';
 import 'package:log_ride/ui/dialogs/string_list_dialog.dart';
 import 'package:log_ride/widgets/dialogs/date_picker.dart';
 import 'package:log_ride/widgets/dialogs/duration_picker.dart';
@@ -15,6 +17,7 @@ import 'package:log_ride/widgets/forms/ride_status_dropdown.dart';
 import 'package:log_ride/widgets/forms/submission_decoration.dart';
 import 'package:log_ride/widgets/forms/submission_divider.dart';
 import 'package:log_ride/widgets/shared/interface_button.dart';
+import 'package:preferences/preferences.dart';
 
 class SubmitAttractionPage extends StatefulWidget {
   SubmitAttractionPage({this.existingData, this.parentPark, this.pm});
@@ -75,6 +78,11 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
     });
 
     _initModels = _asyncInitModels();
+
+    // Note - while this page reads preferences to ensure that we're in the right
+    // measurement system, as it is a full page thing we don't have to listen to
+    // updates. The user literally cannot press the button to change the setting
+    // while in this page.
 
     super.initState();
   }
@@ -367,6 +375,23 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
       initialModel = Model(id: null, name: _data.model);
     }
 
+    bool usingMetric =
+        PrefService.getBool(preferencesKeyMap[PREFERENCE_KEYS.USE_METRIC]);
+
+    num initialHeight = _data.height;
+    if (initialHeight != null && initialHeight != 0.0 && usingMetric)
+      initialHeight =
+          roundUnit(convertUnit(initialHeight, Unit.foot, Unit.meter));
+
+    num initialSpeed = _data.maxSpeed;
+    if (initialSpeed != null && initialSpeed != 0.0 && usingMetric)
+      initialSpeed = roundUnit(convertUnit(initialSpeed, Unit.mph, Unit.kph));
+
+    num initialLength = _data.length;
+    if (initialLength != null && initialLength != 0.0 && usingMetric)
+      initialLength =
+          roundUnit(convertUnit(initialLength, Unit.foot, Unit.meter));
+
     return <Widget>[
       ManufacturerPickerFormField(
         widget.pm.manufacturers,
@@ -435,13 +460,13 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
             }
           }),
       TextFormField(
-        initialValue: (_data.height != null && _data.height != 0.0)
-            ? _data.height.toString()
+        initialValue: (initialHeight != null && initialHeight != 0.0)
+            ? initialHeight.toString()
             : "",
         decoration: submissionDecoration(
           hintText: "Height",
           labelText: "Height",
-          suffixText: "ft ",
+          suffixText: (usingMetric) ? "m " : "ft ",
         ),
         keyboardType: TextInputType.numberWithOptions(decimal: true),
         validator: (value) {
@@ -457,17 +482,24 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
           return null;
         },
         onSaved: (value) {
-          _data.height = num.tryParse(value);
+          num parsed = num.tryParse(value);
+          if (parsed == null) {
+            _data.height = 0;
+            return;
+          }
+          _data.height = (usingMetric)
+              ? roundUnit(convertUnit(parsed, Unit.meter, Unit.foot))
+              : parsed;
         },
       ),
       TextFormField(
-        initialValue: (_data.maxSpeed != null && _data.maxSpeed != 0.0)
-            ? _data.maxSpeed.toString()
+        initialValue: (initialSpeed != null && initialSpeed != 0.0)
+            ? initialSpeed.toString()
             : "",
         decoration: submissionDecoration(
           hintText: "Speed",
           labelText: "Max Speed",
-          suffixText: "mph ",
+          suffixText: (usingMetric) ? "kph " : "mph ",
         ),
         keyboardType: TextInputType.numberWithOptions(decimal: true),
         validator: (value) {
@@ -483,17 +515,24 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
           return null;
         },
         onSaved: (value) {
-          _data.maxSpeed = num.tryParse(value);
+          num parsed = num.tryParse(value);
+          if (parsed == null) {
+            _data.maxSpeed = 0;
+            return;
+          }
+          _data.maxSpeed = (usingMetric)
+              ? roundUnit(convertUnit(parsed, Unit.kph, Unit.mph))
+              : parsed;
         },
       ),
       TextFormField(
-        initialValue: (_data.length != null && _data.length != 0.0)
-            ? _data.length.toString()
+        initialValue: (initialLength != null && initialLength != 0.0)
+            ? initialLength.toString()
             : "",
         decoration: submissionDecoration(
           hintText: "Length",
           labelText: "Length",
-          suffixText: "ft ",
+          suffixText: (usingMetric) ? "m " : "ft ",
         ),
         keyboardType: TextInputType.numberWithOptions(decimal: true),
         validator: (value) {
@@ -509,7 +548,14 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
           return null;
         },
         onSaved: (value) {
-          _data.length = num.tryParse(value);
+          num parsed = num.tryParse(value);
+          if (parsed == null) {
+            _data.length = 0;
+            return;
+          }
+          _data.length = (usingMetric)
+              ? roundUnit(convertUnit(parsed, Unit.meter, Unit.foot))
+              : parsed;
         },
       ),
       DurationPickerFormField(
