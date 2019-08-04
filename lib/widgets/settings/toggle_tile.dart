@@ -80,6 +80,7 @@ class _TogglePreferenceState extends State<TogglePreference> {
         secondaryString: widget.label2,
         onTap: () {
           PrefService.setBool(widget.localKey, !currentState);
+          if (widget.onChange != null) widget.onChange();
           setState(() {});
         });
   }

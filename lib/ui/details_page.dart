@@ -9,6 +9,8 @@ import 'package:latlong/latlong.dart' as oldLatLng;
 import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
+import 'package:log_ride/data/shared_prefs_data.dart';
+import 'package:log_ride/data/units.dart';
 import 'package:log_ride/ui/dialogs/attraction_scorecard_page.dart';
 import 'package:log_ride/widgets/shared/embedded_map_entry.dart';
 import 'package:log_ride/widgets/shared/interface_button.dart';
@@ -16,6 +18,7 @@ import 'package:log_ride/widgets/shared/photo_credit_text.dart';
 import 'package:log_ride/widgets/shared/side_strike_text.dart';
 import 'package:log_ride/widgets/shared/stored_image_widget.dart';
 import 'package:log_ride/widgets/shared/title_bar_icon.dart';
+import 'package:preferences/preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 enum _DetailsType { PARK_DETAILS, ATTRACTION_DETAILS }
@@ -52,6 +55,10 @@ class _DetailsPageState extends State<DetailsPage> {
   @override
   void initState() {
     super.initState();
+
+    PrefService.onNotify(
+        preferencesKeyMap[PREFERENCE_KEYS.USE_METRIC], () => _settingsNotify());
+
     if (widget.data is BluehostAttraction) {
       _type = _DetailsType.ATTRACTION_DETAILS;
       FirebaseAnalytics().logEvent(name: "view_attraction", parameters: {
@@ -69,6 +76,17 @@ class _DetailsPageState extends State<DetailsPage> {
     } else {
       throw FormatException("Improper data structure passed to details page.");
     }
+  }
+
+  void _settingsNotify() {
+    print("Metric/Imperial settings have been updated");
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    PrefService.onNotifyRemove(preferencesKeyMap[PREFERENCE_KEYS.USE_METRIC]);
   }
 
   @override
@@ -471,28 +489,31 @@ class _DetailsPageState extends State<DetailsPage> {
         details.add(_furtherDetailsTextEntry("Model", attraction.model));
 
       if (attraction.height != 0)
-        details
-            .add(_furtherDetailsTextEntry("Height", "${attraction.height} ft"));
+        details.add(_furtherDetailsTextEntry(
+            "Height", prefDisplay(attraction.height, Unit.foot)));
 
       if (attraction.liftHeight != 0.0)
         details.add(_furtherDetailsTextEntry(
-            "Lift Height", "${attraction.liftHeight} ft"));
+            "Lift Height", prefDisplay(attraction.liftHeight, Unit.foot)));
 
       if (attraction.dropHeight != 0.0)
         details.add(_furtherDetailsTextEntry(
-            "Drop Height", "${attraction.dropHeight} ft"));
+            "Drop Height", prefDisplay(attraction.dropHeight, Unit.foot)));
 
       if (attraction.maxSpeed != 0)
         details.add(_furtherDetailsTextEntry(
-            "Max Speed", "${attraction.maxSpeed} mph"));
+            "Max Speed", prefDisplay(attraction.maxSpeed, Unit.mph)));
 
       if (attraction.length != 0)
-        details
-            .add(_furtherDetailsTextEntry("Length", "${attraction.length} ft"));
+        details.add(_furtherDetailsTextEntry(
+            "Length", prefDisplay(attraction.length, Unit.foot)));
 
-      if (attraction.attractionDuration != 0)
-        details.add(_furtherDetailsTextEntry("Duration",
-            "${attraction.attractionDuration ~/ 60}m ${attraction.attractionDuration % 60}s"));
+      if (attraction.attractionDuration != 0) {
+        num minutes = attraction.attractionDuration ~/ 60;
+        num seconds = attraction.attractionDuration % 60;
+        details.add(_furtherDetailsTextEntry(
+            "Duration", "$minutes:${seconds.toString().padLeft(2, '0')}"));
+      }
 
       if (attraction.capacity != 0)
         details.add(

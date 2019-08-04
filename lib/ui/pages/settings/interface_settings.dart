@@ -30,6 +30,9 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
           subtitleBuilder: (v) {
             return "Units displayed will be part of the ${v ? "Metric" : "Imperial"} system";
           },
+          onChange: () {
+            PrefService.notify(preferencesKeyMap[PREFERENCE_KEYS.USE_METRIC]);
+          },
         ),
         SwitchPreference(
           "Show Duplicate Parks",
