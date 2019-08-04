@@ -41,45 +41,6 @@ class _AppInfoPageState extends State<AppInfoPage> {
     });
   }
 
-  void _locationSwitchTapped() {
-    setState(() {
-      _locationSpoofEnabled = !_locationSpoofEnabled;
-    });
-  }
-
-  void _creditsPopUp() {
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text("LogRide Credits"),
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15.0)),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                _CreditHeader("App Development"),
-                _CreditEntry("Justin Lawrence (iOS)"),
-                _CreditEntry("Mark Lawrence (iOS)"),
-                _CreditEntry("Thomas Stoeckert (Android)"),
-                _CreditHeader("Park / Attraction Research"),
-                _CreditEntry("Cardin Menkemeller"),
-                _CreditEntry("Daniel Fischman"),
-                _CreditEntry("Mario Brajevich"),
-                _CreditHeader("Social Media"),
-                _CreditEntry("Michael Brenkan")
-              ],
-            ),
-            actions: <Widget>[
-              FlatButton(
-                child: Text("Close"),
-                onPressed: () => Navigator.of(context).pop(),
-              )
-            ],
-          );
-        });
-  }
-
   @override
   Widget build(BuildContext context) {
     TextStyle linkStyle = Theme.of(context)
@@ -90,7 +51,7 @@ class _AppInfoPageState extends State<AppInfoPage> {
     Widget toggleWidget = Padding(
       padding: const EdgeInsets.only(top: 16.0),
       child: InkWell(
-        onTap: _locationSwitchTapped,
+        onTap: () {},
         child: Row(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -100,7 +61,7 @@ class _AppInfoPageState extends State<AppInfoPage> {
             Switch.adaptive(
                 value: _locationSpoofEnabled,
                 activeColor: Theme.of(context).primaryColor,
-                onChanged: (nValue) => _locationSwitchTapped())
+                onChanged: (nValue) {})
           ],
         ),
       ),
@@ -165,7 +126,7 @@ class _AppInfoPageState extends State<AppInfoPage> {
                             child: Text("Credits",
                                 style: linkStyle.apply(
                                     decoration: TextDecoration.underline)),
-                            onTap: () => _creditsPopUp(),
+                            //onTap: () => _creditsPopUp(),
                           ),
                         ),
                         Padding(
@@ -213,33 +174,5 @@ class _AppInfoPageState extends State<AppInfoPage> {
             )
           ],
         ));
-  }
-}
-
-class _CreditHeader extends StatelessWidget {
-  _CreditHeader(this.text);
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Text(
-        text,
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-}
-
-class _CreditEntry extends StatelessWidget {
-  _CreditEntry(this.text);
-  final String text;
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: TextStyle(fontSize: 16.0),
-    );
   }
 }
