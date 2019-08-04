@@ -21,18 +21,21 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
         ),
       ),
       body: PreferencePage([
-        TogglePreference(
-          title: "Measurement Units",
-          defaultVal: defaultPreferences[PREFERENCE_KEYS.USE_METRIC],
-          localKey: preferencesKeyMap[PREFERENCE_KEYS.USE_METRIC],
-          label1: "Metric",
-          label2: "Imperial",
-          subtitleBuilder: (v) {
-            return "Units displayed will be part of the ${v ? "Metric" : "Imperial"} system";
-          },
-          onChange: () {
-            PrefService.notify(preferencesKeyMap[PREFERENCE_KEYS.USE_METRIC]);
-          },
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: TogglePreference(
+            title: "Measurement Units",
+            defaultVal: defaultPreferences[PREFERENCE_KEYS.USE_METRIC],
+            localKey: preferencesKeyMap[PREFERENCE_KEYS.USE_METRIC],
+            label1: "Metric",
+            label2: "Imperial",
+            subtitleBuilder: (v) {
+              return "Units displayed will be part of the ${v ? "Metric" : "Imperial"} system";
+            },
+            onChange: () {
+              PrefService.notify(preferencesKeyMap[PREFERENCE_KEYS.USE_METRIC]);
+            },
+          ),
         ),
         SwitchPreference(
           "Show Duplicate Parks",

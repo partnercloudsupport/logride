@@ -5,6 +5,7 @@ class SliderPreference extends StatefulWidget {
   SliderPreference(this.title, this.localKey,
       {this.desc,
       this.defaultVal,
+      this.onChangeEnd,
       this.onChange,
       this.min = 0.0,
       this.max = 1.0});
@@ -16,18 +17,23 @@ class SliderPreference extends StatefulWidget {
   final double min;
   final double max;
 
-  final Function onChange;
+  final Function(double val) onChange;
+  final Function(double val) onChangeEnd;
 
   @override
   _SliderPreferenceState createState() => _SliderPreferenceState();
 }
 
 class _SliderPreferenceState extends State<SliderPreference> {
+  double rangeVal;
+
   @override
   void initState() {
     super.initState();
     if (PrefService.getDouble(widget.localKey) == null)
       PrefService.setDouble(widget.localKey, widget.defaultVal);
+
+    rangeVal = PrefService.getDouble(widget.localKey);
   }
 
   @override
@@ -39,20 +45,24 @@ class _SliderPreferenceState extends State<SliderPreference> {
           subtitle: widget.desc == null ? null : Text(widget.desc),
         ),
         Slider.adaptive(
-          value: PrefService.getDouble(widget.localKey) ?? widget.defaultVal,
-          onChanged: onChange,
+          value: rangeVal,
           min: widget.min,
           max: widget.max,
           activeColor: Theme.of(context).primaryColor,
           inactiveColor: Colors.grey,
+          onChangeEnd: onChangeEnd,
+          onChanged: (v) {
+            setState(() => rangeVal = v);
+            if (widget.onChange != null) widget.onChange(v);
+          },
           label: "Test",
         )
       ],
     );
   }
 
-  void onChange(double val) async {
+  void onChangeEnd(double val) async {
     setState(() => PrefService.setDouble(widget.localKey, val));
-    if (widget.onChange != null) widget.onChange(val);
+    if (widget.onChangeEnd != null) widget.onChangeEnd(val);
   }
 }

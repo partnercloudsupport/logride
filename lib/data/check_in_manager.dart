@@ -1,11 +1,13 @@
+import 'dart:async';
+
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong/latlong.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
-
-const double _CHECK_IN_RANGE = 1609;
+import 'package:log_ride/data/shared_prefs_data.dart';
+import 'package:preferences/preferences.dart';
 
 class CheckInManager {
   final BaseDB db;
@@ -19,12 +21,76 @@ class CheckInManager {
       accuracy: LocationAccuracy.high,
       distanceFilter: 15,
       timeInterval: 1000); // Wait one minute between check-in thing
+  StreamSubscription<Position> locationStream;
+  Position lastPosition;
+
+  static double checkInRange;
 
   CheckInManager({this.db, this.serverParks, this.addPark}) {
-    geolocator.getPositionStream(locationOptions).listen(_positionUpdate);
+    checkInRange = PrefService.getDouble(
+            preferencesKeyMap[PREFERENCE_KEYS.GEOLOCATOR_RANGE]) ??
+        defaultPreferences[PREFERENCE_KEYS.GEOLOCATOR_RANGE];
+
+    bool isEnabled = PrefService.getBool(
+            preferencesKeyMap[PREFERENCE_KEYS.ENABLE_GEOLOCATION]) ??
+        defaultPreferences[PREFERENCE_KEYS.ENABLE_GEOLOCATION];
+
+    if (isEnabled) {
+      locationStream =
+          geolocator.getPositionStream(locationOptions).listen(_positionUpdate);
+    } else {
+      print("Geolocation is not enabled at this time");
+    }
+
+    // We need to pay attention to two things: Range and Enabled
+    PrefService.onNotify(preferencesKeyMap[PREFERENCE_KEYS.ENABLE_GEOLOCATION],
+        () => _enablePrefUpdate());
+    PrefService.onNotify(preferencesKeyMap[PREFERENCE_KEYS.GEOLOCATOR_RANGE],
+        () => _rangePrefUpdate());
   }
 
-  void _positionUpdate(Position position) async {
+  void deactivate() {
+    PrefService.onNotifyRemove(
+        preferencesKeyMap[PREFERENCE_KEYS.ENABLE_GEOLOCATION]);
+    PrefService.onNotifyRemove(
+        preferencesKeyMap[PREFERENCE_KEYS.GEOLOCATOR_RANGE]);
+    locationStream?.cancel();
+  }
+
+  /// Called when the 'Enabled' preference changes. If it turns off, we cancel
+  /// our subscription and clear our listenable. Turns on, begin our stream again.
+  void _enablePrefUpdate() {
+    bool isEnabled = PrefService.getBool(
+        preferencesKeyMap[PREFERENCE_KEYS.ENABLE_GEOLOCATION]);
+    if (isEnabled) {
+      locationStream =
+          geolocator.getPositionStream(locationOptions).listen(_positionUpdate);
+    } else {
+      // May be null if we didn't have a location stream to begin with
+      locationStream?.cancel();
+      // Reset our listenable to null
+      listenable.value = CheckInData(null, false);
+    }
+  }
+
+  /// Called when the 'Range' preference changes. When it does, we update our
+  /// range variable, and then recalculate nearest park
+  void _rangePrefUpdate() {
+    checkInRange = PrefService.getDouble(
+            preferencesKeyMap[PREFERENCE_KEYS.GEOLOCATOR_RANGE]) ??
+        defaultPreferences[PREFERENCE_KEYS.GEOLOCATOR_RANGE];
+    _geolocatorCheck(lastPosition);
+  }
+
+  /// Callback for the geolocator position stream. Store our last position and then do something with it.
+  void _positionUpdate(Position position) {
+    lastPosition = position;
+    _geolocatorCheck(position);
+  }
+
+  /// Used to handle all the logic related to checking if the user is near a park.
+  /// This is handled manually, as we want to check it once the user has updated their geolocation range, too.
+  void _geolocatorCheck(Position position) async {
     print("position update");
     // Get the user's position...
     LatLng userPosition = _positionToLatLng(position);
@@ -33,7 +99,7 @@ class CheckInManager {
     // Find the parks within check_in_range
     serverParks.forEach((park) {
       double userDistance = Distance().distance(userPosition, park.location);
-      if (userDistance <= _CHECK_IN_RANGE) {
+      if (userDistance <= checkInRange) {
         // We're within check-in range for this park!
         closestParks[park] = userDistance;
       }
@@ -47,7 +113,7 @@ class CheckInManager {
 
     // Otherwise, find the closest park
     double closestDistance =
-        _CHECK_IN_RANGE * 10; // Just get it silly far away. Just to be safe
+        checkInRange * 10; // Just get it silly far away. Just to be safe
     BluehostPark closestPark;
     closestParks.forEach((park, distance) {
       if (distance < closestDistance) {

@@ -172,6 +172,14 @@ class _HomeState extends State<Home> {
     return;
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+
+    subscription.cancel();
+    _checkInManager.deactivate();
+  }
+
   void _parksManagerListener(ParksManagerEvent event) {
     switch (event) {
       case ParksManagerEvent.INITIALIZED:

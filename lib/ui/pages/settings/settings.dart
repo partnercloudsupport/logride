@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:log_ride/data/shared_prefs_data.dart';
 import 'package:log_ride/ui/pages/settings/account_settings.dart';
+import 'package:log_ride/ui/pages/settings/geolocation_settings.dart';
 import 'package:log_ride/ui/pages/settings/interface_settings.dart';
 import 'package:log_ride/widgets/settings/account_tile.dart';
 import 'package:log_ride/widgets/settings/settings_footer.dart';
@@ -58,6 +59,9 @@ class _SettingsPageState extends State<SettingsPage> {
                   title: "Geolocation Settings",
                   subtitle: "Change the way LogRide uses your GPS position",
                   showNavArrow: true,
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                          GeolocationSettings())),
                 ),
                 SettingsTile(
                   title: "Default Park Settings",
@@ -78,22 +82,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   appVersion: snapshot?.data?.version ?? "error",
                 ),
                 /*
-              PreferenceTitle("Account Settings"),
-              InkWell(
-                  onTap: () => print("Test"), child: PreferenceText("Sign Out")),
-              InkWell(
-                onTap: () => print("Delete"),
-                child: PreferenceText("Delete Account"),
-              ),
-              PreferenceTitle("Interface Settings"),
-              SwitchPreference(
-                "Show Favorites in 'All Parks'",
-                preferencesKeyMap[PREFERENCE_KEYS.SHOW_DUPED_FAVORITES],
-                defaultVal:
-                    defaultPreferences[PREFERENCE_KEYS.SHOW_DUPED_FAVORITES],
-                desc:
-                    "Turning this on places your favorite parks in both the Favorites and All Parks part of the 'My Parks' page. Default is on.",
-              ),
+
               PreferenceTitle("Geolocation Settings"),
               SwitchPreference(
                 "Enable Geolocation-based Check-in",
@@ -134,104 +123,4 @@ class _SettingsPageState extends State<SettingsPage> {
               ]));
         });
   }
-  /*
-
-          // Account Settings
-          // - Sign Out
-          // - Delete Account (with confirm)
-          // UI Settings
-          // - Show Favorites in All Parks (favs duplication)
-          // Park Default Settings
-          // - Show Defunct/Seasonal default
-          // - tally/toggle default
-          _settingsSectionHeader(context, "Park Settings"),
-          _settingsToggle(context,
-              value: showDefunct,
-              key: PREFERENCE_KEYS.SHOW_DEFUNCT,
-              label: "Show Defunct Attractions",
-              description:
-                  "New parks ${showDefunct ? "do" : "don't"} show defunct attractions by default",
-              updateValue: (v) {
-            setState(() {
-              showDefunct = v;
-            });
-          }),
-          _settingsToggle(context,
-              value: showSeasonal,
-              key: PREFERENCE_KEYS.SHOW_SEASONAL,
-              label: "Show Seasonal Attractions",
-              description:
-                  "New parks ${showSeasonal ? "do" : "don't"} show seasonal attractions by default",
-              updateValue: (v) {
-            setState(() {
-              showSeasonal = v;
-            });
-          }),
-          _settingsToggle(context,
-              value: incrementorOn,
-              key: PREFERENCE_KEYS.INCREMENT_ON,
-              label: "Tally Mode",
-              description:
-                  "New parks ${incrementorOn ? "will" : "won't"} be in tally mode by default",
-              updateValue: (v) {
-            setState(() {
-              incrementorOn = v;
-            });
-          }),
-          // News Settings
-          _settingsSectionHeader(context, "News Settings")
-          // App info / contact
-          // - Just like old info page
-        ],
-      ),
-    );
-  }
-
-  Widget _settingsSectionHeader(BuildContext context, String headerTitle) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0).copyWith(top: 12.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            headerTitle,
-            style: Theme.of(context).textTheme.title,
-          ),
-          Divider()
-        ],
-      ),
-    );
-  }
-
-  Widget _settingsToggle(BuildContext context,
-      {bool value,
-      PREFERENCE_KEYS key,
-      String label,
-      String description,
-      Function(bool) updateValue}) {
-    return SwitchListTile.adaptive(
-        value: value,
-        title: Text(label ?? key.toString()),
-        subtitle: Text(description ?? ""),
-        onChanged: (v) async {
-          if (v != value && v != null) {
-            updateValue(v);
-            storeBool(v, key);
-          }
-        });
-  }
-
-  Widget _settingsTappableTile(BuildContext context,
-      {String label, String description, Function() onTap}) {
-    return ListTile(
-      dense: true,
-      contentPadding: EdgeInsets.zero,
-      title: Text(label),
-      subtitle: (description != null) ? Text(description) : null,
-      onTap: () {
-        if (onTap != null) onTap();
-      },
-    );
-  }
-  */
 }
