@@ -86,7 +86,7 @@ class CheckInManager {
     checkInRange = PrefService.getDouble(
             preferencesKeyMap[PREFERENCE_KEYS.GEOLOCATOR_RANGE]) ??
         defaultPreferences[PREFERENCE_KEYS.GEOLOCATOR_RANGE];
-    _geolocatorCheck(lastPosition);
+    _positionUpdate(lastPosition);
   }
 
   void _spoofPrefUpdate() {
@@ -96,7 +96,13 @@ class CheckInManager {
     if (spoofing) {
       _geolocatorCheck(_dakPosition);
     } else {
-      _geolocatorCheck(lastPosition);
+      if (PrefService.getBool(
+              preferencesKeyMap[PREFERENCE_KEYS.ENABLE_GEOLOCATION]) &&
+          lastPosition != null) {
+        _geolocatorCheck(lastPosition);
+      } else {
+        listenable.value = CheckInData(null, false);
+      }
     }
   }
 

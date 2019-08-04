@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:log_ride/data/shared_prefs_data.dart';
 import 'package:log_ride/data/user_structure.dart';
 import 'package:log_ride/ui/pages/settings/account_settings.dart';
+import 'package:log_ride/ui/pages/settings/admin_settings.dart';
 import 'package:log_ride/ui/pages/settings/app_info.dart';
 import 'package:log_ride/ui/pages/settings/geolocation_settings.dart';
 import 'package:log_ride/ui/pages/settings/interface_settings.dart';
@@ -87,6 +88,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     title: "Admin Page 🎉",
                     subtitle: "You shouldn't see this",
                     showNavArrow: true,
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (BuildContext context) => AdminSettings())),
                   ),
                 SettingsFooter(
                   appVersion: snapshot?.data?.version ?? "error",

@@ -11,6 +11,7 @@ import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/shared_prefs_data.dart';
 import 'package:log_ride/data/units.dart';
+import 'package:log_ride/data/user_structure.dart';
 import 'package:log_ride/ui/dialogs/attraction_scorecard_page.dart';
 import 'package:log_ride/widgets/shared/embedded_map_entry.dart';
 import 'package:log_ride/widgets/shared/interface_button.dart';
@@ -19,6 +20,7 @@ import 'package:log_ride/widgets/shared/side_strike_text.dart';
 import 'package:log_ride/widgets/shared/stored_image_widget.dart';
 import 'package:log_ride/widgets/shared/title_bar_icon.dart';
 import 'package:preferences/preferences.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 enum _DetailsType { PARK_DETAILS, ATTRACTION_DETAILS }
@@ -58,6 +60,8 @@ class _DetailsPageState extends State<DetailsPage> {
 
     PrefService.onNotify(
         preferencesKeyMap[PREFERENCE_KEYS.USE_METRIC], () => _settingsNotify());
+    PrefService.onNotify(
+        preferencesKeyMap[PREFERENCE_KEYS.SHOW_ADMIN], () => _settingsNotify());
 
     if (widget.data is BluehostAttraction) {
       _type = _DetailsType.ATTRACTION_DETAILS;
@@ -87,6 +91,7 @@ class _DetailsPageState extends State<DetailsPage> {
   void dispose() {
     super.dispose();
     PrefService.onNotifyRemove(preferencesKeyMap[PREFERENCE_KEYS.USE_METRIC]);
+    PrefService.onNotifyRemove(preferencesKeyMap[PREFERENCE_KEYS.SHOW_ADMIN]);
   }
 
   @override
@@ -122,6 +127,8 @@ class _DetailsPageState extends State<DetailsPage> {
 
     List<Widget> userDetails = [Container()];
     userDetails = _buildUserDetails(context);
+
+    List<Widget> adminRow = _buildAdminRow(context);
 
     return SafeArea(
       child: Stack(
@@ -162,6 +169,7 @@ class _DetailsPageState extends State<DetailsPage> {
                           statusRow,
                           ...furtherDetails,
                           ...userDetails,
+                          ...adminRow,
                         ]),
                   ),
                 ],
@@ -565,6 +573,32 @@ class _DetailsPageState extends State<DetailsPage> {
     }
 
     return details;
+  }
+
+  List<Widget> _buildAdminRow(BuildContext context) {
+    LogRideUser user = Provider.of<LogRideUser>(context);
+    if (!user.isAdmin ||
+        !PrefService.getBool(preferencesKeyMap[PREFERENCE_KEYS.SHOW_ADMIN]))
+      return [Container()];
+
+    if (_type == _DetailsType.PARK_DETAILS) {
+      BluehostPark p = widget.data as BluehostPark;
+      return [
+        _furtherDetailsTextEntry("Park ID", p.id.toString()),
+        _furtherDetailsTextEntry(
+            "# of Attractions", p.attractions.length.toString()),
+        _furtherDetailsTextEntry("Calculated Initials", p.initials)
+      ];
+    } else {
+      BluehostAttraction a = widget.data as BluehostAttraction;
+      return [
+        _furtherDetailsTextEntry("Attraction ID", a.attractionID.toString()),
+        _furtherDetailsTextEntry("Park ID", a.parkID.toString()),
+        _furtherDetailsTextEntry(
+            "Manufacturer ID", a.manufacturerID.toString()),
+        _furtherDetailsTextEntry("Model ID", a.modelID.toString())
+      ];
+    }
   }
 
   Widget _furtherDetailsTextEntry(String leftText, String rightText) {
