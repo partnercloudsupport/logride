@@ -7,7 +7,10 @@ import 'package:latlong/latlong.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/shared_prefs_data.dart';
+import 'package:log_ride/data/user_structure.dart';
 import 'package:preferences/preferences.dart';
+
+Position _dakPosition = Position(latitude: 28.356993, longitude: -81.590357);
 
 class CheckInManager {
   final BaseDB db;
@@ -15,6 +18,7 @@ class CheckInManager {
   final CheckInListenable listenable =
       CheckInListenable(CheckInData(null, false));
   final Function(int parkID) addPark;
+  final LogRideUser user;
 
   var geolocator = Geolocator();
   var locationOptions = LocationOptions(
@@ -26,7 +30,7 @@ class CheckInManager {
 
   static double checkInRange;
 
-  CheckInManager({this.db, this.serverParks, this.addPark}) {
+  CheckInManager({this.db, this.serverParks, this.addPark, this.user}) {
     checkInRange = PrefService.getDouble(
             preferencesKeyMap[PREFERENCE_KEYS.GEOLOCATOR_RANGE]) ??
         defaultPreferences[PREFERENCE_KEYS.GEOLOCATOR_RANGE];
@@ -47,6 +51,8 @@ class CheckInManager {
         () => _enablePrefUpdate());
     PrefService.onNotify(preferencesKeyMap[PREFERENCE_KEYS.GEOLOCATOR_RANGE],
         () => _rangePrefUpdate());
+    PrefService.onNotify(
+        preferencesKeyMap[PREFERENCE_KEYS.SPOOF_DAK], () => _spoofPrefUpdate());
   }
 
   void deactivate() {
@@ -54,6 +60,7 @@ class CheckInManager {
         preferencesKeyMap[PREFERENCE_KEYS.ENABLE_GEOLOCATION]);
     PrefService.onNotifyRemove(
         preferencesKeyMap[PREFERENCE_KEYS.GEOLOCATOR_RANGE]);
+    PrefService.onNotifyRemove(preferencesKeyMap[PREFERENCE_KEYS.SPOOF_DAK]);
     locationStream?.cancel();
   }
 
@@ -82,10 +89,26 @@ class CheckInManager {
     _geolocatorCheck(lastPosition);
   }
 
+  void _spoofPrefUpdate() {
+    bool spoofing =
+        PrefService.getBool(preferencesKeyMap[PREFERENCE_KEYS.SPOOF_DAK]) &&
+            user.isAdmin;
+    if (spoofing) {
+      _geolocatorCheck(_dakPosition);
+    } else {
+      _geolocatorCheck(lastPosition);
+    }
+  }
+
   /// Callback for the geolocator position stream. Store our last position and then do something with it.
   void _positionUpdate(Position position) {
     lastPosition = position;
-    _geolocatorCheck(position);
+    if (user.isAdmin &&
+        PrefService.getBool(preferencesKeyMap[PREFERENCE_KEYS.SPOOF_DAK])) {
+      _geolocatorCheck(_dakPosition);
+    } else {
+      _geolocatorCheck(position);
+    }
   }
 
   /// Used to handle all the logic related to checking if the user is near a park.

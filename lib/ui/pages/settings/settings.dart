@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:log_ride/data/shared_prefs_data.dart';
+import 'package:log_ride/data/user_structure.dart';
 import 'package:log_ride/ui/pages/settings/account_settings.dart';
 import 'package:log_ride/ui/pages/settings/app_info.dart';
 import 'package:log_ride/ui/pages/settings/geolocation_settings.dart';
@@ -10,6 +11,7 @@ import 'package:log_ride/widgets/settings/settings_footer.dart';
 import 'package:log_ride/widgets/settings/settings_tile.dart';
 import 'package:package_info/package_info.dart';
 import 'package:preferences/preferences.dart';
+import 'package:provider/provider.dart';
 
 class SettingsPage extends StatefulWidget {
   SettingsPage({this.onSignedOut});
@@ -80,11 +82,12 @@ class _SettingsPageState extends State<SettingsPage> {
                   onTap: () => Navigator.of(context).push(MaterialPageRoute(
                       builder: (BuildContext context) => AppInfoPage())),
                 ),
-                SettingsTile(
-                  title: "Admin Page 🎉",
-                  subtitle: "You shouldn't see this",
-                  showNavArrow: true,
-                ),
+                if (Provider.of<LogRideUser>(context).isAdmin ?? false)
+                  SettingsTile(
+                    title: "Admin Page 🎉",
+                    subtitle: "You shouldn't see this",
+                    showNavArrow: true,
+                  ),
                 SettingsFooter(
                   appVersion: snapshot?.data?.version ?? "error",
                 ),

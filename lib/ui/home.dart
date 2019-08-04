@@ -209,14 +209,21 @@ class _HomeState extends State<Home> {
   }
 
   Future<bool> _dataInit() async {
+    userName = await widget.auth.getCurrentUserName();
+    userEmail = await widget.auth.getCurrentUserEmail();
+    String isAdmin = await widget.db
+        .getEntryAtPath(path: DatabasePath.USER_DETAILS, key: "isAdmin");
+    user = LogRideUser(
+        email: userEmail,
+        username: userName,
+        uuid: widget.uid,
+        isAdmin: isAdmin == "TRUE");
+
     _checkInManager = CheckInManager(
         db: widget.db,
         serverParks: _parksManager.allParksInfo,
+        user: user,
         addPark: _handleAddIDCallback);
-
-    userName = await widget.auth.getCurrentUserName();
-    userEmail = await widget.auth.getCurrentUserEmail();
-    user = LogRideUser(email: userEmail, username: userName, uuid: widget.uid);
 
     rootWidgets = <Tabs, Widget>{
       Tabs.NEWS: TestNewsPage(),
