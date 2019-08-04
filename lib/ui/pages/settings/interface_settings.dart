@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/shared_prefs_data.dart';
 import 'package:log_ride/widgets/settings/toggle_tile.dart';
 import 'package:preferences/preferences.dart';
@@ -14,6 +15,10 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Interface Settings"),
+        leading: IconButton(
+          icon: Icon(FontAwesomeIcons.arrowLeft),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: PreferencePage([
         TogglePreference(
@@ -38,6 +43,10 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
                 preferencesKeyMap[PREFERENCE_KEYS.SHOW_DUPED_FAVORITES]);
           },
         ),
+        /*
+
+        // TODO: Implement "Articles Up Front" when I figure out where to properly inject the formatted names
+
         SwitchPreference(
           "Articles Up Front",
           preferencesKeyMap[PREFERENCE_KEYS.UP_FRONT_ARTICLES],
@@ -49,7 +58,7 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
             PrefService.notify(
                 preferencesKeyMap[PREFERENCE_KEYS.UP_FRONT_ARTICLES]);
           },
-        )
+        )*/
       ]),
     );
   }

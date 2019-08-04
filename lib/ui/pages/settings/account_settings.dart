@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/account_deleter.dart';
 import 'package:log_ride/data/auth_manager.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
@@ -279,6 +280,10 @@ class _AccountSettingsState extends State<AccountSettings> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Account Settings"),
+        leading: IconButton(
+          icon: Icon(FontAwesomeIcons.arrowLeft),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: PreferencePage([
         // UserTile again (no arrow)

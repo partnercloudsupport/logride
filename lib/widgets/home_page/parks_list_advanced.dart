@@ -332,6 +332,9 @@ class _FirebaseParkListViewState extends State<FirebaseParkListView> {
     widget.filter.removeListener(_filterUpdated);
     widget.filter.dispose();
 
+    PrefService.onNotifyRemove(
+        preferencesKeyMap[PREFERENCE_KEYS.SHOW_DUPED_FAVORITES]);
+
     super.dispose();
   }
 }
