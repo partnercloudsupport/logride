@@ -213,6 +213,7 @@ class ParksHomeState extends State<ParksHome> {
                 allParksQuery: widget.db
                     .getQueryForUser(path: DatabasePath.PARKS, key: ""),
                 shrinkWrap: true,
+                bottomEntryPadding: true,
                 physics: ClampingScrollPhysics(),
               ),
             ),

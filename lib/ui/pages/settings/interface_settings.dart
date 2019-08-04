@@ -32,7 +32,11 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
           defaultVal: defaultPreferences[PREFERENCE_KEYS.SHOW_DUPED_FAVORITES],
           desc:
               "Favorite parks ${PrefService.getBool(preferencesKeyMap[PREFERENCE_KEYS.SHOW_DUPED_FAVORITES]) ? "will" : "will not"} show up in both the 'Favorites' and 'All Parks' list. Defaults to ${defaultPreferences[PREFERENCE_KEYS.SHOW_DUPED_FAVORITES] ? "on" : "off"}.",
-          onChange: () => setState(() {}),
+          onChange: () {
+            setState(() {});
+            PrefService.notify(
+                preferencesKeyMap[PREFERENCE_KEYS.SHOW_DUPED_FAVORITES]);
+          },
         ),
         SwitchPreference(
           "Articles Up Front",
@@ -40,7 +44,11 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
           defaultVal: defaultPreferences[PREFERENCE_KEYS.UP_FRONT_ARTICLES],
           desc:
               "Attraction Names ${PrefService.getBool(preferencesKeyMap[PREFERENCE_KEYS.UP_FRONT_ARTICLES]) ? "will" : "will not"} have articles such as 'The' and 'A' appear in the front of their name. Defaults to ${defaultPreferences[PREFERENCE_KEYS.UP_FRONT_ARTICLES] ? "on" : "off"}.",
-          onChange: () => setState(() {}),
+          onChange: () {
+            setState(() {});
+            PrefService.notify(
+                preferencesKeyMap[PREFERENCE_KEYS.UP_FRONT_ARTICLES]);
+          },
         )
       ]),
     );

@@ -5,7 +5,9 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/search_comparators.dart';
+import 'package:log_ride/data/shared_prefs_data.dart';
 import 'package:log_ride/widgets/home_page/park_list_entry.dart';
+import 'package:preferences/preferences.dart';
 
 class ParksFilter extends ValueNotifier<String> {
   ParksFilter(String value) : super(value);
@@ -164,6 +166,16 @@ class _FirebaseParkListViewState extends State<FirebaseParkListView> {
         onValue: _onFavValue);
 
     if (widget.filter != null) widget.filter.addListener(_filterUpdated);
+
+    PrefService.onNotify(
+        preferencesKeyMap[PREFERENCE_KEYS.SHOW_DUPED_FAVORITES],
+        () => _prefUpdate());
+  }
+
+  void _prefUpdate() {
+    print("We got an update!");
+    _buildList();
+    setState(() {});
   }
 
   /// Builds a list used to display all the parks
@@ -199,6 +211,10 @@ class _FirebaseParkListViewState extends State<FirebaseParkListView> {
     _allList.forEach((snap) {
       FirebasePark parsed = FirebasePark.fromMap(Map.from(snap.value));
       if (parsed.parkID == null || parsed.name == null) return;
+
+      if (parsed.favorite &&
+          !PrefService.getBool(
+              preferencesKeyMap[PREFERENCE_KEYS.SHOW_DUPED_FAVORITES])) return;
       buffer.add(parsed);
     });
 
