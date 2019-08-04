@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:log_ride/data/shared_prefs_data.dart';
 import 'package:log_ride/ui/pages/settings/account_settings.dart';
+import 'package:log_ride/ui/pages/settings/interface_settings.dart';
 import 'package:log_ride/widgets/settings/account_tile.dart';
 import 'package:log_ride/widgets/settings/settings_footer.dart';
 import 'package:log_ride/widgets/settings/settings_tile.dart';
@@ -42,15 +43,16 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               body: PreferencePage([
                 AccountTile(
-                  onTap: () => Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (BuildContext context) {
-                    return AccountSettings(widget.onSignedOut);
-                  })),
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                          AccountSettings(widget.onSignedOut))),
                 ),
                 SettingsTile(
                   title: "Interface Settings",
                   subtitle: "Change the way LogRide looks",
                   showNavArrow: true,
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (BuildContext context) => InterfaceSettings())),
                 ),
                 SettingsTile(
                   title: "Geolocation Settings",
