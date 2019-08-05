@@ -24,35 +24,6 @@ class UserStats {
 
   // Ride Type Specific Stats
   Map<int, RideTypeStats> rideTypeStats = Map<int, RideTypeStats>();
-  /*
-  // Ride Type Specific Stats
-  int rideTypeChildrensExperiences;
-  int rideTypeChildrens;
-  int rideTypeDarkRideExperiences;
-  int rideTypeDarkRides;
-  int rideTypeExploreExperiences;
-  int rideTypeExplores;
-  int rideTypeFilmExperiences;
-  int rideTypeFilms;
-  int rideTypeFlatRideExperiences;
-  int rideTypeFlatRides;
-  int rideTypeParadeExperience;
-  int rideTypeParades;
-  int rideTypePlayAreaExperiences;
-  int rideTypePlayAreas;
-  int rideTypeRollerCoasterExperiences;
-  int rideTypeRollerCoasters;
-  int rideTypeShowExperiences;
-  int rideTypeShows;
-  int rideTypeSpectacularExperiences;
-  int rideTypeSpectaculars;
-  int rideTypeTransportExperiences;
-  int rideTypeTransports;
-  int rideTypeChargeExperiences;
-  int rideTypeChargeRides;
-  int rideTypeWaterExperience;
-  int rideTypeWaterRides;
-  */
 
   Map<List<String>, LatLng> parkLocations = Map<List<String>, LatLng>();
   LinkedHashMap<BluehostAttraction, int> topAttractions =
