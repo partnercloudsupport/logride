@@ -7,6 +7,7 @@ import 'package:log_ride/data/parks_manager.dart';
 import 'package:log_ride/data/webfetcher.dart';
 import 'package:log_ride/widgets/dialogs/generic_list_picker.dart';
 import 'package:log_ride/widgets/shared/interface_button.dart';
+import 'package:log_ride/widgets/stats/misc_headers.dart';
 
 class ListsPage extends StatefulWidget {
   ListsPage({this.wf, this.pm, this.db});
@@ -30,7 +31,7 @@ class _ListsPageState extends State<ListsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Lists"),
+        title: PadlessPageHeader(text: "LISTS"),
       ),
       body: Container(
         constraints: BoxConstraints.expand(),

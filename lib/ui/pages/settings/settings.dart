@@ -10,6 +10,7 @@ import 'package:log_ride/ui/pages/settings/park_settings.dart';
 import 'package:log_ride/widgets/settings/account_tile.dart';
 import 'package:log_ride/widgets/settings/settings_footer.dart';
 import 'package:log_ride/widgets/settings/settings_tile.dart';
+import 'package:log_ride/widgets/stats/misc_headers.dart';
 import 'package:package_info/package_info.dart';
 import 'package:preferences/preferences.dart';
 import 'package:provider/provider.dart';
@@ -45,7 +46,7 @@ class _SettingsPageState extends State<SettingsPage> {
         builder: (context, snapshot) {
           return Scaffold(
               appBar: AppBar(
-                title: Text("Settings"),
+                title: PadlessPageHeader(text: "SETTINGS"),
               ),
               body: PreferencePage([
                 AccountTile(
@@ -94,25 +95,6 @@ class _SettingsPageState extends State<SettingsPage> {
                 SettingsFooter(
                   appVersion: snapshot?.data?.version ?? "error",
                 ),
-                /*
-
-              PreferenceTitle("Default Park Settings"),
-              SwitchPreference("Experience Tally Mode",
-                  preferencesKeyMap[PREFERENCE_KEYS.INCREMENT_ON],
-                  defaultVal: defaultPreferences[PREFERENCE_KEYS.INCREMENT_ON],
-                  desc:
-                      "Turning this on makes new parks start in experience tally mode. Default is on."),
-              SwitchPreference("Show Defunct Attractions",
-                  preferencesKeyMap[PREFERENCE_KEYS.SHOW_DEFUNCT],
-                  defaultVal: defaultPreferences[PREFERENCE_KEYS.SHOW_DEFUNCT],
-                  desc:
-                      "Turning this on lets new parks show defunct attractions by default. Default is on."),
-              SwitchPreference("Experience Tally Mode",
-                  preferencesKeyMap[PREFERENCE_KEYS.SHOW_SEASONAL],
-                  defaultVal: defaultPreferences[PREFERENCE_KEYS.SHOW_SEASONAL],
-                  desc:
-                      "Turning this on lets new parks show seasonal attractions by default. Default is on."),
-            */
               ]));
         });
   }

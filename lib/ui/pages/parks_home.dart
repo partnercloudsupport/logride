@@ -16,6 +16,7 @@ import 'package:log_ride/widgets/home_page/check_in_widget.dart';
 import 'package:log_ride/widgets/home_page/park_list_entry.dart';
 import 'package:log_ride/widgets/home_page/parks_list_advanced.dart';
 import 'package:log_ride/widgets/shared/styled_dialog.dart';
+import 'package:log_ride/widgets/stats/misc_headers.dart';
 
 class ParksHomeFocus extends ValueNotifier<bool> {
   ParksHomeFocus(bool inFocus) : super(inFocus);
@@ -171,10 +172,8 @@ class ParksHomeState extends State<ParksHome> {
     return Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: Text(
-            "My Parks",
-            style:
-                Theme.of(context).textTheme.headline.apply(color: Colors.white),
+          title: PadlessPageHeader(
+            text: "MY PARKS",
           ),
           actions: <Widget>[
             IconButton(

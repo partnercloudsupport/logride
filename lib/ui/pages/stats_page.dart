@@ -1,11 +1,12 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/parks_manager.dart';
 import 'package:log_ride/data/stats_calculator.dart';
-import 'package:log_ride/ui/stats/attractions.dart';
-import 'package:log_ride/ui/stats/parks.dart';
+import 'package:log_ride/ui/pages/stats/attractions.dart';
+import 'package:log_ride/ui/pages/stats/parks.dart';
 import 'package:log_ride/widgets/shared/spinning_iconbutton.dart';
 import 'package:log_ride/widgets/stats/misc_headers.dart';
 import 'package:toast/toast.dart';
@@ -157,7 +158,7 @@ class _StatsPageState extends State<StatsPage>
         ),
         bottom: TabBar(
           controller: _tabController,
-          tabs: <Widget>[Tab(text: "Parks"), Tab(text: "Attractions")],
+          tabs: <Widget>[Tab(text: "PARKS"), Tab(text: "ATTRACTIONS")],
         ),
       ),
       body: AnimatedSwitcher(

@@ -9,11 +9,24 @@ class PageHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.only(top: 12.0, left: 8.0),
+      padding: EdgeInsets.only(top: 8.0, left: 16.0),
       child: Text(
         text,
         style: TextStyle(fontSize: 32.0, fontWeight: FontWeight.w800),
       ),
+    );
+  }
+}
+
+class PadlessPageHeader extends StatelessWidget {
+  PadlessPageHeader({this.text});
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: TextStyle(fontSize: 32.0, fontWeight: FontWeight.w800),
     );
   }
 }
