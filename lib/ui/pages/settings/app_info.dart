@@ -65,7 +65,7 @@ class _AppInfoPageState extends State<AppInfoPage> {
               "Questions or Comments? Contact the LogRide Team via email @${URL_EMAIL.replaceAll("mailto:", "")}",
           onTap: () async {
             String mailURL = URL_EMAIL +
-                "?subject=LogRide%20Android%20Feedback&body=Android%Edition.%20Version:%20${ourInfo?.version ?? "unknown"}";
+                "?subject=LogRide%20Android%20Feedback&body=Android%20Edition.%20Version:%20${ourInfo?.version ?? "unknown"}";
             if (await canLaunch(mailURL)) {
               await launch(mailURL);
             }
