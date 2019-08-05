@@ -23,7 +23,7 @@ enum WebLocation {
 
 enum SubmissionType { ATTRACTION_NEW, PARK, IMAGE }
 
-const _VERSION_URL = "Version1.2.1";
+const _VERSION_URL = "Version2.1";
 
 class WebFetcher {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
@@ -196,9 +196,12 @@ class WebFetcher {
           (attr.modelID != null) ? (attr.modelID < 0) ? 0 : attr.modelID : 0,
       "inversions": attr.inversions ?? 0,
       "height": attr.height ?? 0,
+      "dropHeight": attr.dropHeight ?? 0,
+      "liftHeight": attr.liftHeight ?? 0,
       "maxSpeed": attr.maxSpeed ?? 0,
       "length": attr.length ?? 0,
       "duration": attr.attractionDuration ?? 0,
+      "capacity": attr.capacity ?? 0,
       "email": username,
       "token": await _firebaseMessaging.getToken(),
       "userID": uid

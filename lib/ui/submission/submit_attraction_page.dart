@@ -193,36 +193,13 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
           return null;
         },
         onSaved: (RideType v) {
-          _data.rideType = v;
-          _data.rideTypeID = v.id;
-          _data.typeLabel = v.label;
+          if (v != null) {
+            _data.rideType = v;
+            _data.rideTypeID = v.id;
+            _data.typeLabel = v.label;
+          }
         },
       ),
-      /*
-      FormField(
-        // Ok, attractions have it stored as
-        initialValue: _data.rideType,
-        onSaved: (v) {
-          _data.rideType = v;
-        },
-        builder: (FormFieldState<int> state) {
-          return InputDecorator(
-            decoration: submissionDecoration(
-              hintText: "Attraction Type",
-              labelText: "Type *",
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<int>(
-                value: state.value,
-                onChanged: (value) {
-                  state.didChange(value);
-                },
-                items: dropDownTypes,
-              ),
-            ),
-          );
-        },
-      ),*/
       StringListField(
         onSaved: (d) {
           _data.formerNames = d;
@@ -389,6 +366,18 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
       initialHeight =
           roundUnit(convertUnit(initialHeight, Unit.foot, Unit.meter));
 
+    num initialDropHeight = _data.dropHeight;
+    if (initialDropHeight != null && initialDropHeight != 0.0 && usingMetric) {
+      initialDropHeight =
+          roundUnit(convertUnit(initialDropHeight, Unit.foot, Unit.meter));
+    }
+
+    num initialLiftHeight = _data.liftHeight;
+    if (initialLiftHeight != null && initialLiftHeight != 0.0 && usingMetric) {
+      initialLiftHeight =
+          roundUnit(convertUnit(initialLiftHeight, Unit.foot, Unit.meter));
+    }
+
     num initialSpeed = _data.maxSpeed;
     if (initialSpeed != null && initialSpeed != 0.0 && usingMetric)
       initialSpeed = roundUnit(convertUnit(initialSpeed, Unit.mph, Unit.kph));
@@ -494,6 +483,72 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
             return;
           }
           _data.height = (usingMetric)
+              ? roundUnit(convertUnit(parsed, Unit.meter, Unit.foot))
+              : parsed;
+        },
+      ),
+      TextFormField(
+        initialValue: (initialDropHeight != null && initialDropHeight != 0.0)
+            ? initialDropHeight.toString()
+            : "",
+        decoration: submissionDecoration(
+          hintText: "Drop Height",
+          labelText: "Drop Height",
+          suffixText: (usingMetric) ? "m " : "ft ",
+        ),
+        keyboardType: TextInputType.numberWithOptions(decimal: true),
+        validator: (value) {
+          if (value == "") return null;
+
+          num parsed = num.tryParse(value);
+          if (parsed == null) {
+            return "Please enter a valid height";
+          } else if (parsed <= 0) {
+            return "Please enter a positive height";
+          }
+
+          return null;
+        },
+        onSaved: (value) {
+          num parsed = num.tryParse(value);
+          if (parsed == null) {
+            _data.dropHeight = 0;
+            return;
+          }
+          _data.dropHeight = (usingMetric)
+              ? roundUnit(convertUnit(parsed, Unit.meter, Unit.foot))
+              : parsed;
+        },
+      ),
+      TextFormField(
+        initialValue: (initialLiftHeight != null && initialLiftHeight != 0.0)
+            ? initialLiftHeight.toString()
+            : "",
+        decoration: submissionDecoration(
+          hintText: "Lift Height",
+          labelText: "Lift Height",
+          suffixText: (usingMetric) ? "m " : "ft ",
+        ),
+        keyboardType: TextInputType.numberWithOptions(decimal: true),
+        validator: (value) {
+          if (value == "") return null;
+
+          num parsed = num.tryParse(value);
+          if (parsed == null) {
+            return "Please enter a valid height";
+          } else if (parsed <= 0) {
+            return "Please enter a positive height";
+          }
+
+          return null;
+        },
+        onSaved: (value) {
+          num parsed = num.tryParse(value);
+          if (parsed == null) {
+            _data.liftHeight = 0;
+            return;
+          }
+          _data.liftHeight = (usingMetric)
               ? roundUnit(convertUnit(parsed, Unit.meter, Unit.foot))
               : parsed;
         },

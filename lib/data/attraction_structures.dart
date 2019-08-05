@@ -195,6 +195,8 @@ class BluehostAttraction {
 
     newAttraction.attractionName = attr.attractionName;
     newAttraction.parkID = attr.parkID;
+    newAttraction.rideTypeID = attr.rideTypeID;
+    newAttraction.typeLabel = attr.typeLabel;
     newAttraction.rideType = attr.rideType;
     newAttraction.yearOpen = attr.yearOpen;
     newAttraction.yearClosed = attr.yearClosed;
