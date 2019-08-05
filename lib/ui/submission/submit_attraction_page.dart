@@ -5,6 +5,7 @@ import 'package:log_ride/data/manufacturer_structures.dart';
 import 'package:log_ride/data/model_structures.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/parks_manager.dart';
+import 'package:log_ride/data/ride_type_structures.dart';
 import 'package:log_ride/data/shared_prefs_data.dart';
 import 'package:log_ride/data/units.dart';
 import 'package:log_ride/ui/dialogs/string_list_dialog.dart';
@@ -37,8 +38,6 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
   TextEditingController _openYearController;
   TextEditingController _closeYearController;
 
-  List<DropdownMenuItem<int>> dropDownTypes;
-
   BluehostAttraction _data;
 
   AttractionStatus _attractionStatus;
@@ -61,8 +60,6 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
 
     _attractionStatus = getAttractionStateFromBluehostAttraction(_data);
 
-    dropDownTypes = List<DropdownMenuItem<int>>();
-
     _openYearController = TextEditingController(
         text: (_data.yearOpen != null && _data.yearOpen != 0)
             ? _data.yearOpen.toString()
@@ -71,11 +68,6 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
         text: (_data.yearClosed != null && _data.yearClosed != 0)
             ? _data.yearClosed.toString()
             : "");
-
-    // Build our attraction types list
-    widget.pm.attractionTypes.forEach((val, label) {
-      dropDownTypes.add(DropdownMenuItem<int>(child: Text(label), value: val));
-    });
 
     _initModels = _asyncInitModels();
 
@@ -193,6 +185,20 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
           _data.attractionName = value;
         },
       ),
+      RideTypePickerFormField(
+        widget.pm.attractionTypes,
+        initialValue: _data.rideType,
+        validator: (RideType v) {
+          if (v == null || v.id == 0) return "Please select a valid ride type";
+          return null;
+        },
+        onSaved: (RideType v) {
+          _data.rideType = v;
+          _data.rideTypeID = v.id;
+          _data.typeLabel = v.label;
+        },
+      ),
+      /*
       FormField(
         // Ok, attractions have it stored as
         initialValue: _data.rideType,
@@ -216,7 +222,7 @@ class _SubmitAttractionPageState extends State<SubmitAttractionPage> {
             ),
           );
         },
-      ),
+      ),*/
       StringListField(
         onSaved: (d) {
           _data.formerNames = d;

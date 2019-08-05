@@ -202,7 +202,7 @@ class _DetailsPageState extends State<DetailsPage> {
     } else if (_type == _DetailsType.ATTRACTION_DETAILS) {
       BluehostAttraction attractionData = (widget.data as BluehostAttraction);
       titleText = attractionData.attractionName;
-      subtitleText = attractionData.typeLabel;
+      subtitleText = attractionData.rideType.label;
 
       if (attractionData.scoreCard) {
         _leftIcon = TitleBarIcon(

@@ -1,3 +1,5 @@
+import 'package:log_ride/data/ride_type_structures.dart';
+
 class FirebaseAttraction {
   final int rideID;
   int numberOfTimesRidden = 0;
@@ -40,7 +42,8 @@ class BluehostAttraction {
   String attractionName;
   int attractionID;
   int parkID;
-  int rideType = 1;
+  int rideTypeID = 1;
+  RideType rideType;
   int yearOpen;
   int yearClosed;
   List<String> inactivePeriods;
@@ -91,7 +94,7 @@ class BluehostAttraction {
 
     newAttraction.attractionName = json["Name"];
     newAttraction.parkID = num.parse(json["ParkID"]);
-    newAttraction.rideType = num.parse(json["RideType"]);
+    newAttraction.rideTypeID = num.parse(json["RideType"]);
     newAttraction.yearOpen = num.parse(json["YearOpen"]);
     newAttraction.yearClosed = num.parse(json["YearClosed"]);
 

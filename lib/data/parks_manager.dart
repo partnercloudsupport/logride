@@ -7,6 +7,7 @@ import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/manufacturer_structures.dart';
 import 'package:log_ride/data/model_structures.dart';
 import 'package:log_ride/data/park_structures.dart';
+import 'package:log_ride/data/ride_type_structures.dart';
 import 'package:log_ride/data/shared_prefs_data.dart';
 import 'package:log_ride/data/webfetcher.dart';
 import 'package:preferences/preferences.dart';
@@ -18,7 +19,7 @@ class ParksManager {
   final WebFetcher wf;
 
   List<BluehostPark> allParksInfo;
-  Map<int, String> attractionTypes;
+  List<RideType> attractionTypes;
   List<Manufacturer> manufacturers;
   Map<int, List<Model>> models;
 
@@ -40,7 +41,7 @@ class ParksManager {
 
     // Since we're relying on this for the attraction building, we'll wait for
     // you too.
-    attractionTypes = await wf.getAttractionTypesMap();
+    attractionTypes = await wf.getAttractionTypes();
 
     // Go through and set-up the allParksInfo to match the user database.
     // The 'filled' tag is used in the all-parks-search to show the user they

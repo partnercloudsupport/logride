@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/manufacturer_structures.dart';
 import 'package:log_ride/data/model_structures.dart';
+import 'package:log_ride/data/ride_type_structures.dart';
 import 'package:log_ride/data/search_comparators.dart';
 import 'package:log_ride/ui/dialogs/single_value_dialog.dart';
 
@@ -257,6 +258,34 @@ class ModelPicker extends StatelessWidget {
         if (modName == null || modName == "") return null;
 
         return Model(name: modName);
+      },
+    );
+  }
+}
+
+class RideTypePicker extends StatelessWidget {
+  RideTypePicker({this.types});
+
+  final List<RideType> types;
+
+  @override
+  Widget build(BuildContext context) {
+    return GenericListPicker<RideType>(
+      types,
+      searchLabel: "Search Types",
+      emptyString: "No Types Found",
+      allowCustomSubmit: false,
+      itemBuilder: (BuildContext context, int index, dynamic t, String filter) {
+        if (t.label.toLowerCase().contains(filter.toLowerCase())) {
+          return ListTile(
+            title: Text(t.label),
+            onTap: () {
+              Navigator.of(context).pop(t);
+            },
+          );
+        } else {
+          return Container();
+        }
       },
     );
   }

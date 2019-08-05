@@ -8,6 +8,7 @@ import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/manufacturer_structures.dart';
 import 'package:log_ride/data/model_structures.dart';
 import 'package:log_ride/data/park_structures.dart';
+import 'package:log_ride/data/ride_type_structures.dart';
 
 enum WebLocation {
   ALL_PARKS,
@@ -76,7 +77,7 @@ class WebFetcher {
 
   Future<List<BluehostAttraction>> getAllAttractionData(
       {num parkID,
-      Map<int, String> rideTypes,
+      List<RideType> rideTypes,
       List<BluehostPark> allParks}) async {
     List<BluehostAttraction> data = List<BluehostAttraction>();
 
@@ -91,7 +92,10 @@ class WebFetcher {
         _fixBluehostAttractionText(newAttraction);
 
         // Get our type label, or leave it blank if it doesn't exist
-        newAttraction.typeLabel = rideTypes[newAttraction.rideType] ?? "";
+        RideType rideType =
+            findRideTypeByID(rideTypes, newAttraction.rideTypeID);
+        newAttraction.typeLabel = rideType?.label ?? "";
+        newAttraction.rideType = rideType ?? findRideTypeByID(rideTypes, 0);
         if (newAttraction.previousParkID != 0) {
           newAttraction.previousParkLabel =
               getBluehostParkByID(allParks, newAttraction.previousParkID)
@@ -123,15 +127,25 @@ class WebFetcher {
     return null;
   }
 
-  Future<Map<int, String>> getAttractionTypesMap() async {
+  Future<List<RideType>> getAttractionTypes() async {
     final response = await http.get(_serverURLS[WebLocation.ATTRACTION_TYPES]);
 
     if (response.statusCode == 200) {
       // The map from the PHP script has the keys as strings, but they're really ints
       // We need to convert that first before we return it
-      return (jsonDecode(response.body) as Map).map((key, value) {
-        return MapEntry<int, String>(int.parse(key), value);
+      List<RideType> types = List<RideType>();
+
+      (jsonDecode(response.body) as Map).forEach((key, value) {
+        types.add(RideType(id: int.parse(key), label: value));
       });
+
+      types.sort(
+          (a, b) => a.label.toLowerCase().compareTo(b.label.toLowerCase()));
+
+      // Unknown shall sit at the top
+      types.insert(0, RideType(id: 0, label: ""));
+
+      return types;
     }
 
     return null;
@@ -160,7 +174,7 @@ class WebFetcher {
           ? ""
           : attr.inactivePeriods.join(
               ", "), // TODO - Switch to traditional semicolon line-breaks once iOS gets up to speed
-      "type": attr.rideType ?? 0,
+      "type": attr.rideType?.id ?? 0,
       "park": park.parkName ?? "",
       "rideID": isNewAttraction ? 0 : attr.attractionID,
       "active": activeStatus,

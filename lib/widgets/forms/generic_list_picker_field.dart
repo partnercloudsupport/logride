@@ -2,6 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:log_ride/data/manufacturer_structures.dart';
 import 'package:log_ride/data/model_structures.dart';
+import 'package:log_ride/data/ride_type_structures.dart';
 import 'package:log_ride/widgets/dialogs/generic_list_picker.dart';
 import 'package:log_ride/widgets/forms/submission_decoration.dart';
 
@@ -14,7 +15,8 @@ class GenericListPickerFormField<T> extends StatelessWidget {
       this.valueBuilder,
       this.pickerBuilder,
       this.label = "List",
-      this.enabled = true});
+      this.enabled = true,
+      this.clearable = true});
 
   final List<T> list;
   final Function onSaved;
@@ -23,6 +25,7 @@ class GenericListPickerFormField<T> extends StatelessWidget {
   final T initialValue;
   final String label;
   final bool enabled;
+  final bool clearable;
 
   final String Function(BuildContext context, T entry) valueBuilder;
   final Widget Function(BuildContext context, List<T> list) pickerBuilder;
@@ -36,8 +39,8 @@ class GenericListPickerFormField<T> extends StatelessWidget {
         onSaved: (d) => onSaved(d),
         enabled: enabled,
         validator: (v) {
-          if (validator != null) validator(v);
-          return;
+          if (validator != null) return validator(v);
+          return null;
         },
         builder: (FormFieldState<T> state) {
           String valueLabel = "";
@@ -73,11 +76,23 @@ class GenericListPickerFormField<T> extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text(
-                    label,
-                    style: Theme.of(context).textTheme.title.apply(
-                        fontWeightDelta: -1,
-                        color: enabled ? Colors.grey[700] : Colors.grey[350]),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        label,
+                        style: Theme.of(context).textTheme.title.apply(
+                            fontWeightDelta: -1,
+                            color:
+                                enabled ? Colors.grey[700] : Colors.grey[350]),
+                      ),
+                      if (state.hasError)
+                        Text(
+                          state.errorText,
+                          style: TextStyle(color: Colors.red),
+                        )
+                    ],
                   ),
                   Expanded(
                     child: AutoSizeText(valueLabel,
@@ -90,7 +105,7 @@ class GenericListPickerFormField<T> extends StatelessWidget {
                                     .primaryColor
                                     .withOpacity(0.5))),
                   ),
-                  if (state.value != null)
+                  if (state.value != null && clearable)
                     IconButton(
                         icon: Icon(Icons.clear),
                         onPressed: () {
@@ -180,6 +195,48 @@ class ModelPickerFormField extends StatelessWidget {
       },
       pickerBuilder: (BuildContext context, List<Model> list) {
         return ModelPicker(models: list);
+      },
+    );
+  }
+}
+
+class RideTypePickerFormField extends StatelessWidget {
+  RideTypePickerFormField(this.list,
+      {this.onSaved,
+      this.onUpdate,
+      this.validator,
+      this.initialValue,
+      this.enabled = true,
+      this.clearable = false});
+
+  final List<RideType> list;
+  final Function(RideType t) onSaved;
+  final Function(RideType t) onUpdate;
+  final Function validator;
+  final RideType initialValue;
+  final bool enabled;
+  final bool clearable;
+
+  @override
+  Widget build(BuildContext context) {
+    return GenericListPickerFormField<RideType>(
+      list,
+      onSaved: (RideType type) {
+        if (onSaved != null) onSaved(type);
+      },
+      onUpdate: (RideType type) {
+        if (onUpdate != null) onUpdate(type);
+      },
+      validator: validator,
+      initialValue: initialValue,
+      enabled: enabled,
+      clearable: clearable,
+      label: "Ride Type *",
+      valueBuilder: (BuildContext context, RideType entry) {
+        return entry?.label ?? "";
+      },
+      pickerBuilder: (BuildContext context, List<RideType> list) {
+        return RideTypePicker(types: list);
       },
     );
   }

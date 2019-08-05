@@ -82,7 +82,7 @@ class AttractionListState extends State<AttractionListEntry> {
                       Text(
                           widget.attractionData.upcoming
                               ? "Opening Soon"
-                              : widget.attractionData.typeLabel,
+                              : widget.attractionData.rideType.label,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context)
                               .textTheme

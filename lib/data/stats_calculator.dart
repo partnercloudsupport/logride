@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+
 import 'package:latlong/latlong.dart';
 import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
@@ -192,12 +193,11 @@ class StatsCalculator {
         await db.getEntryAtPath(path: DatabasePath.PARKS, key: "");
 
     // User doesn't have any park data to analyze, return the bare UserStats object
-    if(rawResponse == null){
+    if (rawResponse == null) {
       return stats;
     }
 
     print(rawResponse);
-
 
     List entries = Map.from(rawResponse).values.toList();
 
@@ -205,7 +205,7 @@ class StatsCalculator {
 
     entries.forEach((e) {
       FirebasePark park = FirebasePark.fromMap(Map.from(e));
-      if(park != null) {
+      if (park != null) {
         userParks.add(park);
       }
     });
@@ -221,7 +221,7 @@ class StatsCalculator {
       FirebasePark park = userParks[i];
 
       // Sometime a null park pops up. Treat it like it doesn't exist and skip over it.
-      if(park.name == null) continue;
+      if (park.name == null) continue;
 
       BluehostPark furtherData = getBluehostParkByID(serverParks, park.parkID);
       // For each park, we need to do a few things
@@ -244,9 +244,10 @@ class StatsCalculator {
 
       // Then we run the loop for each of the user's attractions for the park
       dynamic rawResponse = await db
-          .getEntryAtPath(path: DatabasePath.ATTRACTIONS, key: "${park.parkID}").timeout(Duration(milliseconds: 500), onTimeout: () => null);
+          .getEntryAtPath(path: DatabasePath.ATTRACTIONS, key: "${park.parkID}")
+          .timeout(Duration(milliseconds: 500), onTimeout: () => null);
 
-      if(rawResponse != null) {
+      if (rawResponse != null) {
         List attractionEntries = List();
 
         // Occasionally, firebase will send us a "list" with a null entry instead
@@ -254,16 +255,13 @@ class StatsCalculator {
         // In cases where this occurs, the map fails, so we just make it a list instead
         // and filter out the nulls.
         try {
-          attractionEntries = Map
-              .from(rawResponse)
-              .values
-              .toList();
+          attractionEntries = Map.from(rawResponse).values.toList();
           print(attractionEntries);
         } catch (e) {
           print(e);
           List temp = List.from(rawResponse);
           temp.forEach((i) {
-            if(i != null){
+            if (i != null) {
               attractionEntries.add(i);
             }
           });
@@ -338,12 +336,11 @@ class StatsCalculator {
     return stats;
   }
 
-  Future<void> _calculateAttractionStats(dynamic data, UserStats stats, List<BluehostAttraction> furtherData){
-
-    FirebaseAttraction attraction =
-    FirebaseAttraction.fromMap(Map.from(data));
-    BluehostAttraction attrData = getBluehostAttractionFromList(
-        furtherData, attraction.rideID);
+  Future<void> _calculateAttractionStats(
+      dynamic data, UserStats stats, List<BluehostAttraction> furtherData) {
+    FirebaseAttraction attraction = FirebaseAttraction.fromMap(Map.from(data));
+    BluehostAttraction attrData =
+        getBluehostAttractionFromList(furtherData, attraction.rideID);
 
     // This traditionally happens when a user rides then removes an attraction. Data is still there, but just in case.
     if (attraction.numberOfTimesRidden <= 0) return null;
@@ -358,9 +355,8 @@ class StatsCalculator {
       stats.extinctAttractionsChecked++;
     }
 
-
     // I'd REALLY love to do something different here, but since it's hard-coded in firebase, we're stuck with this
-    switch (attrData.rideType) {
+    switch (attrData.rideType.id) {
       case 1:
         stats.rideTypeRollerCoasters++;
         stats.rideTypeRollerCoasterExperiences +=
@@ -372,33 +368,27 @@ class StatsCalculator {
         break;
       case 3:
         stats.rideTypeChildrens++;
-        stats.rideTypeChildrensExperiences +=
-            attraction.numberOfTimesRidden;
+        stats.rideTypeChildrensExperiences += attraction.numberOfTimesRidden;
         break;
       case 4:
         stats.rideTypeFlatRides++;
-        stats.rideTypeFlatRideExperiences +=
-            attraction.numberOfTimesRidden;
+        stats.rideTypeFlatRideExperiences += attraction.numberOfTimesRidden;
         break;
       case 5:
         stats.rideTypeTransports++;
-        stats.rideTypeTransportExperiences +=
-            attraction.numberOfTimesRidden;
+        stats.rideTypeTransportExperiences += attraction.numberOfTimesRidden;
         break;
       case 6:
         stats.rideTypeDarkRides++;
-        stats.rideTypeDarkRideExperiences +=
-            attraction.numberOfTimesRidden;
+        stats.rideTypeDarkRideExperiences += attraction.numberOfTimesRidden;
         break;
       case 7:
         stats.rideTypeExplores++;
-        stats.rideTypeExploreExperiences +=
-            attraction.numberOfTimesRidden;
+        stats.rideTypeExploreExperiences += attraction.numberOfTimesRidden;
         break;
       case 8:
         stats.rideTypeSpectaculars++;
-        stats.rideTypeSpectacularExperiences +=
-            attraction.numberOfTimesRidden;
+        stats.rideTypeSpectacularExperiences += attraction.numberOfTimesRidden;
         break;
       case 9:
         stats.rideTypeShows++;
@@ -414,8 +404,7 @@ class StatsCalculator {
         break;
       case 12:
         stats.rideTypePlayAreas++;
-        stats.rideTypePlayAreaExperiences +=
-            attraction.numberOfTimesRidden;
+        stats.rideTypePlayAreaExperiences += attraction.numberOfTimesRidden;
         break;
       case 13:
         stats.rideTypeChargeRides++;
