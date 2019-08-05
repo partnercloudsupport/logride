@@ -49,6 +49,18 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
                 preferencesKeyMap[PREFERENCE_KEYS.SHOW_DUPED_FAVORITES]);
           },
         ),
+        SwitchPreference(
+          "Hide Empty Stats",
+          preferencesKeyMap[PREFERENCE_KEYS.HIDE_EMPTY_STATS],
+          defaultVal: defaultPreferences[PREFERENCE_KEYS.HIDE_EMPTY_STATS],
+          desc:
+              "Empty Ride Type Categories on the Stats page ${PrefService.getBool(preferencesKeyMap[PREFERENCE_KEYS.HIDE_EMPTY_STATS]) ? "will" : "will not"} be hidden from view",
+          onChange: () {
+            setState(() {});
+            PrefService.notify(
+                preferencesKeyMap[PREFERENCE_KEYS.HIDE_EMPTY_STATS]);
+          },
+        )
         /*
 
         // TODO: Implement "Articles Up Front" when I figure out where to properly inject the formatted names

@@ -40,8 +40,10 @@ class _StatsPageState extends State<StatsPage>
 
   @override
   void initState() {
-    calculator =
-        StatsCalculator(db: widget.db, serverParks: widget.pm.allParksInfo);
+    calculator = StatsCalculator(
+        db: widget.db,
+        serverParks: widget.pm.allParksInfo,
+        rideTypes: widget.pm.attractionTypes);
     _refreshCalculation();
 
     _tabController = TabController(length: 2, vsync: this);

@@ -5,6 +5,7 @@ import 'package:latlong/latlong.dart';
 import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
+import 'package:log_ride/data/ride_type_structures.dart';
 
 const int _MAX_LIST_SIZE = 5;
 
@@ -21,6 +22,9 @@ class UserStats {
   int extinctAttractionsChecked;
   int totalExperiences;
 
+  // Ride Type Specific Stats
+  Map<int, RideTypeStats> rideTypeStats = Map<int, RideTypeStats>();
+  /*
   // Ride Type Specific Stats
   int rideTypeChildrensExperiences;
   int rideTypeChildrens;
@@ -48,6 +52,7 @@ class UserStats {
   int rideTypeChargeRides;
   int rideTypeWaterExperience;
   int rideTypeWaterRides;
+  */
 
   Map<List<String>, LatLng> parkLocations = Map<List<String>, LatLng>();
   LinkedHashMap<BluehostAttraction, int> topAttractions =
@@ -59,73 +64,26 @@ class UserStats {
       {this.activeAttractionsChecked = 0,
       this.totalAttractionsChecked = 0,
       this.totalCheckIns = 0,
-      this.rideTypeChildrensExperiences = 0,
-      this.rideTypeChildrens = 0,
       this.countries = 0,
-      this.rideTypeDarkRides = 0,
-      this.rideTypeDarkRideExperiences = 0,
       this.totalExperiences = 0,
-      this.rideTypeExploreExperiences = 0,
-      this.rideTypeExplores = 0,
       this.extinctAttractionsChecked = 0,
-      this.rideTypeFilms = 0,
-      this.rideTypeFilmExperiences = 0,
-      this.rideTypeFlatRideExperiences = 0,
-      this.rideTypeFlatRides = 0,
-      this.rideTypeParades = 0,
-      this.rideTypeParadeExperience = 0,
       this.totalParks = 0,
       this.parksCompleted = 0,
-      this.rideTypePlayAreaExperiences = 0,
-      this.rideTypePlayAreas = 0,
-      this.rideTypeRollerCoasterExperiences = 0,
-      this.rideTypeRollerCoasters = 0,
-      this.rideTypeShowExperiences = 0,
-      this.rideTypeShows = 0,
-      this.rideTypeSpectacularExperiences = 0,
-      this.rideTypeSpectaculars = 0,
-      this.rideTypeTransportExperiences = 0,
-      this.rideTypeTransports = 0,
-      this.rideTypeChargeExperiences = 0,
-      this.rideTypeChargeRides = 0,
-      this.rideTypeWaterExperience = 0,
-      this.rideTypeWaterRides = 0});
+      List<RideType> rideTypes}) {
+    rideTypes.forEach((t) {
+      rideTypeStats[t.id] = RideTypeStats(label: t.label);
+    });
+  }
 
   UserStats.fromJson(Map<String, dynamic> json) {
     activeAttractionsChecked = json['activeAttractions'] ?? 0;
     totalAttractionsChecked = json['attractions'] ?? 0;
     totalCheckIns = json['checkIns'] ?? 0;
-    rideTypeChildrensExperiences = json['childrensRideExperience'] ?? 0;
-    rideTypeChildrens = json['childrensRides'] ?? 0;
     countries = json['countries'] ?? 0;
-    rideTypeDarkRides = json['darkRides'] ?? 0;
-    rideTypeDarkRideExperiences = json['darkRidesExperience'] ?? 0;
     totalExperiences = json['experiences'] ?? 0;
-    rideTypeExploreExperiences = json['exploreExperience'] ?? 0;
-    rideTypeExplores = json['exploreRides'] ?? 0;
     extinctAttractionsChecked = json['extinctAttracions'] ?? 0;
-    rideTypeFilms = json['films'] ?? 0;
-    rideTypeFilmExperiences = json['filmsExperience'] ?? 0;
-    rideTypeFlatRideExperiences = json['flatRideExperience'] ?? 0;
-    rideTypeFlatRides = json['flatRides'] ?? 0;
-    rideTypeParades = json['parades'] ?? 0;
-    rideTypeParadeExperience = json['paradesExperience'] ?? 0;
     totalParks = json['parks'] ?? 0;
     parksCompleted = json['parksCompleted'] ?? 0;
-    rideTypePlayAreaExperiences = json['playAreaExperience'] ?? 0;
-    rideTypePlayAreas = json['playAreas'] ?? 0;
-    rideTypeRollerCoasterExperiences = json['rollerCoasterExperience'] ?? 0;
-    rideTypeRollerCoasters = json['rollerCoasters'] ?? 0;
-    rideTypeShowExperiences = json['showExperience'] ?? 0;
-    rideTypeShows = json['shows'] ?? 0;
-    rideTypeSpectacularExperiences = json['spectacularExperince'] ?? 0;
-    rideTypeSpectaculars = json['spectaculars'] ?? 0;
-    rideTypeTransportExperiences = json['transportExperience'] ?? 0;
-    rideTypeTransports = json['transportRides'] ?? 0;
-    rideTypeChargeExperiences = json['upchargeExperience'] ?? 0;
-    rideTypeChargeRides = json['upchargeRides'] ?? 0;
-    rideTypeWaterExperience = json['waterExperience'] ?? 0;
-    rideTypeWaterRides = json['waterRides'] ?? 0;
   }
 
   Map<String, dynamic> toJson() {
@@ -133,46 +91,28 @@ class UserStats {
     data['activeAttractions'] = this.activeAttractionsChecked;
     data['attractions'] = this.totalAttractionsChecked;
     data['checkIns'] = this.totalCheckIns;
-    data['childrensRideExperience'] = this.rideTypeChildrensExperiences;
-    data['childrensRides'] = this.rideTypeChildrens;
-    data['countries'] = this.countries;
-    data['darkRides'] = this.rideTypeDarkRides;
-    data['darkRidesExperience'] = this.rideTypeDarkRideExperiences;
     data['experiences'] = this.totalExperiences;
-    data['exploreExperience'] = this.rideTypeExploreExperiences;
-    data['exploreRides'] = this.rideTypeExplores;
     data['extinctAttracions'] = this.extinctAttractionsChecked;
-    data['films'] = this.rideTypeFilms;
-    data['filmsExperience'] = this.rideTypeFilmExperiences;
-    data['flatRideExperience'] = this.rideTypeFlatRideExperiences;
-    data['flatRides'] = this.rideTypeFlatRides;
-    data['parades'] = this.rideTypeParades;
-    data['paradesExperience'] = this.rideTypeParadeExperience;
     data['parks'] = this.totalParks;
     data['parksCompleted'] = this.parksCompleted;
-    data['playAreaExperience'] = this.rideTypePlayAreaExperiences;
-    data['playAreas'] = this.rideTypePlayAreas;
-    data['rollerCoasterExperience'] = this.rideTypeRollerCoasterExperiences;
-    data['rollerCoasters'] = this.rideTypeRollerCoasters;
-    data['showExperience'] = this.rideTypeShowExperiences;
-    data['shows'] = this.rideTypeShows;
-    data['spectacularExperince'] = this.rideTypeSpectacularExperiences;
-    data['spectaculars'] = this.rideTypeSpectaculars;
-    data['transportExperience'] = this.rideTypeTransportExperiences;
-    data['transportRides'] = this.rideTypeTransports;
-    data['upchargeExperience'] = this.rideTypeChargeExperiences;
-    data['upchargeRides'] = this.rideTypeChargeRides;
-    data['waterExperience'] = this.rideTypeWaterExperience;
-    data['waterRides'] = this.rideTypeWaterRides;
     return data;
   }
 }
 
+class RideTypeStats {
+  RideTypeStats({this.label, this.experienceCount = 0, this.checkCount = 0});
+
+  String label;
+  int experienceCount = 0;
+  int checkCount = 0;
+}
+
 class StatsCalculator {
-  StatsCalculator({this.db, this.serverParks});
+  StatsCalculator({this.db, this.serverParks, this.rideTypes});
 
   final BaseDB db;
   final List<BluehostPark> serverParks;
+  final List<RideType> rideTypes;
 
   void _setServerStats(UserStats stats) async {
     db.setEntryAtPath(
@@ -183,7 +123,7 @@ class StatsCalculator {
 
   Future<UserStats> countStats() async {
     // Since we're calculating user stats fresh each time, we don't have to wait for the old values to load
-    UserStats stats = UserStats();
+    UserStats stats = UserStats(rideTypes: rideTypes);
 
     print("Beginning Stats Count");
 
@@ -356,64 +296,15 @@ class StatsCalculator {
     }
 
     // I'd REALLY love to do something different here, but since it's hard-coded in firebase, we're stuck with this
-    switch (attrData.rideType.id) {
-      case 1:
-        stats.rideTypeRollerCoasters++;
-        stats.rideTypeRollerCoasterExperiences +=
-            attraction.numberOfTimesRidden;
-        break;
-      case 2:
-        stats.rideTypeWaterRides++;
-        stats.rideTypeWaterExperience += attraction.numberOfTimesRidden;
-        break;
-      case 3:
-        stats.rideTypeChildrens++;
-        stats.rideTypeChildrensExperiences += attraction.numberOfTimesRidden;
-        break;
-      case 4:
-        stats.rideTypeFlatRides++;
-        stats.rideTypeFlatRideExperiences += attraction.numberOfTimesRidden;
-        break;
-      case 5:
-        stats.rideTypeTransports++;
-        stats.rideTypeTransportExperiences += attraction.numberOfTimesRidden;
-        break;
-      case 6:
-        stats.rideTypeDarkRides++;
-        stats.rideTypeDarkRideExperiences += attraction.numberOfTimesRidden;
-        break;
-      case 7:
-        stats.rideTypeExplores++;
-        stats.rideTypeExploreExperiences += attraction.numberOfTimesRidden;
-        break;
-      case 8:
-        stats.rideTypeSpectaculars++;
-        stats.rideTypeSpectacularExperiences += attraction.numberOfTimesRidden;
-        break;
-      case 9:
-        stats.rideTypeShows++;
-        stats.rideTypeShowExperiences += attraction.numberOfTimesRidden;
-        break;
-      case 10:
-        stats.rideTypeFilms++;
-        stats.rideTypeFilmExperiences += attraction.numberOfTimesRidden;
-        break;
-      case 11:
-        stats.rideTypeParades++;
-        stats.rideTypeParadeExperience += attraction.numberOfTimesRidden;
-        break;
-      case 12:
-        stats.rideTypePlayAreas++;
-        stats.rideTypePlayAreaExperiences += attraction.numberOfTimesRidden;
-        break;
-      case 13:
-        stats.rideTypeChargeRides++;
-        stats.rideTypeChargeExperiences += attraction.numberOfTimesRidden;
-        break;
-      default:
-        print("Error with calculating stats - unknown ride type");
-        break;
+    // Update 8/5/2019 - I'm just going to ignore firebase and do my thing
+    if (attrData.rideType != null &&
+        attrData.rideType.id != null &&
+        stats.rideTypeStats.containsKey(attrData.rideType.id)) {
+      RideTypeStats rideTypeStats = stats.rideTypeStats[attrData.rideType.id];
+      rideTypeStats.checkCount++;
+      rideTypeStats.experienceCount += attraction.numberOfTimesRidden ?? 0;
     }
+
     // Set add our attraction to the top scores
     stats.topAttractions[attrData] = attraction.numberOfTimesRidden;
 

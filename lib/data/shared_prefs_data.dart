@@ -11,7 +11,8 @@ enum PREFERENCE_KEYS {
   UP_FRONT_ARTICLES,
   HIDE_IGNORED,
   SHOW_ADMIN,
-  SPOOF_DAK
+  SPOOF_DAK,
+  HIDE_EMPTY_STATS
 }
 
 Map<PREFERENCE_KEYS, String> preferencesKeyMap = {
@@ -25,7 +26,8 @@ Map<PREFERENCE_KEYS, String> preferencesKeyMap = {
   PREFERENCE_KEYS.UP_FRONT_ARTICLES: "articleUpFront",
   PREFERENCE_KEYS.HIDE_IGNORED: "hideIgnored",
   PREFERENCE_KEYS.SHOW_ADMIN: "showAdmin",
-  PREFERENCE_KEYS.SPOOF_DAK: "spoofDAK"
+  PREFERENCE_KEYS.SPOOF_DAK: "spoofDAK",
+  PREFERENCE_KEYS.HIDE_EMPTY_STATS: "hideEmptyStats"
 };
 
 Map<PREFERENCE_KEYS, dynamic> defaultPreferences = {
@@ -40,6 +42,7 @@ Map<PREFERENCE_KEYS, dynamic> defaultPreferences = {
   PREFERENCE_KEYS.HIDE_IGNORED: false,
   PREFERENCE_KEYS.SHOW_ADMIN: false,
   PREFERENCE_KEYS.SPOOF_DAK: false,
+  PREFERENCE_KEYS.HIDE_EMPTY_STATS: true
 };
 
 dynamic safelyGetPreference(SharedPreferences prefs, PREFERENCE_KEYS key) {

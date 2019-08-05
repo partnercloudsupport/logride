@@ -17,7 +17,7 @@ import 'package:log_ride/ui/pages/lists.dart';
 import 'package:log_ride/ui/pages/news_page.dart';
 import 'package:log_ride/ui/pages/parks_home.dart';
 import 'package:log_ride/ui/pages/settings/settings.dart';
-import 'package:log_ride/ui/pages/stats_page.dart';
+import 'package:log_ride/ui/pages/stats/stats_page.dart';
 import 'package:log_ride/ui/submission/submit_park_page.dart';
 import 'package:log_ride/widgets/navigation/nav_bar.dart';
 import 'package:log_ride/widgets/navigation/offstage_crossfade.dart';

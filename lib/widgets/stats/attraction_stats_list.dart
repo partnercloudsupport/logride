@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:log_ride/data/color_constants.dart';
+import 'package:log_ride/data/shared_prefs_data.dart';
 import 'package:log_ride/data/stats_calculator.dart';
+import 'package:preferences/preferences.dart';
 
 enum _AttractionStatsSorting { RIDE_TYPE, EXPERIENCES, CHECK_INS }
 
@@ -17,7 +19,7 @@ class _AttractionStatsState extends State<AttractionStats> {
 
   List<_AttractionStatData> displayData;
 
-  _handleButtonTap(_AttractionStatsSorting buttonType) {
+  void _handleButtonTap(_AttractionStatsSorting buttonType) {
     if (buttonType != sortMode) {
       setState(() {
         sortMode = buttonType;
@@ -27,60 +29,18 @@ class _AttractionStatsState extends State<AttractionStats> {
 
   /// Returns a list of [_AttractionStatData] to display, sorted by the widget's [sortMode]
   List<_AttractionStatData> prepareAndSort() {
-    List<_AttractionStatData> data = [
-      _AttractionStatData(
-          type: "Roller Coasters",
-          checks: widget.stats.rideTypeRollerCoasters,
-          experiences: widget.stats.rideTypeRollerCoasterExperiences),
-      _AttractionStatData(
-          type: "Water Rides",
-          checks: widget.stats.rideTypeWaterRides,
-          experiences: widget.stats.rideTypeWaterExperience),
-      _AttractionStatData(
-          type: "Shows",
-          checks: widget.stats.rideTypeShows,
-          experiences: widget.stats.rideTypeShowExperiences),
-      _AttractionStatData(
-          type: "Dark Rides",
-          checks: widget.stats.rideTypeDarkRides,
-          experiences: widget.stats.rideTypeDarkRideExperiences),
-      _AttractionStatData(
-          type: "Flat Rides",
-          checks: widget.stats.rideTypeFlatRides,
-          experiences: widget.stats.rideTypeFlatRideExperiences),
-      _AttractionStatData(
-          type: "Films",
-          checks: widget.stats.rideTypeFilms,
-          experiences: widget.stats.rideTypeFilmExperiences),
-      _AttractionStatData(
-          type: "Parades",
-          checks: widget.stats.rideTypeParades,
-          experiences: widget.stats.rideTypeParadeExperience),
-      _AttractionStatData(
-          type: "Spectaculars",
-          checks: widget.stats.rideTypeSpectaculars,
-          experiences: widget.stats.rideTypeSpectacularExperiences),
-      _AttractionStatData(
-          type: "Play Areas",
-          checks: widget.stats.rideTypePlayAreas,
-          experiences: widget.stats.rideTypePlayAreaExperiences),
-      _AttractionStatData(
-          type: "Transport Rides",
-          checks: widget.stats.rideTypeTransports,
-          experiences: widget.stats.rideTypeTransportExperiences),
-      _AttractionStatData(
-          type: "Children's Rides",
-          checks: widget.stats.rideTypeChildrens,
-          experiences: widget.stats.rideTypeChildrensExperiences),
-      _AttractionStatData(
-          type: "Explore",
-          checks: widget.stats.rideTypeExplores,
-          experiences: widget.stats.rideTypeExploreExperiences),
-      _AttractionStatData(
-          type: "Upcharged",
-          checks: widget.stats.rideTypeChargeRides,
-          experiences: widget.stats.rideTypeChargeExperiences),
-    ];
+    List<_AttractionStatData> data = List<_AttractionStatData>();
+
+    widget.stats.rideTypeStats.forEach((i, t) {
+      // We don't want unknown/empty types displaying
+      if (i == 0) return;
+      // We'll hide empty ride types
+      if (t.experienceCount + t.checkCount == 0 &&
+          PrefService.getBool(
+              preferencesKeyMap[PREFERENCE_KEYS.HIDE_EMPTY_STATS])) return;
+      data.add(_AttractionStatData(
+          type: t.label, checks: t.checkCount, experiences: t.experienceCount));
+    });
 
     data.sort((_AttractionStatData a, _AttractionStatData b) {
       switch (sortMode) {
@@ -187,6 +147,20 @@ class _AttractionStatsState extends State<AttractionStats> {
         ],
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    PrefService.onNotify(preferencesKeyMap[PREFERENCE_KEYS.HIDE_EMPTY_STATS],
+        () => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    PrefService.onNotifyRemove(
+        preferencesKeyMap[PREFERENCE_KEYS.HIDE_EMPTY_STATS]);
   }
 }
 
