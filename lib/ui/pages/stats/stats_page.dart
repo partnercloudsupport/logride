@@ -6,6 +6,7 @@ import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/parks_manager.dart';
 import 'package:log_ride/data/stats_calculator.dart';
 import 'package:log_ride/ui/pages/stats/attractions.dart';
+import 'package:log_ride/ui/pages/stats/coaster.dart';
 import 'package:log_ride/ui/pages/stats/parks.dart';
 import 'package:log_ride/widgets/shared/spinning_iconbutton.dart';
 import 'package:log_ride/widgets/stats/misc_headers.dart';
@@ -121,7 +122,10 @@ class _StatsPageState extends State<StatsPage>
           ParksStatsPage(stats: userData, refreshCallback: _refreshCalculation),
           AttractionsStatsPage(
               stats: userData, refreshCallback: _refreshCalculation),
-          Center(child: Text("Coasters"))
+          CoasterStatsPage(
+            stats: userData,
+            refreshCallback: _refreshCalculation,
+          )
         ],
       );
     }

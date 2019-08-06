@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:log_ride/data/stats_calculator.dart';
 import 'package:log_ride/widgets/stats/generic_stats_list.dart';
+import 'package:log_ride/widgets/stats/generic_superlative.dart';
 import 'package:log_ride/widgets/stats/misc_headers.dart';
 import 'package:log_ride/widgets/stats/summed_progress_bar.dart';
 import 'package:log_ride/widgets/stats/top_scores.dart';
@@ -55,8 +56,9 @@ class AttractionsStatsPage extends StatelessWidget {
                     color: Theme.of(context).primaryColor,
                   ),
                 ),
-                StatlessHeader(
-                  text: "ATTRACTIONS OVERVIEW",
+                AttractionStatsSuperlative(
+                  label: "TOP RIDE TYPE",
+                  list: stats.rideTypeStats.values.toList(),
                 ),
                 // Attractions Stats can possibly have 0 checks/experience.
                 // Manufacturers cannot. As such, we can tell the manufacturers
@@ -76,9 +78,15 @@ class AttractionsStatsPage extends StatelessWidget {
                   stat: stats.totalManufacturerStats.values.length,
                   text: "TOTAL MANUFACTURERS",
                 ),
-                StatlessHeader(text: "MANUFACTURERS OVERVIEW"),
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: ManufacturerStatsSuperlative(
+                    label: "TOP MANUFACTURER",
+                    list: stats.totalManufacturerStats.values.toList(),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
                   child: ManufacturerStatsTable(
                     stats.totalManufacturerStats.values.toList(),
                     alone: false,

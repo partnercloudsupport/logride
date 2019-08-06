@@ -84,13 +84,13 @@ class _DetailsPageState extends State<DetailsPage> {
 
   void _settingsNotify() {
     print("Metric/Imperial settings have been updated");
-    setState(() {});
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
     super.dispose();
-    PrefService.onNotifyRemove(preferencesKeyMap[PREFERENCE_KEYS.USE_METRIC]);
+    //PrefService.onNotifyRemove(preferencesKeyMap[PREFERENCE_KEYS.USE_METRIC]);
     PrefService.onNotifyRemove(preferencesKeyMap[PREFERENCE_KEYS.SHOW_ADMIN]);
   }
 

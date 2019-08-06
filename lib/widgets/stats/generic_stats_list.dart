@@ -10,7 +10,7 @@ class GenericStats extends StatefulWidget {
   GenericStats(
       {this.statData, this.labelLabel, this.persistKey, this.alone = true});
 
-  final List<_GenericStatData> statData;
+  final List<GenericStatData> statData;
   final String labelLabel;
 
   /// [persistKey] is a string used by the PrefService to keep track of which
@@ -34,6 +34,7 @@ class GenericStats extends StatefulWidget {
 
 class _GenericStatsState extends State<GenericStats> {
   _SortState sortState = _SortState.LABEL;
+  bool empty = false;
 
   @override
   void initState() {
@@ -71,17 +72,22 @@ class _GenericStatsState extends State<GenericStats> {
   }
 
   /// Prepares a new list from the widget's given list for display, sorting it
-  List<_GenericStatData> prepareAndSort() {
-    List<_GenericStatData> data = List<_GenericStatData>();
+  List<GenericStatData> prepareAndSort() {
+    List<GenericStatData> data = List<GenericStatData>();
 
     bool hideEmpty = PrefService.getBool(
         preferencesKeyMap[PREFERENCE_KEYS.HIDE_EMPTY_STATS]);
 
+    int sum = 0;
+
     widget.statData.forEach((t) {
       // Don't include empty data when we don't want to
       if (t.checks + t.experiences == 0 && hideEmpty) return;
+      sum += t.checks + t.experiences;
       data.add(t);
     });
+
+    if (sum == 0) empty = true;
 
     data.sort((a, b) {
       switch (sortState) {
@@ -103,15 +109,18 @@ class _GenericStatsState extends State<GenericStats> {
 
   @override
   Widget build(BuildContext context) {
-    List<_GenericStatData> toDisplay = prepareAndSort();
+    List<GenericStatData> toDisplay = prepareAndSort();
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         // Header buttons/bars
         _buildButtonRow(context),
-        for (int i = 0; i < toDisplay.length; i++)
-          _GenericStatEntry(toDisplay[i], (i % 2 == 1))
+        if (toDisplay.length == 0 || empty)
+          Text("No Attractions")
+        else
+          for (int i = 0; i < toDisplay.length; i++)
+            _GenericStatEntry(toDisplay[i], (i % 2 == 1))
       ],
     );
   }
@@ -149,7 +158,7 @@ class _GenericStatsState extends State<GenericStats> {
 class _GenericStatEntry extends StatelessWidget {
   _GenericStatEntry(this.data, this.odd);
 
-  final _GenericStatData data;
+  final GenericStatData data;
   final bool odd;
 
   @override
@@ -251,8 +260,8 @@ class _GenericStatColButton extends StatelessWidget {
   }
 }
 
-class _GenericStatData {
-  _GenericStatData({this.label, this.checks, this.experiences});
+class GenericStatData {
+  GenericStatData({this.label, this.checks, this.experiences});
 
   final String label;
   final int checks;
@@ -274,13 +283,13 @@ class AttractionStatsTable extends StatefulWidget {
 class _AttractionStatsTableState extends State<AttractionStatsTable> {
   // This widget is kept as a stateful widget so we don't have to recalculate
   // the list of data every time, nor offload that work to our parent widget
-  List<_GenericStatData> data;
+  List<GenericStatData> data;
 
   @override
   void initState() {
-    data = List<_GenericStatData>();
+    data = List<GenericStatData>();
     widget.stats.forEach((t) {
-      data.add(_GenericStatData(
+      data.add(GenericStatData(
           checks: t.checkCount,
           label: t.label,
           experiences: t.experienceCount));
@@ -292,7 +301,7 @@ class _AttractionStatsTableState extends State<AttractionStatsTable> {
   @override
   Widget build(BuildContext context) {
     return GenericStats(
-      labelLabel: "Attraction Type",
+      labelLabel: "Ride Type",
       statData: data,
       alone: widget.alone,
       persistKey: widget.persistKey,
@@ -313,13 +322,13 @@ class ManufacturerStatsTable extends StatefulWidget {
 }
 
 class _ManufacturerStatsTableState extends State<ManufacturerStatsTable> {
-  List<_GenericStatData> data;
+  List<GenericStatData> data;
 
   @override
   void initState() {
-    data = List<_GenericStatData>();
+    data = List<GenericStatData>();
     widget.stats.forEach((t) {
-      data.add(_GenericStatData(
+      data.add(GenericStatData(
           checks: t.checkCount,
           label: t.label,
           experiences: t.experienceCount));

@@ -253,10 +253,11 @@ class BluehostAttraction {
   }
 }
 
-class AttractionPair {
-  AttractionPair({this.firebase, this.bluehost});
+class AttractionBundle {
+  AttractionBundle({this.firebase, this.bluehost, this.parkName});
   FirebaseAttraction firebase;
   BluehostAttraction bluehost;
+  String parkName;
 }
 
 FirebaseAttraction getFirebaseAttractionFromList(

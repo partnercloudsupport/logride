@@ -9,6 +9,7 @@ import 'package:log_ride/data/check_in_manager.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/parks_manager.dart';
+import 'package:log_ride/data/shared_prefs_data.dart';
 import 'package:log_ride/data/user_structure.dart';
 import 'package:log_ride/data/webfetcher.dart';
 import 'package:log_ride/ui/dialogs/park_search.dart';
@@ -23,6 +24,7 @@ import 'package:log_ride/widgets/navigation/nav_bar.dart';
 import 'package:log_ride/widgets/navigation/offstage_crossfade.dart';
 import 'package:log_ride/widgets/navigation/tab_navigation.dart';
 import 'package:log_ride/widgets/shared/styled_dialog.dart';
+import 'package:preferences/preferences.dart';
 import 'package:provider/provider.dart';
 
 enum Tabs { NEWS, STATS, MY_PARKS, LISTS, SETTINGS }
@@ -178,6 +180,10 @@ class _HomeState extends State<Home> {
 
     subscription.cancel();
     _checkInManager.deactivate();
+
+    PREFERENCE_KEYS.values.forEach((k) {
+      PrefService.onNotifyRemove(preferencesKeyMap[k]);
+    });
   }
 
   void _parksManagerListener(ParksManagerEvent event) {

@@ -88,10 +88,11 @@ class RideTypeStats {
 
 class CoasterStats {
   int coasterCount = 0;
-  AttractionPair tallest;
-  AttractionPair fastest;
-  AttractionPair timeLongest;
-  AttractionPair lengthLongest;
+  int experienceCount = 0;
+  AttractionBundle tallest;
+  AttractionBundle fastest;
+  AttractionBundle timeLongest;
+  AttractionBundle lengthLongest;
   num totalLength = 0;
   num totalTime = 0;
 }
@@ -209,7 +210,7 @@ class StatsCalculator {
         }
 
         attractionEntries.forEach((data) {
-          _calculateAttractionStats(data, stats, furtherData.attractions);
+          _calculateAttractionStats(data, stats, furtherData);
         });
       } else {
         continue;
@@ -282,10 +283,10 @@ class StatsCalculator {
   }
 
   Future<void> _calculateAttractionStats(
-      dynamic data, UserStats stats, List<BluehostAttraction> furtherData) {
+      dynamic data, UserStats stats, BluehostPark furtherData) {
     FirebaseAttraction attraction = FirebaseAttraction.fromMap(Map.from(data));
-    BluehostAttraction attrData =
-        getBluehostAttractionFromList(furtherData, attraction.rideID);
+    BluehostAttraction attrData = getBluehostAttractionFromList(
+        furtherData.attractions, attraction.rideID);
 
     // This traditionally happens when a user rides then removes an attraction. Data is still there, but just in case.
     if (attraction.numberOfTimesRidden <= 0) return null;
@@ -318,7 +319,7 @@ class StatsCalculator {
     if (attrData.rideType != null &&
         attrData.rideType.id != null &&
         attrData.rideType.id == _RIDE_TYPE_COASTER) {
-      calculateCoasterStats(stats, attraction, attrData);
+      calculateCoasterStats(stats, attraction, attrData, furtherData.parkName);
     }
 
     calculateManufacturerStats(stats, attraction, attrData);
@@ -326,45 +327,47 @@ class StatsCalculator {
     return null;
   }
 
-  void calculateCoasterStats(
-      UserStats stats, FirebaseAttraction attr, BluehostAttraction details) {
+  void calculateCoasterStats(UserStats stats, FirebaseAttraction attr,
+      BluehostAttraction details, String parkName) {
     // Objects are passed as a reference in flutter, so we're fine
     CoasterStats coasterStats = stats.coasterStats;
     coasterStats.coasterCount++;
+    coasterStats.experienceCount += attr.numberOfTimesRidden;
 
     // Find the fastest coaster
     if (coasterStats.fastest == null ||
         details.maxSpeed > coasterStats.fastest.bluehost.maxSpeed) {
-      coasterStats.fastest = AttractionPair(firebase: attr, bluehost: details);
+      coasterStats.fastest = AttractionBundle(
+          firebase: attr, bluehost: details, parkName: parkName);
     }
 
     // Find the tallest coaster
     if (coasterStats.tallest == null ||
-            details.height > coasterStats?.fastest?.bluehost?.height ??
-        0) {
-      coasterStats.tallest = AttractionPair(firebase: attr, bluehost: details);
+        details.height > coasterStats.tallest.bluehost.height) {
+      print("New tallest: ${details.attractionName}");
+      coasterStats.tallest = AttractionBundle(
+          firebase: attr, bluehost: details, parkName: parkName);
     }
 
     // Find the longest (time) coaster
     if (coasterStats.timeLongest == null ||
-            details.attractionDuration >
-                coasterStats?.timeLongest?.bluehost?.attractionDuration ??
-        0) {
-      coasterStats.timeLongest =
-          AttractionPair(firebase: attr, bluehost: details);
+        details.attractionDuration >
+            coasterStats.timeLongest.bluehost.attractionDuration) {
+      coasterStats.timeLongest = AttractionBundle(
+          firebase: attr, bluehost: details, parkName: parkName);
     }
 
     // Find the longest (track) coaster
     if (coasterStats.lengthLongest == null ||
-            details.length > coasterStats?.lengthLongest?.bluehost?.length ??
-        0) {
-      coasterStats.lengthLongest =
-          AttractionPair(firebase: attr, bluehost: details);
+        details.length > coasterStats.lengthLongest.bluehost.length) {
+      coasterStats.lengthLongest = AttractionBundle(
+          firebase: attr, bluehost: details, parkName: parkName);
     }
 
     // Calculate summed stats (total length, total time)
-    coasterStats.totalLength += details.length;
-    coasterStats.totalTime += details.attractionDuration;
+    coasterStats.totalLength += details.length * attr.numberOfTimesRidden;
+    coasterStats.totalTime +=
+        details.attractionDuration * attr.numberOfTimesRidden;
 
     // Handle coaster manufacturer stuff
     if (details.manufacturerID != 0) {
