@@ -46,7 +46,7 @@ class _StatsPageState extends State<StatsPage>
         rideTypes: widget.pm.attractionTypes);
     _refreshCalculation();
 
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
 
     super.initState();
   }
@@ -120,7 +120,8 @@ class _StatsPageState extends State<StatsPage>
         children: <Widget>[
           ParksStatsPage(stats: userData, refreshCallback: _refreshCalculation),
           AttractionsStatsPage(
-              stats: userData, refreshCallback: _refreshCalculation)
+              stats: userData, refreshCallback: _refreshCalculation),
+          Center(child: Text("Coasters"))
         ],
       );
     }
@@ -155,12 +156,19 @@ class _StatsPageState extends State<StatsPage>
           physics: NeverScrollableScrollPhysics(),
           children: <Widget>[
             PageHeader(text: "PARKS STATS"),
-            PageHeader(text: "ATTRACTIONS STATS")
+            PageHeader(text: "ATTRACTIONS STATS"),
+            PageHeader(text: "COASTERS")
           ],
         ),
         bottom: TabBar(
           controller: _tabController,
-          tabs: <Widget>[Tab(text: "PARKS"), Tab(text: "ATTRACTIONS")],
+          tabs: <Widget>[
+            Tab(
+              text: "PARKS",
+            ),
+            Tab(text: "ATTRACTIONS"),
+            Tab(text: "COASTERS"),
+          ],
         ),
       ),
       body: AnimatedSwitcher(

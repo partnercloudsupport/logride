@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:log_ride/data/stats_calculator.dart';
+import 'package:log_ride/widgets/stats/generic_stats_list.dart';
 import 'package:log_ride/widgets/stats/misc_headers.dart';
 import 'package:log_ride/widgets/stats/summed_progress_bar.dart';
 import 'package:log_ride/widgets/stats/top_scores.dart';
-import 'package:log_ride/widgets/stats/attraction_stats_list.dart';
 
 class AttractionsStatsPage extends StatelessWidget {
   AttractionsStatsPage({this.stats, this.refreshCallback});
 
   final UserStats stats;
   final Function refreshCallback;
-
 
   @override
   Widget build(BuildContext context) {
@@ -59,9 +58,31 @@ class AttractionsStatsPage extends StatelessWidget {
                 StatlessHeader(
                   text: "ATTRACTIONS OVERVIEW",
                 ),
+                // Attractions Stats can possibly have 0 checks/experience.
+                // Manufacturers cannot. As such, we can tell the manufacturers
+                // table to ignore updates, and just have the attractions table
+                // behave normally.
+                AttractionStatsTable(
+                  stats.rideTypeStats.values.toList(),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Divider(
+                    height: 8.0,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+                HeaderStat(
+                  stat: stats.totalManufacturerStats.values.length,
+                  text: "TOTAL MANUFACTURERS",
+                ),
+                StatlessHeader(text: "MANUFACTURERS OVERVIEW"),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8.0),
-                  child: AttractionStats(stats: stats),
+                  child: ManufacturerStatsTable(
+                    stats.totalManufacturerStats.values.toList(),
+                    alone: false,
+                  ),
                 )
               ],
             ),

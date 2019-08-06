@@ -4,10 +4,12 @@ import 'dart:collection';
 import 'package:latlong/latlong.dart';
 import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
+import 'package:log_ride/data/manufacturer_structures.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/ride_type_structures.dart';
 
 const int _MAX_LIST_SIZE = 5;
+const int _RIDE_TYPE_COASTER = 1;
 
 class UserStats {
   // Park Related Stats
@@ -24,6 +26,12 @@ class UserStats {
 
   // Ride Type Specific Stats
   Map<int, RideTypeStats> rideTypeStats = Map<int, RideTypeStats>();
+  CoasterStats coasterStats = CoasterStats();
+
+  Map<int, ManufacturerStats> totalManufacturerStats =
+      Map<int, ManufacturerStats>();
+  Map<int, ManufacturerStats> coasterManufacturerStats =
+      Map<int, ManufacturerStats>();
 
   Map<List<String>, LatLng> parkLocations = Map<List<String>, LatLng>();
   LinkedHashMap<BluehostAttraction, int> topAttractions =
@@ -78,12 +86,33 @@ class RideTypeStats {
   int checkCount = 0;
 }
 
+class CoasterStats {
+  int coasterCount = 0;
+  AttractionPair tallest;
+  AttractionPair fastest;
+  AttractionPair timeLongest;
+  AttractionPair lengthLongest;
+  num totalLength = 0;
+  num totalTime = 0;
+}
+
+class ManufacturerStats {
+  ManufacturerStats(
+      {this.label, this.experienceCount = 0, this.checkCount = 0});
+
+  String label;
+  int experienceCount;
+  int checkCount;
+}
+
 class StatsCalculator {
-  StatsCalculator({this.db, this.serverParks, this.rideTypes});
+  StatsCalculator(
+      {this.db, this.serverParks, this.rideTypes, this.manufacturers});
 
   final BaseDB db;
   final List<BluehostPark> serverParks;
   final List<RideType> rideTypes;
+  final List<Manufacturer> manufacturers;
 
   void _setServerStats(UserStats stats) async {
     db.setEntryAtPath(
@@ -187,6 +216,11 @@ class StatsCalculator {
       }
     }
 
+    // Clear unknown attraction and manufacturers
+    stats.rideTypeStats.removeWhere((i, t) => t.label == "");
+    stats.totalManufacturerStats.removeWhere((i, t) => t.label == "");
+    stats.coasterManufacturerStats.removeWhere((i, t) => t.label == "");
+
     stats.countries = countryLabelList.length;
 
     // Finally, we sort and chop the top lists
@@ -270,15 +304,94 @@ class StatsCalculator {
     // Update 8/5/2019 - I'm just going to ignore firebase and do my thing
     if (attrData.rideType != null &&
         attrData.rideType.id != null &&
+        attrData.rideType.id != 0 &&
         stats.rideTypeStats.containsKey(attrData.rideType.id)) {
       RideTypeStats rideTypeStats = stats.rideTypeStats[attrData.rideType.id];
       rideTypeStats.checkCount++;
       rideTypeStats.experienceCount += attraction.numberOfTimesRidden ?? 0;
     }
 
-    // Set add our attraction to the top scores
+    // Add our attraction to the top scores
     stats.topAttractions[attrData] = attraction.numberOfTimesRidden;
 
+    // Coaster Stats - if our attraction is of type 2, Coaster, we need to do any and all logic related to being a roller coaster
+    if (attrData.rideType != null &&
+        attrData.rideType.id != null &&
+        attrData.rideType.id == _RIDE_TYPE_COASTER) {
+      calculateCoasterStats(stats, attraction, attrData);
+    }
+
+    calculateManufacturerStats(stats, attraction, attrData);
+
     return null;
+  }
+
+  void calculateCoasterStats(
+      UserStats stats, FirebaseAttraction attr, BluehostAttraction details) {
+    // Objects are passed as a reference in flutter, so we're fine
+    CoasterStats coasterStats = stats.coasterStats;
+    coasterStats.coasterCount++;
+
+    // Find the fastest coaster
+    if (coasterStats.fastest == null ||
+        details.maxSpeed > coasterStats.fastest.bluehost.maxSpeed) {
+      coasterStats.fastest = AttractionPair(firebase: attr, bluehost: details);
+    }
+
+    // Find the tallest coaster
+    if (coasterStats.tallest == null ||
+            details.height > coasterStats?.fastest?.bluehost?.height ??
+        0) {
+      coasterStats.tallest = AttractionPair(firebase: attr, bluehost: details);
+    }
+
+    // Find the longest (time) coaster
+    if (coasterStats.timeLongest == null ||
+            details.attractionDuration >
+                coasterStats?.timeLongest?.bluehost?.attractionDuration ??
+        0) {
+      coasterStats.timeLongest =
+          AttractionPair(firebase: attr, bluehost: details);
+    }
+
+    // Find the longest (track) coaster
+    if (coasterStats.lengthLongest == null ||
+            details.length > coasterStats?.lengthLongest?.bluehost?.length ??
+        0) {
+      coasterStats.lengthLongest =
+          AttractionPair(firebase: attr, bluehost: details);
+    }
+
+    // Calculate summed stats (total length, total time)
+    coasterStats.totalLength += details.length;
+    coasterStats.totalTime += details.attractionDuration;
+
+    // Handle coaster manufacturer stuff
+    if (details.manufacturerID != 0) {
+      // If our manufacturer doesn't exist in our manuStats, add them
+      if (!stats.coasterManufacturerStats.containsKey(details.manufacturerID)) {
+        stats.coasterManufacturerStats[details.manufacturerID] =
+            ManufacturerStats(label: details.manufacturer);
+      }
+
+      // Add our attraction stats to the thing
+      stats.coasterManufacturerStats[details.manufacturerID].checkCount++;
+      stats.coasterManufacturerStats[details.manufacturerID].experienceCount +=
+          attr.numberOfTimesRidden;
+    }
+  }
+
+  void calculateManufacturerStats(
+      UserStats stats, FirebaseAttraction attr, BluehostAttraction details) {
+    if (details.manufacturerID != 0) {
+      if (!stats.totalManufacturerStats.containsKey(details.manufacturerID)) {
+        stats.totalManufacturerStats[details.manufacturerID] =
+            ManufacturerStats(label: details.manufacturer);
+      }
+
+      stats.totalManufacturerStats[details.manufacturerID].checkCount++;
+      stats.totalManufacturerStats[details.manufacturerID].experienceCount +=
+          attr.numberOfTimesRidden;
+    }
   }
 }

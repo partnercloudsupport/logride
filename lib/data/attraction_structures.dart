@@ -253,6 +253,12 @@ class BluehostAttraction {
   }
 }
 
+class AttractionPair {
+  AttractionPair({this.firebase, this.bluehost});
+  FirebaseAttraction firebase;
+  BluehostAttraction bluehost;
+}
+
 FirebaseAttraction getFirebaseAttractionFromList(
     List<FirebaseAttraction> toSearch, int attractionID) {
   for (int i = 0; i < toSearch.length; i++) {
