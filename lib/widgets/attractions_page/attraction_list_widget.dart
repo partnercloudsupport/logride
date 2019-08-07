@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:log_ride/data/attraction_structures.dart';
@@ -182,7 +183,12 @@ class _AttractionsListViewState extends State<AttractionsListView> {
                 attraction.numberOfTimesRidden = notRiddenYet ? 1 : 0;
 
                 if (notRiddenYet && attr.scoreCard) _collectScore(attraction);
+                if (notRiddenYet)
+                  FirebaseAnalytics().logEvent(name: "add_new_attraction");
               } else {
+                if (attraction.numberOfTimesRidden == 0)
+                  FirebaseAnalytics().logEvent(name: "add_new_attraction");
+
                 attraction.numberOfTimesRidden =
                     attraction.numberOfTimesRidden + 1;
 
