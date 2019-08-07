@@ -280,7 +280,7 @@ class WebFetcher {
       }
     }
 
-    news.sort((a, b) => b.dateLastUpdated.compareTo(a.dateLastUpdated));
+    news.sort((a, b) => b.dateCreated.compareTo(a.dateCreated));
 
     return news;
   }

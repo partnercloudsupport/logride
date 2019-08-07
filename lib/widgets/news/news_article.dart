@@ -90,7 +90,7 @@ class _NewsArticleEntryState extends State<NewsArticleEntry> {
                                   ),
                                 ),
                               Text(
-                                "Last Updated ${DateFormat.yMMMMd("en_US").format(widget.news.dateLastUpdated)}",
+                                "Posted ${DateFormat.yMMMMd("en_US").format(widget.news.dateCreated)}",
                                 style: TextStyle(color: Colors.grey),
                                 textAlign: TextAlign.left,
                               ),

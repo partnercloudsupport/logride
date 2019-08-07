@@ -3,10 +3,13 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/news/article_manager.dart';
 import 'package:log_ride/data/news/news_structures.dart';
+import 'package:log_ride/data/parks_manager.dart';
+import 'package:log_ride/data/shared_prefs_data.dart';
 import 'package:log_ride/data/webfetcher.dart';
 import 'package:log_ride/widgets/news/news_article.dart';
 import 'package:log_ride/widgets/shared/spinning_iconbutton.dart';
 import 'package:log_ride/widgets/stats/misc_headers.dart';
+import 'package:preferences/preferences.dart';
 import 'package:provider/provider.dart';
 
 class NewsPage extends StatefulWidget {
@@ -59,6 +62,25 @@ class _NewsPageState extends State<NewsPage> {
     });
   }
 
+  List<BluehostNews> buildDisplayList(BuildContext context) {
+    List<BluehostNews> displayList = <BluehostNews>[];
+    bool filter = PrefService.getBool(
+            preferencesKeyMap[PREFERENCE_KEYS.SHOW_MY_PARKS_NEWS]) ??
+        true;
+
+    List<int> myParksIDs = Provider.of<ParksManager>(context).userParkIDs;
+
+    for (BluehostNews n in news) {
+      if (!filter)
+        displayList.add(n);
+      else {
+        if (myParksIDs.contains(n.parkId)) displayList.add(n);
+      }
+    }
+
+    return displayList;
+  }
+
   void _checkNewNews() {
     if (widget.newsNotifier != null && !hasSentNotification) {
       widget.newsNotifier(!manager.getData(news.first.newsID).hasRead);
@@ -67,6 +89,9 @@ class _NewsPageState extends State<NewsPage> {
 
   @override
   Widget build(BuildContext context) {
+    List<BluehostNews> displayList;
+    if (hasBluehost) displayList = buildDisplayList(context);
+
     return Provider<ArticleManager>.value(
       value: manager,
       child: Scaffold(
@@ -92,17 +117,20 @@ class _NewsPageState extends State<NewsPage> {
         body: AnimatedSwitcher(
             duration: Duration(milliseconds: 250),
             child: RefreshIndicator(
-              onRefresh:
-                  (hasFirebase && hasBluehost) ? () => _refereshNews() : null,
+              onRefresh: (hasFirebase && hasBluehost)
+                  ? () => _refereshNews()
+                  : () {
+                      return;
+                    },
               child: (hasFirebase && hasBluehost)
                   ? ListView.builder(
                       key: ValueKey(news.hashCode),
                       controller: _scrollController,
-                      itemCount: news.length,
+                      itemCount: displayList.length,
                       itemBuilder: (BuildContext context, int index) {
                         return NewsArticleEntry(
-                          news: news[index],
-                          userData: manager.getData(news[index].newsID),
+                          news: displayList[index],
+                          userData: manager.getData(displayList[index].newsID),
                         );
                       })
                   : Center(

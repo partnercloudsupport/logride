@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/shared_prefs_data.dart';
+import 'package:log_ride/widgets/stats/misc_headers.dart';
 import 'package:preferences/preferences.dart';
 
 class DefaultParkSettings extends StatefulWidget {
@@ -13,7 +14,7 @@ class _DefaultParkSettingsState extends State<DefaultParkSettings> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Park Settings"),
+        title: PadlessPageHeader(text: "Park Settings"),
         leading: IconButton(
           icon: Icon(FontAwesomeIcons.arrowLeft),
           onPressed: () => Navigator.of(context).pop(),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/shared_prefs_data.dart';
+import 'package:log_ride/widgets/stats/misc_headers.dart';
 import 'package:preferences/preferences.dart';
 
 class AdminSettings extends StatefulWidget {
@@ -13,7 +14,7 @@ class _AdminSettingsState extends State<AdminSettings> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("ADMIN SETTINGS"),
+        title: PadlessPageHeader(text: "ADMIN SETTINGS"),
         leading: IconButton(
           icon: Icon(FontAwesomeIcons.arrowLeft),
           onPressed: () => Navigator.of(context).pop(),

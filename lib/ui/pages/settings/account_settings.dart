@@ -9,6 +9,7 @@ import 'package:log_ride/ui/dialogs/single_value_dialog.dart';
 import 'package:log_ride/widgets/settings/account_tile.dart';
 import 'package:log_ride/widgets/settings/settings_tile.dart';
 import 'package:log_ride/widgets/shared/styled_dialog.dart';
+import 'package:log_ride/widgets/stats/misc_headers.dart';
 import 'package:preferences/preferences.dart';
 import 'package:provider/provider.dart';
 
@@ -279,7 +280,7 @@ class _AccountSettingsState extends State<AccountSettings> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Account Settings"),
+        title: PadlessPageHeader(text: "Account Settings"),
         leading: IconButton(
           icon: Icon(FontAwesomeIcons.arrowLeft),
           onPressed: () => Navigator.of(context).pop(),

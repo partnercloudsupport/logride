@@ -1,5 +1,3 @@
-import 'package:shared_preferences/shared_preferences.dart';
-
 enum PREFERENCE_KEYS {
   SHOW_DUPED_FAVORITES,
   SHOW_DEFUNCT,
@@ -12,7 +10,9 @@ enum PREFERENCE_KEYS {
   HIDE_IGNORED,
   SHOW_ADMIN,
   SPOOF_DAK,
-  HIDE_EMPTY_STATS
+  HIDE_EMPTY_STATS,
+  SHOW_MY_PARKS_NEWS,
+  SHOW_PARKS_NEWS_NOTIFICATION
 }
 
 Map<PREFERENCE_KEYS, String> preferencesKeyMap = {
@@ -27,7 +27,9 @@ Map<PREFERENCE_KEYS, String> preferencesKeyMap = {
   PREFERENCE_KEYS.HIDE_IGNORED: "hideIgnored",
   PREFERENCE_KEYS.SHOW_ADMIN: "showAdmin",
   PREFERENCE_KEYS.SPOOF_DAK: "spoofDAK",
-  PREFERENCE_KEYS.HIDE_EMPTY_STATS: "hideEmptyStats"
+  PREFERENCE_KEYS.HIDE_EMPTY_STATS: "hideEmptyStats",
+  PREFERENCE_KEYS.SHOW_MY_PARKS_NEWS: "showMyParksInNews",
+  PREFERENCE_KEYS.SHOW_PARKS_NEWS_NOTIFICATION: "showParksNewsNotification"
 };
 
 Map<PREFERENCE_KEYS, dynamic> defaultPreferences = {
@@ -42,10 +44,7 @@ Map<PREFERENCE_KEYS, dynamic> defaultPreferences = {
   PREFERENCE_KEYS.HIDE_IGNORED: false,
   PREFERENCE_KEYS.SHOW_ADMIN: false,
   PREFERENCE_KEYS.SPOOF_DAK: false,
-  PREFERENCE_KEYS.HIDE_EMPTY_STATS: true
+  PREFERENCE_KEYS.HIDE_EMPTY_STATS: true,
+  PREFERENCE_KEYS.SHOW_MY_PARKS_NEWS: true,
+  PREFERENCE_KEYS.SHOW_PARKS_NEWS_NOTIFICATION: true
 };
-
-dynamic safelyGetPreference(SharedPreferences prefs, PREFERENCE_KEYS key) {
-  dynamic value = prefs.get(preferencesKeyMap[key]) ?? defaultPreferences[key];
-  return value;
-}

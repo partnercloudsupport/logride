@@ -6,6 +6,7 @@ import 'package:log_ride/ui/pages/settings/admin_settings.dart';
 import 'package:log_ride/ui/pages/settings/app_info.dart';
 import 'package:log_ride/ui/pages/settings/geolocation_settings.dart';
 import 'package:log_ride/ui/pages/settings/interface_settings.dart';
+import 'package:log_ride/ui/pages/settings/news_settings.dart';
 import 'package:log_ride/ui/pages/settings/park_settings.dart';
 import 'package:log_ride/widgets/settings/account_tile.dart';
 import 'package:log_ride/widgets/settings/settings_footer.dart';
@@ -76,6 +77,14 @@ class _SettingsPageState extends State<SettingsPage> {
                   onTap: () => Navigator.of(context).push(MaterialPageRoute(
                       builder: (BuildContext context) =>
                           DefaultParkSettings())),
+                ),
+                SettingsTile(
+                  title: "News Settings",
+                  subtitle: "Change the way News is delivered",
+                  showNavArrow: true,
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (BuildContext context) => NewsSettingsPage()
+                  )),
                 ),
                 SettingsTile(
                   title: "App Info",

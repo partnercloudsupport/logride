@@ -22,6 +22,7 @@ class ParksManager {
   List<RideType> attractionTypes;
   List<Manufacturer> manufacturers;
   Map<int, List<Model>> models;
+  List<int> userParkIDs;
 
   ParksManagerStream _streamController = ParksManagerStream();
   Stream<ParksManagerEvent> parksManagerStream;
@@ -47,6 +48,7 @@ class ParksManager {
     // The 'filled' tag is used in the all-parks-search to show the user they
     // have that park.
     List<Future<bool>> parkFutures = <Future<bool>>[];
+    List<int> parkIDs = List<int>();
     db.getEntryAtPath(path: DatabasePath.PARKS, key: "").then((snap) async {
       if (snap == null) {
         print("User has no data currently. Returning.");
@@ -67,6 +69,7 @@ class ParksManager {
           continue;
         }
         BluehostPark targetPark = getBluehostParkByID(allParksInfo, entryID);
+        parkIDs.add(entryID);
 
         // This part appears to take the longest. I'm going to let it run async
         // And just prevent the user from viewing the attraction page until
@@ -91,6 +94,8 @@ class ParksManager {
       });
     });
 
+    userParkIDs = parkIDs;
+
     _streamController.add(ParksManagerEvent.PARKS_FETCHED);
     return true;
   }
@@ -109,6 +114,8 @@ class ParksManager {
         parkID: targetParkID,
         rideTypes: attractionTypes,
         allParks: allParksInfo);
+
+    userParkIDs.add(targetParkID);
 
     print("We are adding ${targetPark.parkName} to our user");
 
@@ -150,6 +157,8 @@ class ParksManager {
         path: DatabasePath.ATTRACTIONS, key: targetID.toString());
     // And remove ignored data for the user's parks
     db.removeEntryFromPath(path: DatabasePath.IGNORE, key: targetID.toString());
+    // And remove it from their news lists
+    userParkIDs.remove(targetID);
   }
 
   void addParkToFavorites(num targetID) async {

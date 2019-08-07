@@ -4,6 +4,7 @@ import 'package:log_ride/data/contact_url_constants.dart';
 import 'package:log_ride/widgets/dialogs/credits_dialog.dart';
 import 'package:log_ride/widgets/settings/settings_footer.dart';
 import 'package:log_ride/widgets/settings/settings_tile.dart';
+import 'package:log_ride/widgets/stats/misc_headers.dart';
 import 'package:package_info/package_info.dart';
 import 'package:preferences/preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -33,7 +34,7 @@ class _AppInfoPageState extends State<AppInfoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("App Info"),
+        title: PadlessPageHeader(text: "App Info"),
         leading: IconButton(
           icon: Icon(FontAwesomeIcons.arrowLeft),
           onPressed: () => Navigator.of(context).pop(),

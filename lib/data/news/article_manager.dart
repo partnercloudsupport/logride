@@ -20,6 +20,9 @@ class ArticleManager {
   Future<bool> likeArticle(
     BluehostNews article,
   ) async {
+    // Like it first client-side
+    article.numberOfLikes++;
+
     // Send "like" to bluehost
     String payload = '{"newsID": ${article.newsID}';
     String signedString = await signString(payload, PRIVATE_KEY);
@@ -39,8 +42,6 @@ class ArticleManager {
     // Update our local data
     FirebaseNews local = getData(article.newsID);
     local.hasLiked = true;
-
-    article.numberOfLikes++;
 
     return (request.statusCode == 200);
   }

@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/shared_prefs_data.dart';
 import 'package:log_ride/data/units.dart';
 import 'package:log_ride/widgets/forms/preference_slider.dart';
+import 'package:log_ride/widgets/stats/misc_headers.dart';
 import 'package:preferences/preferences.dart';
 
 class GeolocationSettings extends StatefulWidget {
@@ -37,7 +38,7 @@ class _GeolocationSettingsState extends State<GeolocationSettings> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Geolocation Settings"),
+        title: PadlessPageHeader(text: "Geolocation Settings"),
         leading: IconButton(
           icon: Icon(FontAwesomeIcons.arrowLeft),
           onPressed: () => Navigator.of(context).pop(),

@@ -170,6 +170,11 @@ class _HomeState extends State<Home> {
       });
     });
 
+    // Just recycling that function because it does the same thing. If it ever DOESN'T do the same thing, fix this pls.
+    PrefService.onNotify(
+        preferencesKeyMap[PREFERENCE_KEYS.SHOW_PARKS_NEWS_NOTIFICATION],
+        () => _handleHomeFocusChanged());
+
     super.initState();
   }
 
@@ -192,6 +197,7 @@ class _HomeState extends State<Home> {
     subscription.cancel();
     _checkInManager.deactivate();
 
+    // Totally clear out our notifies, just in case
     PREFERENCE_KEYS.values.forEach((k) {
       PrefService.onNotifyRemove(preferencesKeyMap[k]);
     });
@@ -384,7 +390,10 @@ class _HomeState extends State<Home> {
                           ContextNavBarItem(
                               label: "News",
                               iconData: FontAwesomeIcons.solidNewspaper,
-                              hasNotification: newsHasNotification),
+                              hasNotification: PrefService.getBool(
+                                      preferencesKeyMap[PREFERENCE_KEYS
+                                          .SHOW_PARKS_NEWS_NOTIFICATION]) &&
+                                  newsHasNotification),
                           ContextNavBarItem(
                               label: "Stats",
                               iconData: FontAwesomeIcons.chartPie),
