@@ -5,6 +5,7 @@ import 'package:firebase_database/firebase_database.dart';
 enum DatabasePath {
   USER_DETAILS,
   USER_PERSONAL_LISTS,
+  USER_PERSONAL_NEWS,
   STATS,
   SCORECARD,
   IGNORE,
@@ -16,6 +17,7 @@ enum DatabasePath {
 Map<DatabasePath, String> _databasePathStrings = {
   DatabasePath.USER_DETAILS: "users/details",
   DatabasePath.USER_PERSONAL_LISTS: "user-created-list",
+  DatabasePath.USER_PERSONAL_NEWS: "user-newsfeed",
   DatabasePath.STATS: "stats-list",
   DatabasePath.SCORECARD: "score-card-list",
   DatabasePath.IGNORE: "ignore-list",

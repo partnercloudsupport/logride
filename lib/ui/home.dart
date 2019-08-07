@@ -70,6 +70,7 @@ class _HomeState extends State<Home> {
   ParksHomeFocus _parksHomeFocus = ParksHomeFocus(true);
 
   bool dataLoaded = false;
+  bool newsHasNotification = false;
 
   bool _needsBasePadding = true;
 
@@ -145,6 +146,16 @@ class _HomeState extends State<Home> {
 
   void _handleHomeFocusChanged() {
     setState(() {});
+  }
+
+  void _handleNewsNotification(bool n) {
+    if (n != newsHasNotification) {
+      print("New notification: $n");
+      if (mounted)
+        setState(() {
+          newsHasNotification = n;
+        });
+    }
   }
 
   @override
@@ -232,7 +243,11 @@ class _HomeState extends State<Home> {
         addPark: _handleAddIDCallback);
 
     rootWidgets = <Tabs, Widget>{
-      Tabs.NEWS: TestNewsPage(),
+      Tabs.NEWS: NewsPage(
+        wf: _webFetcher,
+        db: widget.db,
+        newsNotifier: _handleNewsNotification,
+      ),
       Tabs.STATS: StatsPage(
         db: widget.db,
         pm: _parksManager,
@@ -295,6 +310,8 @@ class _HomeState extends State<Home> {
     // Trigger whatever analytics are set up for said page
     switch (Tabs.values[index]) {
       case Tabs.NEWS:
+        // Reset our news notification
+        newsHasNotification = false;
         analytics.setCurrentScreen(screenName: "News");
         break;
       case Tabs.STATS:
@@ -366,7 +383,8 @@ class _HomeState extends State<Home> {
                         items: [
                           ContextNavBarItem(
                               label: "News",
-                              iconData: FontAwesomeIcons.solidNewspaper),
+                              iconData: FontAwesomeIcons.solidNewspaper,
+                              hasNotification: newsHasNotification),
                           ContextNavBarItem(
                               label: "Stats",
                               iconData: FontAwesomeIcons.chartPie),

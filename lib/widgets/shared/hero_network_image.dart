@@ -1,8 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:transparent_image/transparent_image.dart';
 
 class HeroNetworkImage extends StatelessWidget {
-  const HeroNetworkImage({Key key, this.url, this.onTap, this.fit}) : super(key: key);
+  const HeroNetworkImage({Key key, this.url, this.onTap, this.fit})
+      : super(key: key);
 
   final String url;
   final VoidCallback onTap;
@@ -16,10 +18,15 @@ class HeroNetworkImage extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: onTap,
-          child: FadeInImage.memoryNetwork(
-              placeholder: kTransparentImage, image: url, fit: fit)
-        ),
+            onTap: onTap,
+            child: CachedNetworkImage(
+              imageUrl: url,
+              placeholder: (c, url) {
+                return Image.memory(kTransparentImage);
+              },
+              placeholderFadeInDuration: Duration(milliseconds: 250),
+              fit: fit,
+            )),
       ),
     );
   }

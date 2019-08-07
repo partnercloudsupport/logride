@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:log_ride/data/attraction_structures.dart';
 import 'package:log_ride/data/manufacturer_structures.dart';
 import 'package:log_ride/data/model_structures.dart';
+import 'package:log_ride/data/news/news_structures.dart';
 import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/ride_type_structures.dart';
 
@@ -266,17 +267,23 @@ class WebFetcher {
         .then((response) => response.statusCode);
   }
 
-  /*
   Future<List<BluehostNews>> getNews(bool activeOnly) async {
     String args = activeOnly ? "?showOnlyActive=1" : "";
+    List<BluehostNews> news = List<BluehostNews>();
 
     final response = await http.get(_serverURLS[WebLocation.NEWS] + args);
 
     if (response.statusCode == 200) {
       List<dynamic> decoded = jsonDecode(response.body);
-      for (int i = 0; i < decoded.length; i++) {}
+      for (var d in decoded) {
+        news.add(BluehostNews.fromJson(d));
+      }
     }
-  }*/
+
+    news.sort((a, b) => b.dateLastUpdated.compareTo(a.dateLastUpdated));
+
+    return news;
+  }
 
   Future<List<Manufacturer>> getAllManufacturers() async {
     final List<Manufacturer> manufacturers = List<Manufacturer>();

@@ -76,3 +76,30 @@ class BluehostNews {
     return data;
   }
 }
+
+class FirebaseNews {
+  FirebaseNews({this.newsID, this.hasLiked, this.hasRead});
+
+  int newsID;
+  bool hasLiked;
+  bool hasRead;
+
+  FirebaseNews.fromJson(int id, Map<String, dynamic> json) {
+    newsID = id;
+    hasLiked = json['hasLiked'] ?? 'false' == 'true';
+    hasRead = json['hasRead'] ?? 'false' == 'true';
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['articleID'] = this.newsID;
+    data['hasLiked'] = hasLiked ? 'true' : 'false';
+    data['hasRead'] = hasRead ? 'true' : 'false';
+    return data;
+  }
+
+  @override
+  String toString() {
+    return "{articleID: $newsID, hasLiked: $hasLiked, hasRead: $hasRead}";
+  }
+}
