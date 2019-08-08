@@ -1,11 +1,14 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:log_ride/animations/slide_in_transition.dart';
 import 'package:log_ride/data/news/article_manager.dart';
 import 'package:log_ride/data/news/news_structures.dart';
+import 'package:log_ride/widgets/news/article_image.dart';
+import 'package:log_ride/widgets/news/date_and_read_display.dart';
 import 'package:log_ride/widgets/news/like_button.dart';
-import 'package:log_ride/widgets/shared/no_image.dart';
+import 'package:log_ride/widgets/news/positioned_overlays.dart';
+import 'package:log_ride/widgets/shared/interface_button.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class NewsArticleEntry extends StatefulWidget {
   const NewsArticleEntry({Key key, this.news, this.userData}) : super(key: key);
@@ -20,6 +23,19 @@ class NewsArticleEntry extends StatefulWidget {
 class _NewsArticleEntryState extends State<NewsArticleEntry> {
   GlobalKey<LikeButtonState> likeChild;
   ArticleManager manager;
+
+  void _expandArticle(BuildContext context) {
+    Navigator.push(
+        context,
+        SlideInRoute(
+            direction: SlideInDirection.UP,
+            dialogStyle: true,
+            widget: NewsArticleExpanded(
+              news: widget.news,
+              userData: widget.userData,
+              manager: manager,
+            )));
+  }
 
   @override
   void initState() {
@@ -48,25 +64,13 @@ class _NewsArticleEntryState extends State<NewsArticleEntry> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               // Image Display
-              GestureDetector(
-                child: (widget.news.photoLink != "")
-                    ? CachedNetworkImage(
-                        imageUrl: widget.news.photoLink,
-                        placeholder: (BuildContext context, String url) {
-                          return NoImage(
-                              label: "Loading Image",
-                              child: CircularProgressIndicator());
-                        },
-                        placeholderFadeInDuration: Duration(milliseconds: 250),
-                        height: 200.0,
-                        fit: BoxFit.cover,
-                      )
-                    : NoImage(label: "No Image Avaliable"),
-                onDoubleTap: () => likeChild.currentState.like(),
-              ),
+              ArticleImage(
+                  url: widget.news.photoLink,
+                  likeFunction: () => likeChild.currentState.like(),
+                  onTap: () => _expandArticle(context)),
               // Snippet / Data Display
               InkWell(
-                onTap: () => print("Read More"),
+                onTap: () => _expandArticle(context),
                 child: Container(
                   padding: const EdgeInsets.all(8.0),
                   child: Stack(
@@ -76,26 +80,9 @@ class _NewsArticleEntryState extends State<NewsArticleEntry> {
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
                           // Date/time Label
-                          Row(
-                            children: <Widget>[
-                              if (!widget.userData.hasRead)
-                                Padding(
-                                  padding: const EdgeInsets.only(right: 4.0),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                        color: Theme.of(context).primaryColor,
-                                        shape: BoxShape.circle),
-                                    constraints: BoxConstraints.expand(
-                                        width: 8.0, height: 8.0),
-                                  ),
-                                ),
-                              Text(
-                                "Posted ${DateFormat.yMMMMd("en_US").format(widget.news.dateCreated)}",
-                                style: TextStyle(color: Colors.grey),
-                                textAlign: TextAlign.left,
-                              ),
-                            ],
-                            mainAxisSize: MainAxisSize.min,
+                          DateAndReadDisplay(
+                            created: widget.news.dateCreated,
+                            unread: !widget.userData.hasRead,
                           ),
                           // Snippet Display
                           Padding(
@@ -163,49 +150,31 @@ class _NewsArticleEntryState extends State<NewsArticleEntry> {
             ],
           ),
           // Park Label
-          Align(
+          PositionedArticleOverlay(
+            child: Text(
+              widget.news.mainParkName,
+              style: TextStyle(fontSize: 16.0),
+            ),
             alignment: Alignment.topLeft,
-            child: Material(
-                elevation: 3.0,
-                shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.only(bottomRight: Radius.circular(10.0))),
-                child: Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: Text(
-                    widget.news.mainParkName,
-                    style: TextStyle(fontSize: 16.0),
-                  ),
-                )),
           ),
           // Like block
-          Align(
-            alignment: Alignment.topRight,
-            child: Material(
-              elevation: 3.0,
-              shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.only(bottomLeft: Radius.circular(10.0))),
-              child: Padding(
-                padding: const EdgeInsets.all(4.0),
-                child: Column(
-                  children: <Widget>[
-                    LikeButton(
-                      isLiked: widget.userData.hasLiked,
-                      key: likeChild,
-                      onTap: () async {
-                        await Provider.of<ArticleManager>(context)
-                            .likeArticle(widget.news);
-                        setState(() {});
-                      },
-                    ),
-                    Text(
-                      widget.news.numberOfLikes.toString() + " likes",
-                    ),
-                  ],
+          PositionedArticleOverlay(
+            child: Column(
+              children: <Widget>[
+                LikeButton(
+                  isLiked: widget.userData.hasLiked,
+                  key: likeChild,
+                  onTap: () async {
+                    await manager.likeArticle(widget.news);
+                    setState(() {});
+                  },
                 ),
-              ),
+                Text(
+                  widget.news.numberOfLikes.toString() + " likes",
+                ),
+              ],
             ),
+            alignment: Alignment.topRight,
           )
         ],
       ),
@@ -214,17 +183,159 @@ class _NewsArticleEntryState extends State<NewsArticleEntry> {
 }
 
 class NewsArticleExpanded extends StatefulWidget {
-  const NewsArticleExpanded({Key key, this.news}) : super(key: key);
+  const NewsArticleExpanded({Key key, this.news, this.userData, this.manager})
+      : super(key: key);
 
   final BluehostNews news;
+  final FirebaseNews userData;
+  final ArticleManager manager;
 
   @override
   _NewsArticleExpandedState createState() => _NewsArticleExpandedState();
 }
 
 class _NewsArticleExpandedState extends State<NewsArticleExpanded> {
+  GlobalKey<LikeButtonState> likeChild;
+
+  @override
+  void initState() {
+    likeChild = GlobalKey<LikeButtonState>();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    if (widget.userData.hasRead != true) {
+      widget.manager?.viewArticle(widget.news);
+    }
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Dismissible(
+          key: Key('key'),
+          direction: DismissDirection.down,
+          resizeDuration: null,
+          onDismissed: (d) {
+            Navigator.of(context).pop();
+          },
+          child: _buildBody(context),
+        ));
+  }
+
+  Widget _buildBody(BuildContext context) {
+    String partnerURL = widget.news.sourceLink;
+    if (widget.news.sourceLink != "") {
+      Uri partnerUri = Uri.parse(partnerURL);
+      partnerURL = partnerUri.host;
+    }
+
+    return SafeArea(
+      child: Stack(
+        children: <Widget>[
+          GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              constraints: BoxConstraints.expand(),
+              child: Container(),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(top: 56.0),
+            child: Card(
+              clipBehavior: Clip.antiAlias,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(15.0)),
+              ),
+              margin: EdgeInsets.zero,
+              child: Stack(
+                children: <Widget>[
+                  Column(
+                    children: <Widget>[
+                      ArticleImage(
+                        likeFunction: () => likeChild.currentState.like(),
+                        url: widget.news.photoLink,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          children: <Widget>[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                DateAndReadDisplay(
+                                  unread: !widget.userData.hasRead,
+                                  created: widget.news.dateCreated,
+                                ),
+                                if (widget.news.submittedBy != "")
+                                  Text(
+                                    "Posted by " + widget.news.submittedBy,
+                                    style: TextStyle(color: Colors.grey),
+                                  )
+                              ],
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 8.0),
+                              child: Text(
+                                widget.news.snippet,
+                                style: TextStyle(height: 1.1, fontSize: 16.0),
+                              ),
+                            ),
+                            if (partnerURL != "")
+                              InterfaceButton(
+                                text: "Continue Article on",
+                                color: Theme.of(context).primaryColor,
+                                textColor: Colors.white,
+                                subtext: partnerURL,
+                                onPressed: () async {
+                                  if (await canLaunch(widget.news.sourceLink)) {
+                                    await launch(widget.news.sourceLink);
+                                  }
+                                },
+                              )
+                          ],
+                        ),
+                      )
+                    ],
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                  ),
+                  PositionedArticleOverlay(
+                    alignment: Alignment.topRight,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        LikeButton(
+                          isLiked: widget.userData.hasLiked,
+                          key: likeChild,
+                          onTap: () async {
+                            await widget.manager.likeArticle(widget.news);
+                            setState(() {});
+                          },
+                        ),
+                        Text(
+                          widget.news.numberOfLikes.toString() + " likes",
+                        ),
+                      ],
+                    ),
+                  ),
+                  PositionedArticleOverlay(
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      widget.news.mainParkName,
+                      style: TextStyle(fontSize: 16.0),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
