@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:log_ride/data/attraction_structures.dart';
+import 'package:log_ride/data/check_in_manager.dart';
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/manufacturer_structures.dart';
 import 'package:log_ride/data/model_structures.dart';
@@ -13,10 +14,11 @@ import 'package:log_ride/data/webfetcher.dart';
 import 'package:preferences/preferences.dart';
 
 class ParksManager {
-  ParksManager({this.db, this.wf});
+  ParksManager({this.ci, this.db, this.wf});
 
   final BaseDB db;
   final WebFetcher wf;
+  CheckInManager ci;
 
   List<BluehostPark> allParksInfo;
   List<RideType> attractionTypes;
@@ -159,6 +161,11 @@ class ParksManager {
     db.removeEntryFromPath(path: DatabasePath.IGNORE, key: targetID.toString());
     // And remove it from their news lists
     userParkIDs.remove(targetID);
+    // And tell the check-in-manager to forget our check-in for today.
+    CheckInData data = ci.listenable.value;
+    if (data.park.id == targetID) {
+      ci.listenable.value = CheckInData(data.park, false);
+    }
   }
 
   void addParkToFavorites(num targetID) async {

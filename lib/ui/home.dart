@@ -251,6 +251,8 @@ class _HomeState extends State<Home> {
         user: user,
         addPark: _handleAddIDCallback);
 
+    _parksManager.ci = _checkInManager;
+
     rootWidgets = <Tabs, Widget>{
       Tabs.NEWS: NewsPage(
         wf: _webFetcher,

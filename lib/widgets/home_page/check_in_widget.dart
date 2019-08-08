@@ -5,13 +5,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/check_in_manager.dart';
 import 'package:shimmer/shimmer.dart';
 
-/*
-  This pretty much all needs to be gutted
-  The UI needs to be totally altered to fit the new layout, with a card appearing
-  at the top of the home page proclaiming the good news of the user's geolocation
-
- */
-
 class CheckInWidget extends StatefulWidget {
   CheckInWidget({this.manager, this.onTap});
 
