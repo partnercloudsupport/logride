@@ -84,8 +84,14 @@ class FirebaseNews {
   bool hasLiked;
   bool hasRead;
 
-  FirebaseNews.fromJson(int id, Map<String, dynamic> json) {
+  FirebaseNews.fromJsonWithID(int id, Map<String, dynamic> json) {
     newsID = id;
+    hasLiked = json['hasLiked'] ?? 'false' == 'true';
+    hasRead = json['hasRead'] ?? 'false' == 'true';
+  }
+
+  FirebaseNews.fromJsonWithoutID(Map<String, dynamic> json) {
+    newsID = json['articleID'];
     hasLiked = json['hasLiked'] ?? 'false' == 'true';
     hasRead = json['hasRead'] ?? 'false' == 'true';
   }

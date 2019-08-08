@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/shared_prefs_data.dart';
+import 'package:log_ride/data/user_structure.dart';
+import 'package:log_ride/widgets/settings/settings_tile.dart';
 import 'package:log_ride/widgets/stats/misc_headers.dart';
 import 'package:preferences/preferences.dart';
+import 'package:provider/provider.dart';
 
 class AdminSettings extends StatefulWidget {
   @override
@@ -42,6 +45,10 @@ class _AdminSettingsState extends State<AdminSettings> {
             setState(() {});
             PrefService.notify(preferencesKeyMap[PREFERENCE_KEYS.SPOOF_DAK]);
           },
+        ),
+        SettingsTile(
+          title: "UUID",
+          subtitle: Provider.of<LogRideUser>(context).uuid,
         )
       ]),
     );

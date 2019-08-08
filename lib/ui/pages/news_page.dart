@@ -52,11 +52,12 @@ class _NewsPageState extends State<NewsPage> {
     super.initState();
   }
 
-  Future<void> _refereshNews() async {
+  Future<void> _refreshNews() async {
     setState(() => refreshing = true);
     List<BluehostNews> newNews = await widget.wf.getNews(true);
 
     setState(() {
+      hasBluehost = true;
       refreshing = false;
       news = newNews;
     });
@@ -108,7 +109,7 @@ class _NewsPageState extends State<NewsPage> {
                     ? SpinningIconButtonState.SPINNING
                     : SpinningIconButtonState.STOPPED,
                 onTap: () {
-                  _refereshNews();
+                  _refreshNews();
                 },
               ),
             )
@@ -118,7 +119,7 @@ class _NewsPageState extends State<NewsPage> {
             duration: Duration(milliseconds: 250),
             child: RefreshIndicator(
               onRefresh: (hasFirebase && hasBluehost)
-                  ? () => _refereshNews()
+                  ? () => _refreshNews()
                   : () {
                       return;
                     },

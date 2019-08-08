@@ -71,12 +71,32 @@ class ArticleManager {
 
     if (result == null) return {};
 
-    Map<String, dynamic> formatted = Map.from(result);
+    Map<int, FirebaseNews> articles;
 
-    Map<int, FirebaseNews> articles = Map<int, FirebaseNews>();
-    formatted.forEach((i, d) {
-      articles[num.parse(i)] = FirebaseNews.fromJson(num.parse(i), Map.from(d));
-    });
+    try {
+      // Much like with the other Firebase thing, somehow/sometimes LogRide decides
+      // that there's a bunch of null values in the database. When this happens, it gives
+      // us a list instead of the map we want. We need to try/catch this, and
+      // when the problem occurs, we just handle it like a list (with possible
+      // nulls) instead
+
+      Map<String, dynamic> formatted = Map.from(result);
+
+      articles = Map<int, FirebaseNews>();
+      formatted.forEach((i, d) {
+        articles[num.parse(i)] =
+            FirebaseNews.fromJsonWithID(num.parse(i), Map.from(d));
+      });
+    } catch (e) {
+      List<dynamic> formatted = List.from(result);
+
+      articles = Map<int, FirebaseNews>();
+      formatted.forEach((i) {
+        if (i == null) return;
+        FirebaseNews news = FirebaseNews.fromJsonWithoutID(Map.from(i));
+        articles[news.newsID] = news;
+      });
+    }
 
     return articles;
   }
