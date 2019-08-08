@@ -43,6 +43,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   GlobalKey<ParksHomeState> parksHomeKey = GlobalKey<ParksHomeState>();
+  GlobalKey<NewsPageState> newsPageKey = GlobalKey<NewsPageState>();
 
   FirebaseAnalytics analytics = FirebaseAnalytics();
 
@@ -57,6 +58,7 @@ class _HomeState extends State<Home> {
   Map<Tabs, Widget> rootWidgets;
 
   static const int homeIndex = 2;
+  static const int newsIndex = 0;
   int _pageIndex = homeIndex;
 
   WebFetcher _webFetcher;
@@ -253,6 +255,7 @@ class _HomeState extends State<Home> {
         wf: _webFetcher,
         db: widget.db,
         newsNotifier: _handleNewsNotification,
+        key: newsPageKey,
       ),
       Tabs.STATS: StatsPage(
         db: widget.db,
@@ -309,7 +312,13 @@ class _HomeState extends State<Home> {
         } else {
           navigatorKeys[Tabs.values[_pageIndex]].currentState.maybePop();
         }
+      } else
+
+      // ... and we want to scroll to the position on news
+      if (index == newsIndex) {
+        newsPageKey.currentState.jumpTap();
       }
+
       return;
     }
 

@@ -21,10 +21,10 @@ class NewsPage extends StatefulWidget {
       : super(key: key);
 
   @override
-  _NewsPageState createState() => _NewsPageState();
+  NewsPageState createState() => NewsPageState();
 }
 
-class _NewsPageState extends State<NewsPage> {
+class NewsPageState extends State<NewsPage> {
   final ScrollController _scrollController = ScrollController();
   static ArticleManager manager;
 
@@ -34,6 +34,8 @@ class _NewsPageState extends State<NewsPage> {
   bool hasBluehost = false;
   bool hasSentNotification = false;
   bool refreshing = false;
+
+  double scrollExtent = 0.0;
 
   @override
   void initState() {
@@ -63,7 +65,7 @@ class _NewsPageState extends State<NewsPage> {
     });
   }
 
-  List<BluehostNews> buildDisplayList(BuildContext context) {
+  List<BluehostNews> _buildDisplayList(BuildContext context) {
     List<BluehostNews> displayList = <BluehostNews>[];
     bool filter = PrefService.getBool(
             preferencesKeyMap[PREFERENCE_KEYS.SHOW_MY_PARKS_NEWS]) ??
@@ -88,10 +90,23 @@ class _NewsPageState extends State<NewsPage> {
     }
   }
 
+  void jumpTap() {
+    double position = _scrollController.offset;
+    double target = 0.0;
+    if (position == target) {
+      target = scrollExtent;
+    } else {
+      scrollExtent = position;
+    }
+
+    _scrollController.animateTo(target,
+        duration: Duration(milliseconds: 500), curve: Curves.decelerate);
+  }
+
   @override
   Widget build(BuildContext context) {
     List<BluehostNews> displayList;
-    if (hasBluehost) displayList = buildDisplayList(context);
+    if (hasBluehost) displayList = _buildDisplayList(context);
 
     return Provider<ArticleManager>.value(
       value: manager,
