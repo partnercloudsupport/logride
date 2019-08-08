@@ -45,8 +45,6 @@ class _AllParkSearchPageState extends State<AllParkSearchPage> {
   }
 
   void _handleShortEntryTap(BluehostPark park) {
-    if (park.filled) return;
-
     if (!multiMode) {
       widget.tapBack(park, true);
       Navigator.of(context).pop();
