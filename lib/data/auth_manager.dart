@@ -1,6 +1,9 @@
 import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/services.dart';
+import 'package:log_ride/data/verify_username.dart';
 
 abstract class BaseAuth {
   Future<String> signIn(String email, String password);
@@ -24,6 +27,9 @@ class Auth implements BaseAuth {
   }
 
   Future<String> signUp(String username, String email, String password) async {
+    bool unique = await isNewUsername(username);
+    if (!unique) throw PlatformException(code: "ERROR_DUPLICATE_USERNAME");
+
     FirebaseUser user = await _firebaseAuth.createUserWithEmailAndPassword(
         email: email, password: password);
     DatabaseReference reference =
@@ -52,7 +58,9 @@ class Auth implements BaseAuth {
 
   Future<String> getCurrentUserName() async {
     FirebaseUser user = await _firebaseAuth.currentUser();
-    DatabaseReference location = _firebaseDatabase.reference().child("users/details/${user.uid}/userName/");
+    DatabaseReference location = _firebaseDatabase
+        .reference()
+        .child("users/details/${user.uid}/userName/");
     return await location.once().then((snap) => snap.value);
   }
 

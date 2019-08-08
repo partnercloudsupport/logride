@@ -108,7 +108,7 @@ class _AuthPageState extends State<AuthPage>
       String displayMessage;
       _signInError = true;
       _loginEmailValid = _loginPasswordValid = true;
-      switch (exception.code) {
+      switch (exception) {
         case "ERROR_INVALID_EMAIL":
           displayMessage = "Invalid Email. Check the formatting.";
           _loginEmailValid = false;
@@ -175,6 +175,9 @@ class _AuthPageState extends State<AuthPage>
           displayMessage =
               "That email is already in use by a different account.";
           _signUpEmailValid = false;
+          break;
+        case "ERROR_DUPLICATE_USERNAME":
+          displayMessage = "An account with this username already exists.";
           break;
         default:
           // Any other error
