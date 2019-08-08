@@ -140,7 +140,7 @@ class _NewsArticleEntryState extends State<NewsArticleEntry> {
                                 text: widget.news.sourceName,
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 16.0))
+                                    fontSize: 12.0))
                           ]),
                     ),
                     if (widget.news.submittedBy != "")
@@ -154,7 +154,7 @@ class _NewsArticleEntryState extends State<NewsArticleEntry> {
                                   text: widget.news.submittedBy,
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 16.0))
+                                      fontSize: 12.0))
                             ]),
                       )
                   ],
@@ -172,7 +172,10 @@ class _NewsArticleEntryState extends State<NewsArticleEntry> {
                         BorderRadius.only(bottomRight: Radius.circular(10.0))),
                 child: Padding(
                   padding: const EdgeInsets.all(4.0),
-                  child: Text(widget.news.mainParkName),
+                  child: Text(
+                    widget.news.mainParkName,
+                    style: TextStyle(fontSize: 16.0),
+                  ),
                 )),
           ),
           // Like block
