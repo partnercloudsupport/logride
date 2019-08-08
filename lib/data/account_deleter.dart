@@ -23,6 +23,9 @@ class AccountDeleter {
     // Stats-list
     db.removeEntryFromPath(path: DatabasePath.STATS, key: "");
 
+    // News List
+    db.removeEntryFromPath(path: DatabasePath.USER_PERSONAL_NEWS, key: "");
+
     // Users
     db.removeEntryFromPath(path: DatabasePath.USER_DETAILS, key: "");
 

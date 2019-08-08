@@ -33,6 +33,7 @@ class NewsPageState extends State<NewsPage> {
   static ArticleManager manager;
 
   List<BluehostNews> news;
+  List<BluehostNews> displayList;
 
   bool hasFirebase = false;
   bool hasBluehost = false;
@@ -45,15 +46,21 @@ class NewsPageState extends State<NewsPage> {
   void initState() {
     manager = ArticleManager(db: widget.db);
     manager.init().then((v) {
+      if (hasBluehost) {
+        displayList = _buildDisplayList();
+        _checkNewNews();
+      }
       setState(() => hasFirebase = true);
-      if (hasBluehost) _checkNewNews();
     });
     widget.wf.getNews(true).then((l) {
+      news = l;
+      if (hasFirebase) {
+        displayList = _buildDisplayList();
+        _checkNewNews();
+      }
       setState(() {
-        news = l;
         hasBluehost = true;
       });
-      if (hasFirebase) _checkNewNews();
     });
     super.initState();
   }
@@ -61,6 +68,8 @@ class NewsPageState extends State<NewsPage> {
   Future<void> _refreshNews() async {
     setState(() => refreshing = true);
     List<BluehostNews> newNews = await widget.wf.getNews(true);
+
+    displayList = _buildDisplayList();
 
     setState(() {
       hasBluehost = true;
@@ -89,12 +98,13 @@ class NewsPageState extends State<NewsPage> {
   }
 
   void _checkNewNews() {
-    List<BluehostNews> ourNews = _buildDisplayList();
-    if (widget.newsNotifier != null && !hasSentNotification) {
-      print("First news: ${ourNews.first.newsID}");
-      print("First read? ${manager.getData(ourNews.first.newsID)}");
-      print("First poster: ${ourNews.first.submittedBy}");
-      widget.newsNotifier(!manager.getData(ourNews.first.newsID).hasRead);
+    if (widget.newsNotifier != null &&
+        !hasSentNotification &&
+        displayList.isNotEmpty) {
+      print("First news: ${displayList.first.newsID}");
+      print("First read? ${manager.getData(displayList.first.newsID)}");
+      print("First poster: ${displayList.first.submittedBy}");
+      widget.newsNotifier(!manager.getData(displayList.first.newsID).hasRead);
     }
   }
 
@@ -155,8 +165,49 @@ class NewsPageState extends State<NewsPage> {
 
   @override
   Widget build(BuildContext context) {
-    List<BluehostNews> displayList;
-    if (hasBluehost) displayList = _buildDisplayList();
+    Widget content = Container();
+    if (hasFirebase && hasBluehost) {
+      int value;
+      if (displayList.isEmpty) {
+        // User has no news, thanks to not having parks. We need to let them know
+        // their options to solve this problem.
+        value = "newsPageEmpty".hashCode;
+        content = Center(
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            width: double.infinity,
+            child: Text(
+              "There's no news to display - add more parks or turn off the 'My Parks' filter in 'News Settings' to view more",
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.title,
+            ),
+          ),
+        );
+      } else {
+        value = news.hashCode;
+        content = ListView.builder(
+            controller: _scrollController,
+            itemCount: displayList.length,
+            itemBuilder: (BuildContext context, int index) {
+              return NewsArticleEntry(
+                news: displayList[index],
+                userData: manager.getData(displayList[index].newsID),
+              );
+            });
+      }
+      content = RefreshIndicator(
+          key: ValueKey(value),
+          onRefresh: (hasFirebase && hasBluehost)
+              ? () => _refreshNews()
+              : () {
+                  return;
+                },
+          child: content);
+    } else {
+      content = Center(
+        child: CircularProgressIndicator(),
+      );
+    }
 
     return Provider<ArticleManager>.value(
       value: manager,
@@ -190,28 +241,7 @@ class NewsPageState extends State<NewsPage> {
           ],
         ),
         body: AnimatedSwitcher(
-            duration: Duration(milliseconds: 250),
-            child: RefreshIndicator(
-              onRefresh: (hasFirebase && hasBluehost)
-                  ? () => _refreshNews()
-                  : () {
-                      return;
-                    },
-              child: (hasFirebase && hasBluehost)
-                  ? ListView.builder(
-                      key: ValueKey(news.hashCode),
-                      controller: _scrollController,
-                      itemCount: displayList.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return NewsArticleEntry(
-                          news: displayList[index],
-                          userData: manager.getData(displayList[index].newsID),
-                        );
-                      })
-                  : Center(
-                      child: CircularProgressIndicator(),
-                    ),
-            )),
+            duration: Duration(milliseconds: 250), child: content),
       ),
     );
   }

@@ -101,6 +101,7 @@ class DatabaseManager implements BaseDB {
   }
 
   void setEntryAtPath({DatabasePath path, String key, dynamic payload}) {
+    if (_savedID == null) return;
     _getReference(path).child(_savedID).child(key).set(payload);
   }
 
