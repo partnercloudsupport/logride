@@ -24,32 +24,32 @@ enum WebLocation {
 
 enum SubmissionType { ATTRACTION_NEW, PARK, IMAGE }
 
-const _VERSION_URL = "Version2.1";
+const VERSION_URL = "Version2.1";
 
 class WebFetcher {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
 
   final Map _serverURLS = {
     WebLocation.ALL_PARKS:
-        "https://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/parksdbservice.php",
+        "https://www.beingpositioned.com/theparksman/LogRide/$VERSION_URL/parksdbservice.php",
     WebLocation.PARK_ATTRACTIONS:
-        "https://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/attractiondbservice.php?parkid=",
+        "https://www.beingpositioned.com/theparksman/LogRide/$VERSION_URL/attractiondbservice.php?parkid=",
     WebLocation.SPECIFIC_ATTRACTION:
-        "https://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/getAttractionDetails.php?rideID=",
+        "https://www.beingpositioned.com/theparksman/LogRide/$VERSION_URL/getAttractionDetails.php?rideID=",
     WebLocation.ATTRACTION_TYPES:
-        "https://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/attractionTypes.php",
+        "https://www.beingpositioned.com/theparksman/LogRide/$VERSION_URL/attractionTypes.php",
     WebLocation.NEWS:
-        "https://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/newsfeedDownload.php",
+        "https://www.beingpositioned.com/theparksman/LogRide/$VERSION_URL/newsfeedDownload.php",
     WebLocation.MANUFACTURERS:
-        "https://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/manufacturerDownload.php",
+        "https://www.beingpositioned.com/theparksman/LogRide/$VERSION_URL/manufacturerDownload.php",
     WebLocation.MODELS:
-        "https://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/modelDownload.php?manID=",
+        "https://www.beingpositioned.com/theparksman/LogRide/$VERSION_URL/modelDownload.php?manID=",
     SubmissionType.ATTRACTION_NEW:
-        "https://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/usersuggestservice.php",
+        "https://www.beingpositioned.com/theparksman/LogRide/$VERSION_URL/usersuggestservice.php",
     SubmissionType.IMAGE:
-        "https://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/submitPhotoUpload.php",
+        "https://www.beingpositioned.com/theparksman/LogRide/$VERSION_URL/submitPhotoUpload.php",
     SubmissionType.PARK:
-        "https://www.beingpositioned.com/theparksman/LogRide/$_VERSION_URL/suggestParkUploadtoApprove.php",
+        "https://www.beingpositioned.com/theparksman/LogRide/$VERSION_URL/suggestParkUploadtoApprove.php",
   };
 
   Future<List<BluehostPark>> getAllParkData() async {

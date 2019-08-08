@@ -5,9 +5,12 @@ import 'package:log_ride/data/news/article_manager.dart';
 import 'package:log_ride/data/news/news_structures.dart';
 import 'package:log_ride/data/parks_manager.dart';
 import 'package:log_ride/data/shared_prefs_data.dart';
+import 'package:log_ride/data/user_structure.dart';
 import 'package:log_ride/data/webfetcher.dart';
+import 'package:log_ride/ui/submission/submit_article_page.dart';
 import 'package:log_ride/widgets/news/news_article.dart';
 import 'package:log_ride/widgets/shared/spinning_iconbutton.dart';
+import 'package:log_ride/widgets/shared/styled_dialog.dart';
 import 'package:log_ride/widgets/stats/misc_headers.dart';
 import 'package:preferences/preferences.dart';
 import 'package:provider/provider.dart';
@@ -108,6 +111,48 @@ class NewsPageState extends State<NewsPage> {
         duration: Duration(milliseconds: 500), curve: Curves.decelerate);
   }
 
+  void _handleSubmission(BuildContext context) async {
+    dynamic result = await showDialog(
+        barrierDismissible: true,
+        context: context,
+        builder: (BuildContext context) {
+          return SubmitArticlePage();
+        });
+
+    if (result == null) return;
+
+    NewsSubmission article = result as NewsSubmission;
+
+    // Add in our username
+    LogRideUser user = Provider.of<LogRideUser>(context);
+    article.username = user.username;
+
+    // We've got a valid submission - send it to the server.
+    bool success = await manager.suggestArticle(article);
+    if (success) {
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return StyledDialog(
+              title: "Article Submitted",
+              body: "The article you have submitted is now up for review",
+              actionText: "OK",
+            );
+          });
+    } else {
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return StyledDialog(
+              title: "Submission Error",
+              body:
+                  "We were unable to submit your article - please try again later",
+              actionText: "OK",
+            );
+          });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     List<BluehostNews> displayList;
@@ -121,6 +166,15 @@ class NewsPageState extends State<NewsPage> {
             text: "NEWS",
           ),
           actions: <Widget>[
+            // FontAwesomeIcons are slightly misaligned at normal sizes
+            // This padding is to fix that.
+            Padding(
+              padding: const EdgeInsets.only(bottom: 3.0),
+              child: IconButton(
+                icon: Icon(FontAwesomeIcons.edit),
+                onPressed: () => _handleSubmission(context),
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               child: SpinningIconButton(

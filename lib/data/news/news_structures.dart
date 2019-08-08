@@ -109,3 +109,19 @@ class FirebaseNews {
     return "{articleID: $newsID, hasLiked: $hasLiked, hasRead: $hasRead}";
   }
 }
+
+class NewsSubmission {
+  NewsSubmission({this.url, this.description, this.username});
+
+  String url;
+  String description;
+  String username;
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = Map<String, dynamic>();
+    data['article_url'] = url;
+    data['additional_notes'] = description;
+    data['user_name'] = username;
+    return data;
+  }
+}

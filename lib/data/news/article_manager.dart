@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:log_ride/data/fbdb_manager.dart';
 import 'package:log_ride/data/news/news_structures.dart';
 import 'package:log_ride/data/news/public_key.dart';
+import 'package:log_ride/data/webfetcher.dart';
 import 'package:simple_rsa/simple_rsa.dart';
 
 class ArticleManager {
@@ -30,7 +31,7 @@ class ArticleManager {
     Map body = {"payload": payload, "signature": signedString};
 
     http.Response request = await http.post(
-        "http://www.beingpositioned.com/theparksman/LogRide/Version1.2.2/newsfeedLikeArticle.php",
+        "http://www.beingpositioned.com/theparksman/LogRide/$VERSION_URL/newsfeedLikeArticle.php",
         body: jsonEncode(body));
 
     // Store "like" in firebase
@@ -99,5 +100,16 @@ class ArticleManager {
     }
 
     return articles;
+  }
+
+  Future<bool> suggestArticle(NewsSubmission news) async {
+    String suggestURL =
+        "http://www.beingpositioned.com/theparksman/LogRide/$VERSION_URL/userSubmitNewArticle.php";
+    http.Response result =
+        await http.post(suggestURL, body: jsonEncode(news.toJson()));
+    print("[${result.statusCode}]: ${result.body}");
+
+    if (result.statusCode == 200) return true;
+    return false;
   }
 }
