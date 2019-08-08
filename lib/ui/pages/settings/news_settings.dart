@@ -35,7 +35,7 @@ class _NewsSettingsPageState extends State<NewsSettingsPage> {
               setState(() {});
             },
             desc:
-                "LogRide ${PrefService.getBool(preferencesKeyMap[PREFERENCE_KEYS.SHOW_MY_PARKS_NEWS]) ? "will" : "will not"} show news specific to your saved parks",
+                "LogRide ${PrefService.getBool(preferencesKeyMap[PREFERENCE_KEYS.SHOW_MY_PARKS_NEWS]) ? "will" : "will not"} filter news to show news relevant to your saved parks",
           ),
         ),
         SwitchPreference(
@@ -49,7 +49,7 @@ class _NewsSettingsPageState extends State<NewsSettingsPage> {
             setState(() {});
           },
           desc:
-              "The \"News\" tab ${PrefService.getBool(preferencesKeyMap[PREFERENCE_KEYS.SHOW_MY_PARKS_NEWS]) ? "will" : "will not"} display an indicator for unread news",
+              "The \"News\" tab ${PrefService.getBool(preferencesKeyMap[PREFERENCE_KEYS.SHOW_PARKS_NEWS_NOTIFICATION]) ? "will" : "will not"} display an indicator for unread news",
         )
       ]),
     );
