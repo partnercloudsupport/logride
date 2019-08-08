@@ -153,6 +153,7 @@ class _HomeState extends State<Home> {
   void _handleNewsNotification(bool n) {
     if (n != newsHasNotification) {
       print("New notification: $n");
+
       if (mounted)
         setState(() {
           newsHasNotification = n;
@@ -254,6 +255,7 @@ class _HomeState extends State<Home> {
       Tabs.NEWS: NewsPage(
         wf: _webFetcher,
         db: widget.db,
+        pm: _parksManager,
         newsNotifier: _handleNewsNotification,
         key: newsPageKey,
       ),

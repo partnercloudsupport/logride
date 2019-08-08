@@ -15,9 +15,10 @@ import 'package:provider/provider.dart';
 class NewsPage extends StatefulWidget {
   final WebFetcher wf;
   final BaseDB db;
+  final ParksManager pm;
   final Function(bool hasNews) newsNotifier;
 
-  const NewsPage({Key key, this.wf, this.db, this.newsNotifier})
+  const NewsPage({Key key, this.wf, this.db, this.newsNotifier, this.pm})
       : super(key: key);
 
   @override
@@ -65,13 +66,13 @@ class NewsPageState extends State<NewsPage> {
     });
   }
 
-  List<BluehostNews> _buildDisplayList(BuildContext context) {
+  List<BluehostNews> _buildDisplayList() {
     List<BluehostNews> displayList = <BluehostNews>[];
     bool filter = PrefService.getBool(
             preferencesKeyMap[PREFERENCE_KEYS.SHOW_MY_PARKS_NEWS]) ??
         true;
 
-    List<int> myParksIDs = Provider.of<ParksManager>(context).userParkIDs;
+    List<int> myParksIDs = widget.pm.userParkIDs;
 
     for (BluehostNews n in news) {
       if (!filter)
@@ -85,8 +86,12 @@ class NewsPageState extends State<NewsPage> {
   }
 
   void _checkNewNews() {
+    List<BluehostNews> ourNews = _buildDisplayList();
     if (widget.newsNotifier != null && !hasSentNotification) {
-      widget.newsNotifier(!manager.getData(news.first.newsID).hasRead);
+      print("First news: ${ourNews.first.newsID}");
+      print("First read? ${manager.getData(ourNews.first.newsID)}");
+      print("First poster: ${ourNews.first.submittedBy}");
+      widget.newsNotifier(!manager.getData(ourNews.first.newsID).hasRead);
     }
   }
 
@@ -106,7 +111,7 @@ class NewsPageState extends State<NewsPage> {
   @override
   Widget build(BuildContext context) {
     List<BluehostNews> displayList;
-    if (hasBluehost) displayList = _buildDisplayList(context);
+    if (hasBluehost) displayList = _buildDisplayList();
 
     return Provider<ArticleManager>.value(
       value: manager,
