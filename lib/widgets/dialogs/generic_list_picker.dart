@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:log_ride/data/manufacturer_structures.dart';
 import 'package:log_ride/data/model_structures.dart';
+import 'package:log_ride/data/park_structures.dart';
 import 'package:log_ride/data/ride_type_structures.dart';
 import 'package:log_ride/data/search_comparators.dart';
 import 'package:log_ride/ui/dialogs/single_value_dialog.dart';
@@ -174,9 +175,11 @@ class _GenericListPickerState extends State<GenericListPicker> {
 }
 
 class ManufacturerPicker extends StatelessWidget {
-  ManufacturerPicker({@required this.manufacturers});
+  ManufacturerPicker(
+      {@required this.manufacturers, this.allowCustomSubmit = true});
 
   final List<Manufacturer> manufacturers;
+  final bool allowCustomSubmit;
 
   @override
   Widget build(BuildContext context) {
@@ -196,7 +199,7 @@ class ManufacturerPicker extends StatelessWidget {
           return Container();
         }
       },
-      allowCustomSubmit: true,
+      allowCustomSubmit: allowCustomSubmit,
       customLabel: "Suggest Manufacturer...",
       customItemCallback: () async {
         dynamic manName = await showDialog(
@@ -219,9 +222,10 @@ class ManufacturerPicker extends StatelessWidget {
 }
 
 class ModelPicker extends StatelessWidget {
-  ModelPicker({@required this.models});
+  ModelPicker({@required this.models, this.allowCustomSubmit = true});
 
   final List<Model> models;
+  final bool allowCustomSubmit;
 
   @override
   Widget build(BuildContext context) {
@@ -241,7 +245,7 @@ class ModelPicker extends StatelessWidget {
           return Container();
         }
       },
-      allowCustomSubmit: true,
+      allowCustomSubmit: allowCustomSubmit,
       customLabel: "Suggest Model...",
       customItemCallback: () async {
         dynamic modName = await showDialog(
@@ -281,6 +285,35 @@ class RideTypePicker extends StatelessWidget {
             title: Text(t.label),
             onTap: () {
               Navigator.of(context).pop(t);
+            },
+          );
+        } else {
+          return Container();
+        }
+      },
+    );
+  }
+}
+
+class ParkPicker extends StatelessWidget {
+  ParkPicker({this.parks});
+
+  final List<BluehostPark> parks;
+
+  @override
+  Widget build(BuildContext context) {
+    return GenericListPicker<BluehostPark>(
+      parks,
+      searchLabel: "Search Parks",
+      emptyString: "No Parks Found",
+      itemBuilder: (BuildContext context, int index, dynamic t, String filter) {
+        BluehostPark p = t as BluehostPark;
+        if (isBluehostParkInSearch(p, filter)) {
+          return ListTile(
+            title: Text(p.parkName),
+            subtitle: Text(p.parkCity),
+            onTap: () {
+              Navigator.of(context).pop(p);
             },
           );
         } else {

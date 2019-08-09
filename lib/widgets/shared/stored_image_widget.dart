@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -128,31 +129,32 @@ class _FirebaseAttractionImageState extends State<FirebaseAttractionImage> {
         context: context,
         builder: (BuildContext context) {
           return Scaffold(
+              backgroundColor: Colors.black,
               body: Stack(children: [
-            PhotoView(
-              imageProvider: NetworkImage(url),
-              heroTag: url,
-              transitionOnUserGestures: true,
-              gaplessPlayback: true,
-              maxScale: PhotoViewComputedScale.covered * 5.0,
-              minScale: PhotoViewComputedScale.contained * 1.0,
-            ),
-            RoundBackButton(),
-            SafeArea(
-              child: (widget.overlay != null)
-                  ? Container(
-                      constraints: BoxConstraints.expand(),
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                          constraints: BoxConstraints.expand(height: 20),
-                          color: Color.fromRGBO(0, 0, 0, 0.75),
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 20.0),
-                            child: widget.overlay,
-                          )))
-                  : Container(),
-            )
-          ]));
+                PhotoView(
+                  imageProvider: CachedNetworkImageProvider(url),
+                  heroTag: url,
+                  transitionOnUserGestures: true,
+                  gaplessPlayback: true,
+                  maxScale: PhotoViewComputedScale.covered * 5.0,
+                  minScale: PhotoViewComputedScale.contained * 1.0,
+                ),
+                RoundBackButton(),
+                SafeArea(
+                  child: (widget.overlay != null)
+                      ? Container(
+                          constraints: BoxConstraints.expand(),
+                          alignment: Alignment.bottomCenter,
+                          child: Container(
+                              constraints: BoxConstraints.expand(height: 20),
+                              color: Color.fromRGBO(0, 0, 0, 0.75),
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 20.0),
+                                child: widget.overlay,
+                              )))
+                      : Container(),
+                )
+              ]));
         });
   }
 }

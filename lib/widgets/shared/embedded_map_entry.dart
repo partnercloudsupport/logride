@@ -56,6 +56,7 @@ class _EmbeddedMapEntryState extends State<EmbeddedMapEntry> {
             onMapCreated: _onMapCreated,
             initialCameraPosition:
                 CameraPosition(target: widget.center, zoom: widget.zoom),
+            rotateGesturesEnabled: false,
             mapType: MapType.normal,
             markers: markers,
           ),

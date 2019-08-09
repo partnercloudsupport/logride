@@ -14,7 +14,7 @@ import 'package:log_ride/data/user_structure.dart';
 import 'package:log_ride/data/webfetcher.dart';
 import 'package:log_ride/ui/dialogs/park_search.dart';
 import 'package:log_ride/ui/loading_page.dart';
-import 'package:log_ride/ui/pages/lists.dart';
+import 'package:log_ride/ui/pages/collections.dart';
 import 'package:log_ride/ui/pages/news_page.dart';
 import 'package:log_ride/ui/pages/parks_home.dart';
 import 'package:log_ride/ui/pages/settings/settings.dart';
@@ -274,7 +274,7 @@ class _HomeState extends State<Home> {
         key: parksHomeKey,
         parksHomeFocus: _parksHomeFocus,
       ),
-      Tabs.LISTS: ListsPage(
+      Tabs.LISTS: CollectionsPage(
         db: widget.db,
         pm: _parksManager,
         wf: _webFetcher,
@@ -411,7 +411,8 @@ class _HomeState extends State<Home> {
                               label: "Stats",
                               iconData: FontAwesomeIcons.chartPie),
                           ContextNavBarItem(
-                              label: "Lists", iconData: FontAwesomeIcons.list),
+                              label: "Collections",
+                              iconData: FontAwesomeIcons.list),
                           ContextNavBarItem(
                               label: "Settings", iconData: FontAwesomeIcons.cog)
                         ],

@@ -20,6 +20,7 @@ enum WebLocation {
   NEWS,
   MANUFACTURERS,
   MODELS,
+  DB_STATS,
 }
 
 enum SubmissionType { ATTRACTION_NEW, PARK, IMAGE }
@@ -44,6 +45,8 @@ class WebFetcher {
         "https://www.beingpositioned.com/theparksman/LogRide/$VERSION_URL/manufacturerDownload.php",
     WebLocation.MODELS:
         "https://www.beingpositioned.com/theparksman/LogRide/$VERSION_URL/modelDownload.php?manID=",
+    WebLocation.DB_STATS:
+        "https://www.beingpositioned.com/theparksman/LogRide/$VERSION_URL/getDBStats.php",
     SubmissionType.ATTRACTION_NEW:
         "https://www.beingpositioned.com/theparksman/LogRide/$VERSION_URL/usersuggestservice.php",
     SubmissionType.IMAGE:
@@ -328,6 +331,16 @@ class WebFetcher {
     models.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
 
     return models;
+  }
+
+  Future<Map<String, int>> getDatabaseStats() async {
+    http.Response response = await http.get(_serverURLS[WebLocation.DB_STATS]);
+    if (response.statusCode == 200) {
+      Map<String, int> data = jsonDecode(response.body);
+      return data;
+    }
+
+    return null;
   }
 }
 
