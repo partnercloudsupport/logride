@@ -31,10 +31,23 @@ class _CollectionsPageState extends State<CollectionsPage> {
 
   BluehostPark selectedPark;
 
-  int attractionCount = 0;
-  int parkCount = 0;
-  int manCount = 0;
-  int modCount = 0;
+  int attractionCount;
+  int parkCount;
+  int manCount;
+  int modCount;
+
+  @override
+  void initState() {
+    widget.wf.getDatabaseStats().then((m) {
+      setState(() {
+        attractionCount = m['attractionsCount'];
+        parkCount = m['parkCount'];
+        manCount = m['manufacturerCount'];
+        modCount = m['modelCount'];
+      });
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,11 +72,11 @@ class _CollectionsPageState extends State<CollectionsPage> {
                 ),
               ),
               BigStatDisplay(
-                value: 15263,
+                value: attractionCount ?? 0,
                 label: "Attractions",
               ),
               BigStatDisplay(
-                value: 539,
+                value: parkCount ?? 0,
                 label: "Parks",
               ),
               InterfaceButton(
@@ -88,12 +101,12 @@ class _CollectionsPageState extends State<CollectionsPage> {
               Padding(
                 padding: const EdgeInsets.only(top: 8.0),
                 child: BigStatDisplay(
-                  value: 1327,
+                  value: modCount ?? 0,
                   label: "Models",
                 ),
               ),
               BigStatDisplay(
-                value: 286,
+                value: manCount ?? 0,
                 label: "Manufacturers",
               ),
               InterfaceButton(

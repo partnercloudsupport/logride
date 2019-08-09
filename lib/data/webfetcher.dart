@@ -336,7 +336,7 @@ class WebFetcher {
   Future<Map<String, int>> getDatabaseStats() async {
     http.Response response = await http.get(_serverURLS[WebLocation.DB_STATS]);
     if (response.statusCode == 200) {
-      Map<String, int> data = jsonDecode(response.body);
+      Map<String, int> data = Map.from(jsonDecode(response.body));
       return data;
     }
 
