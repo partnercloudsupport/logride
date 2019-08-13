@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:log_ride/animations/slide_in_transition.dart';
 import 'package:log_ride/data/news/article_manager.dart';
 import 'package:log_ride/data/news/news_structures.dart';
+import 'package:log_ride/data/shared_prefs_data.dart';
+import 'package:log_ride/data/user_structure.dart';
 import 'package:log_ride/widgets/news/article_image.dart';
 import 'package:log_ride/widgets/news/date_and_read_display.dart';
 import 'package:log_ride/widgets/news/like_button.dart';
 import 'package:log_ride/widgets/news/positioned_overlays.dart';
 import 'package:log_ride/widgets/shared/interface_button.dart';
+import 'package:preferences/preferences.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -297,7 +300,12 @@ class _NewsArticleExpandedState extends State<NewsArticleExpanded> {
                                     await launch(widget.news.sourceLink);
                                   }
                                 },
-                              )
+                              ),
+                            if (PrefService.getBool(preferencesKeyMap[
+                                    PREFERENCE_KEYS.SHOW_ADMIN]) &&
+                                Provider.of<LogRideUser>(context).isAdmin)
+                              Text(
+                                  "Article ID: ${widget.news.newsID} | Starting: ${widget.news.startingNumberOfLikes}")
                           ],
                         ),
                       )
