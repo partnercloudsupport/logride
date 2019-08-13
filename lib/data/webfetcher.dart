@@ -14,6 +14,7 @@ import 'package:log_ride/data/ride_type_structures.dart';
 enum WebLocation {
   ALL_PARKS,
   PARK_ATTRACTIONS,
+  BATCH_PARK_ATTRACTIONS,
   SPECIFIC_ATTRACTION,
   ATTRACTION_TYPES,
   SUBMISSION_LOG,
@@ -35,6 +36,8 @@ class WebFetcher {
         "https://www.beingpositioned.com/theparksman/LogRide/$VERSION_URL/parksdbservice.php",
     WebLocation.PARK_ATTRACTIONS:
         "https://www.beingpositioned.com/theparksman/LogRide/$VERSION_URL/attractiondbservice.php?parkid=",
+    WebLocation.BATCH_PARK_ATTRACTIONS:
+        "httpS://www.beingpositioned.com/theparksman/LogRide/$VERSION_URL/fetchAttractionsBatch.php?id=",
     WebLocation.SPECIFIC_ATTRACTION:
         "https://www.beingpositioned.com/theparksman/LogRide/$VERSION_URL/getAttractionDetails.php?rideID=",
     WebLocation.ATTRACTION_TYPES:
@@ -77,6 +80,62 @@ class WebFetcher {
         (a, b) => a.parkName.toLowerCase().compareTo(b.parkName.toLowerCase()));
 
     return data;
+  }
+
+  Future<Map<int, List<BluehostAttraction>>> getBatchedAttractionData(
+      {List<int> parkIDs,
+      List<RideType> rideTypes,
+      List<BluehostPark> allParks}) async {
+    Map<int, List<BluehostAttraction>> fetchedData =
+        Map<int, List<BluehostAttraction>>();
+    final response = await http.get(
+        _serverURLS[WebLocation.BATCH_PARK_ATTRACTIONS] + parkIDs.join(","));
+
+    // A successful batched response will return to us a map of lists, with the
+    // key being the parkID and the value being a list of attractions
+    if (response.statusCode == 200) {
+      Map<String, dynamic> decodedResponse = jsonDecode(response.body);
+      // For each park...
+      decodedResponse.forEach((parkIDString, attractions) {
+        // Get the park's ID from the key
+        int parkID = num.parse(parkIDString);
+        // And put together the list of attractions
+        List<BluehostAttraction> attractionData = List<BluehostAttraction>();
+        attractions.forEach((attractionMap) {
+          // First, create the attraction object
+          BluehostAttraction newAttraction =
+              BluehostAttraction.fromJson(attractionMap);
+          // Fix leftover from old iOS mess
+          _fixBluehostAttractionText(newAttraction);
+
+          // Set-up ride type label
+          RideType rideType =
+              findRideTypeByID(rideTypes, newAttraction.rideTypeID);
+          newAttraction.typeLabel = rideType?.label ?? "";
+          newAttraction.rideType = rideType ?? findRideTypeByID(rideTypes, 0);
+
+          // If we have a previous park, use it to find the label
+          if (newAttraction.previousParkID != 0) {
+            newAttraction.previousParkLabel =
+                getBluehostParkByID(allParks, newAttraction.previousParkID)
+                    .parkName;
+          }
+
+          // Add our attraction to the park's attraction's data
+          attractionData.add(newAttraction);
+        });
+
+        // Sort a park's attractions alphabetically
+        attractionData.sort((a, b) => a.attractionName
+            .toLowerCase()
+            .compareTo(b.attractionName.toLowerCase()));
+
+        // And save it in our map by ID
+        fetchedData[parkID] = attractionData;
+      });
+    }
+
+    return fetchedData;
   }
 
   Future<List<BluehostAttraction>> getAllAttractionData(

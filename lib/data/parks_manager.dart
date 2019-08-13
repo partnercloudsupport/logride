@@ -36,20 +36,26 @@ class ParksManager {
 
   /// init returns true once all web data has been fetched for parks
   Future<bool> asyncInit() async {
-    manufacturers = await initManufacturers();
+    print("Fetching Manufacturers");
+    initManufacturers().then((m) {
+      print("Manufacturers fetched");
+      manufacturers = m;
+    });
 
     // Things to do:
     // Get allParks from bluehost
+    print("Fetching global parks list");
     allParksInfo = await wf.getAllParkData();
 
     // Since we're relying on this for the attraction building, we'll wait for
     // you too.
+    print("Fetching attractionTypes list");
     attractionTypes = await wf.getAttractionTypes();
 
+    print("Beginning parks data fetch");
     // Go through and set-up the allParksInfo to match the user database.
     // The 'filled' tag is used in the all-parks-search to show the user they
     // have that park.
-    List<Future<bool>> parkFutures = <Future<bool>>[];
     List<int> parkIDs = List<int>();
     db.getEntryAtPath(path: DatabasePath.PARKS, key: "").then((snap) async {
       if (snap == null) {
@@ -63,37 +69,28 @@ class ParksManager {
       print("Got Parks");
 
       Map<dynamic, dynamic> values = jsonDecode(jsonEncode(snap));
-      for (int i = 0; i < values.keys.length; i++) {
-        int entryID = num.tryParse(values.keys.elementAt(i));
-        if (entryID == null) {
-          print(
-              "ERROR: Key value at index $i for adding user's attractions is not a number");
-          continue;
-        }
-        BluehostPark targetPark = getBluehostParkByID(allParksInfo, entryID);
-        parkIDs.add(entryID);
 
-        // This part appears to take the longest. I'm going to let it run async
-        // And just prevent the user from viewing the attraction page until
-        // the attractions != null
-        parkFutures.add(wf
-            .getAllAttractionData(
-                parkID: targetPark.id,
-                rideTypes: attractionTypes,
-                allParks: allParksInfo)
-            .then((list) {
-          targetPark.attractions = list;
-          print("Park Loaded, id: ${targetPark.id}");
-          return true;
-        }));
+      values.keys.forEach((id) {
+        int result = num.tryParse(id);
+        if (result == null) return;
+        parkIDs.add(result);
+      });
+
+      Map<int, List<BluehostAttraction>> bhAttractionData =
+          await wf.getBatchedAttractionData(
+              parkIDs: parkIDs,
+              allParks: allParksInfo,
+              rideTypes: attractionTypes);
+
+      for (int id in parkIDs) {
+        BluehostPark targetPark = getBluehostParkByID(allParksInfo, id);
+
+        targetPark.attractions = bhAttractionData[targetPark.id];
         targetPark.filled = true;
       }
 
-      Stream joinedStream = Stream.fromFutures(parkFutures);
-      joinedStream.listen((d) {}, onDone: () {
-        _streamController.add(ParksManagerEvent.ATTRACTIONS_FETCHED);
-        _streamController.add(ParksManagerEvent.INITIALIZED);
-      });
+      _streamController.add(ParksManagerEvent.ATTRACTIONS_FETCHED);
+      _streamController.add(ParksManagerEvent.INITIALIZED);
     });
 
     userParkIDs = parkIDs;
