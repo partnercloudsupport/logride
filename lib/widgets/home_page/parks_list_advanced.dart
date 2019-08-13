@@ -211,10 +211,6 @@ class _FirebaseParkListViewState extends State<FirebaseParkListView> {
     _allList.forEach((snap) {
       FirebasePark parsed = FirebasePark.fromMap(Map.from(snap.value));
       if (parsed.parkID == null || parsed.name == null) return;
-
-      if (parsed.favorite &&
-          !PrefService.getBool(
-              preferencesKeyMap[PREFERENCE_KEYS.SHOW_DUPED_FAVORITES])) return;
       buffer.add(parsed);
     });
 
@@ -253,6 +249,12 @@ class _FirebaseParkListViewState extends State<FirebaseParkListView> {
         ),
       );
     }
+
+    if (park.favorite &&
+        !park.inFavorites &&
+        !PrefService.getBool(
+            preferencesKeyMap[PREFERENCE_KEYS.SHOW_DUPED_FAVORITES]))
+      return Container();
 
     if (isFirebaseParkInSearch(park, search)) {
       Widget builtWidget = ParkListEntry(
